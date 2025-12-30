@@ -4,6 +4,9 @@ const CALLBACK_NAMES = {
       MODERATION: 'txn:callback:menu:access:moderation',
       ADMINISTRATION: 'txn:callback:menu:access:administration',
     }
+  },
+  TRACK: {
+    IMPORT: 'txn:callback:track:import'
   }
 };
 

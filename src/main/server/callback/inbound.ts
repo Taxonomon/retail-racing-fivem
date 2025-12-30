@@ -32,7 +32,7 @@ async function handleClientCallbackRequest(
       playerId,
       requestId,
       identifier,
-      { error: new Error(`no callback registered under "${identifier}"`) }
+      { error: `no callback registered under "${identifier}"` }
     );
     return;
   }
@@ -54,7 +54,7 @@ async function handleClientCallbackRequest(
       `failed to handle client callback request "${identifier}" (request id ${requestId}): `
       +`${error.message}`
     );
-    respondToClient(playerId, requestId, identifier, { error });
+    respondToClient(playerId, requestId, identifier, { error: error.message });
   }
 }
 

@@ -78,6 +78,11 @@ export const CONTROL_ACTIONS = {
     type: ControlActionType.PLAYER_CONTROL,
     index: 73
   } satisfies ControlAction,
+
+  INPUT_FRONTEND_RRIGHT: {
+    type: ControlActionType.FRONTEND_CONTROL,
+    index: 194
+  } satisfies ControlAction,
 };
 
 function disableControlActions(...controlActions: ControlAction[]) {

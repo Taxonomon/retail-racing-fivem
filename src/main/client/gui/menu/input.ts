@@ -36,7 +36,7 @@ const MENU_INPUTS = {
     name: 'MENU_CLOSE_MENU',
     performActionOn: 'press',
     action: menuService.closeCurrentMenu,
-    controlAction: CONTROL_ACTIONS.INPUT_FRONTEND_CANCEL
+    controlAction: CONTROL_ACTIONS.INPUT_FRONTEND_RRIGHT
   })
 };
 

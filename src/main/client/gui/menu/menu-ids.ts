@@ -17,6 +17,9 @@ const MENU_IDS = {
   },
   MODERATION: {
     MAIN: 'moderation'
+  },
+  ADMINISTRATION: {
+    MAIN: 'administration'
   }
 };
 

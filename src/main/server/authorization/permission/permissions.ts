@@ -6,6 +6,9 @@ const PERMISSIONS = {
     ADMINISTRATION: {
       OPEN: 'menu:administration:open'
     }
+  },
+  TRACK: {
+    IMPORT: 'track:import'
   }
 };
 

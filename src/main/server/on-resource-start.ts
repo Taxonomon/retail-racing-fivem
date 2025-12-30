@@ -3,6 +3,7 @@ import databaseHealth from "./database/health";
 import logger from "./logging/logger";
 import registerAuthorizationCallbacks from "./authorization/callback";
 import startUpdatingPlayerPings from "./player/ping";
+import registerTrackImportCommand from "./track/import";
 
 on('onResourceStart', async (resource: string) => {
   if (resource === GetCurrentResourceName()) {
@@ -14,6 +15,9 @@ on('onResourceStart', async (resource: string) => {
 
     // register server callbacks
     registerAuthorizationCallbacks();
+
+    // register commands
+    registerTrackImportCommand();
 
     // do other stuff
     startUpdatingPlayerPings();

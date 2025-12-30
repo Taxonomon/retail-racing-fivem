@@ -9,29 +9,34 @@ async function initialize() {
   const accessResult = await triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.ADMINISTRATION);
 
   if (undefined !== accessResult.error) {
-    logger.warn(`error whilst checking access to administration menu: ${accessResult.error.message}`);
+    logger.warn(`error whilst checking access to administration menu: ${accessResult.error}`);
     return;
   } else if (!accessResult.data) {
     logger.debug(`client is not permitted access to administration menu`);
     return;
   }
 
-  // if permitted: insert administration item in front of about item
   menuService.addItemToMenu(
     MENU_IDS.MAIN,
     {
       id: 'administration',
       title: 'Administration',
       description: 'Contains various tools for server administrators.',
-      onPressed: pressModerationItem,
+      onPressed: pressAdministrationItem,
       icon: ItemIconType.SUB_MENU
     },
     { after: 'moderation' }
   );
+
+  menuService.addMenu({
+    id: MENU_IDS.ADMINISTRATION.MAIN,
+    title: 'Administration',
+    items: []
+  });
 }
 
-function pressModerationItem() {
-  menuService.openMenu(MENU_IDS.MODERATION.MAIN);
+function pressAdministrationItem() {
+  menuService.openMenu(MENU_IDS.ADMINISTRATION.MAIN);
 }
 
 const administrationMenu = { initialize };
