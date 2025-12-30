@@ -1,5 +1,5 @@
 import breadcrumpsState from "./state";
-import {BreadCrumpsProps} from "../../common/gui/breadcrumps/BreadCrumpsProps";
+import {BreadCrumpsProps} from "../../common/gui/breadcrumps/breadcrumps-props";
 import logger from "../logging/logger";
 import $ from 'jquery';
 

@@ -1,6 +1,6 @@
 import breadcrumpsState from "./state";
 import sendNuiMessage from "../send-nui-message";
-import {BreadCrumpsProps} from "../../../common/gui/breadcrumps/BreadCrumpsProps";
+import {BreadCrumpsProps} from "../../../common/gui/breadcrumps/breadcrumps-props";
 import {NUI_MSG_IDS} from "../../../common/gui/nui-message";
 import playerState from "../../player/state";
 
