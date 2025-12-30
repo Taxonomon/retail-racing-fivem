@@ -1,0 +1,116 @@
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+:root {
+  /* colors */
+  --color-mono-100: rgba(0, 0, 0, 0.8);
+  --color-mono-200: rgba(30, 30, 30, 0.8);
+  --color-mono-300: rgba(60, 60, 60, 0.8);
+  --color-mono-400: rgba(90, 90, 90, 0.8);
+  --color-mono-900: rgba(255, 255, 255, 1.0);
+
+  /* px values relative to viewport height
+  /* will always grow proportionally with viewport height */
+  /* conversion formula: ((px / 1440) * 100)vh */
+  --2-px-vh: 0.138vh;
+  --3-px-vh: 0.208vh;
+  --4-px-vh: 0.276vh;
+  --10-px-vh: 0.694vh;
+  --20-px-vh: 1.388vh;
+  --50-px-vh: 3.472vh;
+  --450-px-vh: 31.25vh;
+  --500-px-vh: 34.722vh;
+
+  /* font families */
+  --font-family-geist: 'Geist', sans-serif;
+
+  /* font sizes */
+  --font-size-small: 1.250vh;
+  --font-size-regular: 1.500vh;
+
+  /* font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* global settings */
+  font-family: var(--font-family-geist), sans-serif;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-regular);
+}
+
+.menu {
+  position: fixed;
+  right: 2.5%;
+  top: 25%;
+  display: flex;
+}
+
+.menu .image {
+  scale: 0.6;
+  transform-origin: top right;
+  padding-right: var(--20-px-vh);
+}
+
+.menu .items {
+  min-width: var(--450-px-vh);
+  max-width: var(--450-px-vh);
+}
+
+.menu .items .header {
+  font-weight: var(--font-weight-semibold);
+}
+
+.menu .items .item,
+.menu .items .description {
+  background-color: var(--color-mono-100);
+  color: var(--color-mono-900);
+}
+
+.menu .items .item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-height: var(--50-px-vh);
+  max-height: var(--50-px-vh);
+  padding: 0 var(--20-px-vh) 0 var(--20-px-vh);
+}
+
+.menu .items .focused {
+  font-weight: var(--font-weight-semibold);
+  background-color: var(--color-mono-300);
+  animation-name: highlightFocused;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.menu .items .separator {
+  min-height: var(--3-px-vh);
+  max-height: var(--3-px-vh);
+  background-color: var(--color-mono-300);
+}
+
+.menu .items .description {
+  padding: var(--20-px-vh)
+}
+
+@keyframes highlightFocused {
+  0%   { background-color: var(--color-mono-400); }
+  50%  { background-color: var(--color-mono-300); }
+  100% { background-color: var(--color-mono-400); }
+}
+
+.clock {
+  position: fixed;
+  top: var(--10-px-vh);
+  right: var(--10-px-vh);
+  font-size: var(--font-size-small);
+  color: var(--color-mono-900);
+  text-shadow: 0 1px black, 1px 0 black, 1px 1px black, 0 2px black, 2px 0 black, 2px 2px black;
+}

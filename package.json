@@ -1,0 +1,27 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "cd src/scripts && node build.ts",
+    "build:clean": "rm -rf build",
+    "build:deploy": "run-p build && run-p deploy",
+    "deploy": "cd src/scripts && node deploy.ts",
+    "node:clean": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "kysely": "^0.28.9",
+    "nanoid": "^5.1.6",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@citizenfx/client": "^2.0.23683-1",
+    "@citizenfx/server": "^2.0.23683-1",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.6",
+    "@types/jquery": "^3.5.33",
+    "@types/node": "^25.0.3",
+    "@types/pg": "^8.16.0",
+    "esbuild": "^0.27.2",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3"
+  }
+}

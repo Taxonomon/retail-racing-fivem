@@ -1,0 +1,13 @@
+const CONVARS = {
+  DB: {
+    HOST: 'DB_HOST',
+    PORT: 'DB_PORT',
+    USER: 'DB_USER',
+    PASSWORD: 'DB_PASS',
+    DATABASE: 'DB_DATABASE',
+    HEALTH_CHECK_INTERVAL_MS: 'DB_HEALTH_CHECK_INTERVAL_MS'
+  },
+  LOG_LEVEL: 'LOG_LEVEL'
+};
+
+export default CONVARS;

@@ -1,0 +1,26 @@
+name: txn-fivem
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: fxserver
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: txn
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+networks:
+  postgres:
+    driver: bridge
+volumes:
+  postgres:
