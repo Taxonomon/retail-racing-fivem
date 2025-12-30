@@ -4,7 +4,7 @@ import {InputBinding} from "./binding/abstract";
 import logger from "../logging/logger";
 
 class InputState {
-  disabledControlActions: ControlAction[] = [];
+  disabledControlActions: Set<ControlAction> = new Set();
   blockDisabledControlActions: Tick = new Tick('block disabled control actions', logger);
   bindings: InputBinding[] = [];
   bindingListener: Tick = new Tick('input binding listener', logger);

@@ -1,6 +1,14 @@
 import {NUI_MSG_IDS} from "../common/gui/nui-message";
 import menu from "./menu/render";
 import logger from "./logging/logger";
+import breadcrumps from "./breadcrumps/render";
+
+// @ts-ignore
+const ROUTES = new Map([
+  [ NUI_MSG_IDS.MENU.RENDER, menu.render ],
+  [ NUI_MSG_IDS.MENU.CLEAR, menu.clear ],
+  [ NUI_MSG_IDS.BREADCRUMPS, breadcrumps.render ]
+]);
 
 class MessageRouter {
   private readonly _entries: Map<string, Function>;
@@ -19,10 +27,6 @@ class MessageRouter {
   }
 }
 
-const router = new MessageRouter(new Map([
-  // put nui message id plus handler in here
-  [ NUI_MSG_IDS.MENU.RENDER, menu.render ],
-  [ NUI_MSG_IDS.MENU.CLEAR, menu.clear ]
-]));
+const router = new MessageRouter(ROUTES);
 
 export default router;

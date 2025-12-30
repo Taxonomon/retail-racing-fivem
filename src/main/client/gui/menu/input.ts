@@ -1,6 +1,6 @@
 import menuService from "./api/service";
 import menuState from "./api/state";
-import {CONTROL_ACTIONS, ControlAction} from "../../input/control-action";
+import {CONTROL_ACTIONS, controlActionService} from "../../input/control-action";
 import inputState from "../../input/state";
 import {ControlActionInputBinding} from "../../input/binding/control-action";
 import {InputBinding} from "../../input/binding/abstract";
@@ -40,19 +40,6 @@ const MENU_INPUTS = {
   })
 };
 
-const CONTROL_ACTIONS_TO_DISABLE_WHILE_MENU_OPENED: ControlAction[] = [
-  CONTROL_ACTIONS.INPUT_INTERACTION_MENU,
-  CONTROL_ACTIONS.INPUT_MELEE_ATTACK_LIGHT,
-  CONTROL_ACTIONS.INPUT_MELEE_ATTACK_HEAVY
-];
-
-const CONTROL_ACTIONS_TO_DISABLE_WHILE_MENU_CLOSED: ControlAction[] = [
-  CONTROL_ACTIONS.INPUT_FRONTEND_ACCEPT,
-  CONTROL_ACTIONS.INPUT_FRONTEND_CANCEL,
-  CONTROL_ACTIONS.INPUT_FRONTEND_UP,
-  CONTROL_ACTIONS.INPUT_FRONTEND_DOWN
-];
-
 const MENU_BINDINGS_TO_DISABLE_WHILE_MENU_OPENED: InputBinding[] = [
   MENU_INPUTS.OPEN_MAIN_MENU
 ];
@@ -75,19 +62,46 @@ function setUp() {
 
   menuState.blockControlActions.start(() => {
     // control actions need to be disabled every frame
+    //
+    // these arrays are purposefully not pre-declared somewhere else, because some control actions
+    // can't just be re-enabled once the menu closes (e.g. cinematic camera), but need to wait a little
+    // before the control action should work again. else you get stuff like switching into cinematic cam
+    // the instance you close the main menu.
     if (menuState.isAnyMenuOpen()) {
-      CONTROL_ACTIONS_TO_DISABLE_WHILE_MENU_OPENED.forEach((controlAction) =>
-        DisableControlAction(controlAction.type, controlAction.type, true)
+      controlActionService.disableControlActions(
+        CONTROL_ACTIONS.INPUT_INTERACTION_MENU,
+        CONTROL_ACTIONS.INPUT_MELEE_ATTACK_LIGHT,
+        CONTROL_ACTIONS.INPUT_MELEE_ATTACK_HEAVY,
+        CONTROL_ACTIONS.INPUT_VEH_HANDBRAKE,
+        CONTROL_ACTIONS.INPUT_VEH_CIN_CAM,
+        CONTROL_ACTIONS.INPUT_VEH_DUCK
       );
-      CONTROL_ACTIONS_TO_DISABLE_WHILE_MENU_CLOSED.forEach((controlAction) =>
-        EnableControlAction(controlAction.type, controlAction.type, true)
+      controlActionService.enableControlActions(
+        CONTROL_ACTIONS.INPUT_FRONTEND_ACCEPT,
+        CONTROL_ACTIONS.INPUT_FRONTEND_CANCEL,
+        CONTROL_ACTIONS.INPUT_FRONTEND_UP,
+        CONTROL_ACTIONS.INPUT_FRONTEND_DOWN
       );
     } else {
-      CONTROL_ACTIONS_TO_DISABLE_WHILE_MENU_CLOSED.forEach((controlAction) =>
-        DisableControlAction(controlAction.type, controlAction.type, true)
+      controlActionService.disableControlActions(
+        CONTROL_ACTIONS.INPUT_FRONTEND_ACCEPT,
+        CONTROL_ACTIONS.INPUT_FRONTEND_CANCEL,
+        CONTROL_ACTIONS.INPUT_FRONTEND_UP,
+        CONTROL_ACTIONS.INPUT_FRONTEND_DOWN
       );
-      CONTROL_ACTIONS_TO_DISABLE_WHILE_MENU_OPENED.forEach((controlAction) =>
-        EnableControlAction(controlAction.type, controlAction.type, true)
+      // some control actions like cinematic cam needs to surpass a certain timeout after
+      // the main menu has been closed before being re-enabled again.
+      if (GetGameTimer() - menuState.mainMenuLastClosedAt >= 250) {
+        controlActionService.enableControlActions(
+          CONTROL_ACTIONS.INPUT_VEH_CIN_CAM,
+        );
+      }
+      controlActionService.enableControlActions(
+        CONTROL_ACTIONS.INPUT_INTERACTION_MENU,
+        CONTROL_ACTIONS.INPUT_MELEE_ATTACK_LIGHT,
+        CONTROL_ACTIONS.INPUT_MELEE_ATTACK_HEAVY,
+        CONTROL_ACTIONS.INPUT_VEH_HANDBRAKE,
+        CONTROL_ACTIONS.INPUT_VEH_DUCK
       );
     }
   });

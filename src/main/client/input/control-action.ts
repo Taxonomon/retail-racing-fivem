@@ -63,22 +63,32 @@ export const CONTROL_ACTIONS = {
     type: ControlActionType.PLAYER_CONTROL,
     index: 141
   } satisfies ControlAction,
+
+  INPUT_VEH_HANDBRAKE: {
+    type: ControlActionType.PLAYER_CONTROL,
+    index: 76
+  } satisfies ControlAction,
+
+  INPUT_VEH_CIN_CAM: {
+    type: ControlActionType.FRONTEND_CONTROL,
+    index: 80
+  } satisfies ControlAction,
+
+  INPUT_VEH_DUCK: {
+    type: ControlActionType.PLAYER_CONTROL,
+    index: 73
+  } satisfies ControlAction,
 };
 
-function disableControlActions(...controlAction: ControlAction[]) {
-  inputState.disabledControlActions.push(...controlAction);
+function disableControlActions(...controlActions: ControlAction[]) {
+  controlActions.forEach(controlAction => inputState.disabledControlActions.add(controlAction));
 }
 
 function enableControlActions(...controlActions: ControlAction[]) {
-  const filtered = inputState.disabledControlActions.filter((disabledControlAction) => {
-    for (const controlActionToEnable of controlActions) {
-      if (disabledControlAction.index === controlActionToEnable.index) {
-        return true;
-      }
-    }
-    return false;
+  controlActions.forEach(controlAction => {
+    inputState.disabledControlActions.delete(controlAction);
+    EnableControlAction(controlAction.type, controlAction.index, true);
   });
-  inputState.disabledControlActions = filtered;
 }
 
 function startBlockingDisabledControlActions() {

@@ -5,6 +5,7 @@ import {NUI_MSG_IDS} from "../../../../common/gui/nui-message";
 import playSound from "../../../sound";
 import logger from "../../../logging/logger";
 import Item, {ItemConstructorProps} from "./item";
+import wait from "../../../../common/wait";
 
 export type OpenMenuOptions = {
   withSound?: boolean;
@@ -126,6 +127,8 @@ function closeCurrentMenu() {
 
   if (undefined !== parentMenuId) {
     openMenu(parentMenuId, { withSound: false });
+  } else {
+    menuState.mainMenuLastClosedAt = GetGameTimer();
   }
 }
 

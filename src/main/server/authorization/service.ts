@@ -4,6 +4,8 @@ import logger from "../logging/logger";
 import playerUtils from "../player/utils";
 import {PlayerPrincipal} from "./player-principal/schema";
 
+// TODO cache all perms and principals on join and don't go over database for each perm check anymore
+
 async function hasPermission(playerNetId: number, permission: string) {
   const playerName = playerUtils.getPlayerNameFromNetId(playerNetId);
 

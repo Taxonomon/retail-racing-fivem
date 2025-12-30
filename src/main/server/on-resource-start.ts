@@ -2,6 +2,7 @@ import databaseConnection from "./database/connection";
 import databaseHealth from "./database/health";
 import logger from "./logging/logger";
 import registerAuthorizationCallbacks from "./authorization/callback";
+import startUpdatingPlayerPings from "./player/ping";
 
 on('onResourceStart', async (resource: string) => {
   if (resource === GetCurrentResourceName()) {
@@ -13,6 +14,9 @@ on('onResourceStart', async (resource: string) => {
 
     // register server callbacks
     registerAuthorizationCallbacks();
+
+    // do other stuff
+    startUpdatingPlayerPings();
 
     // all done
     logger.info(`txn server script started`);

@@ -12,7 +12,8 @@ const EVENT_NAMES = {
   PLAYER: {
     KICK: {
       SELF: 'txn:player:kick:self'
-    }
+    },
+    PING: 'txn:player:ping'
   }
 };
 
