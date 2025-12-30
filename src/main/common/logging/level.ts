@@ -13,3 +13,7 @@ const WARN: LogLevel = { identifier: 'WARN', priority: 3, color: COLORS.YELLOW }
 const ERROR: LogLevel = { identifier: 'ERROR', priority: 5, color: COLORS.RED_ORANGE };
 
 export const LOG_LEVELS = { TRACE, DEBUG, INFO, WARN, ERROR };
+
+export function logLevelFromPriority(priority: number) {
+  return [ TRACE, DEBUG, INFO, WARN, ERROR ].find(level => level.priority === priority) ?? INFO;
+}

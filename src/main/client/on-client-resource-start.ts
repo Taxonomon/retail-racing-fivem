@@ -7,11 +7,16 @@ import moderationMenu from "./moderation/menu";
 import administrationMenu from "./administration/menu";
 import startUpdatingBreadcrumps from "./gui/breadcrumps/service";
 import startReceivingPingUpdates from "./player/ping";
+import registerMessageFromServerEventListener from "./logging/msg-from-server";
 
 on('onClientResourceStart', async (resource: string) => {
   if (resource === GetCurrentResourceName()) {
     startReceivingPingUpdates();
     startUpdatingBreadcrumps();
+
+    // register event listeners
+    // TODO refactor all other event listeners to follow the "register via function call" practice
+    registerMessageFromServerEventListener();
 
     // menus
     mainMenu.initialize();
