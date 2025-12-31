@@ -50,7 +50,7 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
   const existingTrack = await tracksRepo.findByRockstarJobId(jobId);
   if (undefined !== existingTrack) {
     throw new Error(
-      `track of same job id already imported `
+      `track of same job id "${jobId}" already imported `
       + `("${existingTrack.name}" by "${existingTrack.author}")`
     );
   }
@@ -68,25 +68,25 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
   const raceType = raceParser.raceType(jobJson);
 
   if (undefined === jobType) {
-    throw new Error(`missing job type`);
+    throw new Error(`missing job type for job id "${jobId}"`);
   }
 
   if (!rockstarJobType.isSupported(jobType)) {
     // @ts-ignore
-    throw new Error(`unsupported job type "${jobType.name}"`);
+    throw new Error(`unsupported job type "${jobType.name}" for job id "${jobId}"`);
   }
 
   if (undefined === raceType) {
-    throw new Error(`missing race type`);
+    throw new Error(`missing race type for job id "${jobId}"`);
   }
 
   if (!rockstarRaceType.isSupported(raceType)) {
     // @ts-ignore
-    throw new Error(`unsupported race type "${raceType.id}"`);
+    throw new Error(`unsupported race type "${raceType.id}" for job id "${jobId}"`);
   }
 
   if (!raceParser.isLapRace(jobJson)) {
-    throw new Error('not a lap race');
+    throw new Error('job "${jobId}" is not a lap race');
   }
 
   // TODO check if track of same hash already exists
@@ -105,7 +105,7 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
   });
 
   if (undefined === track) {
-    throw new Error(`failed to persist imported track`);
+    throw new Error(`failed to persist imported track for job id "${jobId}" (database error)`);
   }
 
   // TODO refresh list of available tracks for all connected clients
@@ -118,11 +118,11 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
 
 function validateJobId(jobId: string): void {
   if (EXPECTED_JOB_ID_LENGTH !== jobId.length) {
-    throw new Error('job id not of expected length');
+    throw new Error(`job id "${jobId}" not of expected length`);
   }
 
   if (!REGEX_ROCKSTAR_JOB_ID.test(jobId)) {
-    throw new Error('job id not of expected R* job id format');
+    throw new Error(`job id "${jobId}" not of expected R* job id format`);
   }
 }
 
@@ -131,6 +131,7 @@ async function fetchRockstarJobJson(jobId: string): Promise<any> {
     for (let y = 0; y <= URL_RANGE_Y; y++) {
       for (const language of JSON_LANGUAGES) {
         const json = await performFetch(
+          jobId,
           // e.g. http://prod.cloud.rockstargames.com/ugc/gta5mission/0000/abcdefg/0_0_en.json
           // yes it's actually https and not http
           `http://prod.cloud.rockstargames.com`
@@ -148,7 +149,7 @@ async function fetchRockstarJobJson(jobId: string): Promise<any> {
   return undefined;
 }
 
-async function performFetch(url: string) {
+async function performFetch(jobId: string, url: string) {
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -160,6 +161,6 @@ async function performFetch(url: string) {
     });
     return 200 === response.status ? response.json() : undefined;
   } catch (err: any) {
-    throw new Error(`failed to fetch R* job json: ${err.message}`);
+    throw new Error(`failed to fetch R* job json for job id "${jobId}": ${err.message}`);
   }
 }

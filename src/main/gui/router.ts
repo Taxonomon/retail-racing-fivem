@@ -2,12 +2,14 @@ import {NUI_MSG_IDS} from "../common/gui/nui-message";
 import menu from "./menu/render";
 import logger from "./logging/logger";
 import breadcrumps from "./breadcrumps/render";
+import toasts from "./toasts/render";
 
 // @ts-ignore
 const ROUTES = new Map([
   [ NUI_MSG_IDS.MENU.RENDER, menu.render ],
   [ NUI_MSG_IDS.MENU.CLEAR, menu.clear ],
-  [ NUI_MSG_IDS.BREADCRUMPS, breadcrumps.render ]
+  [ NUI_MSG_IDS.BREADCRUMPS, breadcrumps.render ],
+  [ NUI_MSG_IDS.TOASTS.ADD, toasts.addToast ]
 ]);
 
 class MessageRouter {

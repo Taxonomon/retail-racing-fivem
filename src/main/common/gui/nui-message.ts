@@ -8,5 +8,8 @@ export const NUI_MSG_IDS = {
     RENDER: 'txn:gui:menu:render',
     CLEAR: 'txn:gui:menu:clear'
   },
-  BREADCRUMPS: 'txn:gui:breadcrumps'
+  BREADCRUMPS: 'txn:gui:breadcrumps',
+  TOASTS: {
+    ADD: 'txn:gui:toasts:add'
+  }
 };

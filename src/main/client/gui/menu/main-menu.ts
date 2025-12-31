@@ -4,6 +4,7 @@ import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 import EVENT_NAMES from "../../../common/event-names";
 import wait from "../../../common/wait";
 import playSound from "../../sound";
+import toast from "../toasts/service";
 
 function initialize() {
   menuService.addMenu({
@@ -25,7 +26,8 @@ function initialize() {
         icon: ItemIconType.ACTION,
         onPressed: async () => {
           playSound.select();
-          await wait.millis(100); // wait a little for the sound to finish playing
+          toast.showInfo('Bye bye!');
+          await wait.millis(1000); // wait a little for the sound to finish playing
           emitNet(EVENT_NAMES.PLAYER.KICK.SELF, 'quit via menu')
         }
       }

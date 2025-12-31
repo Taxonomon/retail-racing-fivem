@@ -11,6 +11,9 @@ html, body {
   --color-mono-300: rgba(60, 60, 60, 0.8);
   --color-mono-400: rgba(90, 90, 90, 0.8);
   --color-mono-900: rgba(255, 255, 255, 1.0);
+  --color-error-0: rgba(255, 77, 25, 0.8);
+  --color-warning-0: rgba(255, 179, 0, 0.8);
+  --color-info-0: rgba(55, 192, 255, 0.8);
 
   /* px values relative to viewport height
   /* will always grow proportionally with viewport height */
@@ -21,7 +24,13 @@ html, body {
   --4-px-vh: 0.276vh;
   --10-px-vh: 0.694vh;
   --20-px-vh: 1.388vh;
+  --40-px-vh: 2.776vh;
   --50-px-vh: 3.472vh;
+  --100-px-vh: 6.944vh;
+  --150-px-vh: 10.416vh;
+  --200-px-vh: 13.888vh;
+  --250-px-vh: 17.361vh;
+  --400-px-vh: 27.777vh;
   --450-px-vh: 31.25vh;
   --500-px-vh: 34.722vh;
 
@@ -29,8 +38,9 @@ html, body {
   --font-family-geist: 'Geist', sans-serif;
 
   /* font sizes */
-  --font-size-small: 1.250vh;
-  --font-size-regular: 1.500vh;
+  --font-size-xs: 1.000vh;
+  --font-size-s: 1.250vh;
+  --font-size-r: 1.500vh;
 
   /* font weights */
   --font-weight-regular: 400;
@@ -41,7 +51,8 @@ html, body {
   /* global settings */
   font-family: var(--font-family-geist), sans-serif;
   font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-regular);
+  font-size: var(--font-size-r);
+  line-height: 1.4em;
 }
 
 .menu {
@@ -114,7 +125,7 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: var(--20-px-vh);
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-s);
   color: var(--color-mono-900);
 }
 
@@ -126,4 +137,55 @@ html, body {
     0 var(--2-px-vh) black,
     var(--2-px-vh) 0 black,
     var(--2-px-vh) var(--2-px-vh) black;
+}
+
+.toasts {
+  position: fixed;
+  top: var(--50-px-vh);
+  left: var(--10-px-vh);
+  display: flex;
+  flex-direction: column;
+  gap: var(--20-px-vh);
+  color: var(--color-mono-900);
+}
+
+.toasts .toast {
+  min-width: var(--400-px-vh);
+  max-width: var(--400-px-vh);
+  background-color: var(--color-mono-100);
+  border-left-style: solid;
+  border-left-width: var(--10-px-vh);
+  display: flex;
+  flex-direction: column;
+  padding: var(--10-px-vh) var(--20-px-vh);
+}
+
+.toasts .error {
+  border-left-color: var(--color-error-0);
+}
+
+.toasts .error .label {
+  color: var(--color-error-0);
+}
+
+.toasts .warning {
+  border-left-color: var(--color-warning-0);
+}
+
+.toasts .warning .label {
+  color: var(--color-warning-0);
+}
+
+.toasts .info {
+  border-left-color: var(--color-info-0);
+}
+
+.toasts .info .label {
+  color: var(--color-info-0);
+}
+
+.toasts .label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--2-px-vh);
 }

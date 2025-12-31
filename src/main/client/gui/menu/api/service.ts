@@ -5,7 +5,7 @@ import {NUI_MSG_IDS} from "../../../../common/gui/nui-message";
 import playSound from "../../../sound";
 import logger from "../../../logging/logger";
 import Item, {ItemConstructorProps} from "./item";
-import wait from "../../../../common/wait";
+import toast from "../../toasts/service";
 
 export type OpenMenuOptions = {
   withSound?: boolean;
@@ -63,10 +63,14 @@ function removeMenu(id: string) {
 
 function openMainMenu() {
   if (undefined === menuState.mainMenu) {
-    logger.warn(`cannot open main menu: no main menu found`);
+    const msg = `cannot open main menu: no main menu found`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     playSound.error();
   } else if (menuState.isAnyMenuOpen()) {
-    logger.warn(`cannot open main menu: menu is already open`);
+    const msg = `cannot open main menu: menu is already open`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     playSound.error();
   } else {
     openMenu(menuState.mainMenu);
@@ -78,13 +82,17 @@ function openMenu(id: string, options?: OpenMenuOptions) {
   const soundEnabled = undefined === options?.withSound || false !== options?.withSound;
 
   if (undefined === menu) {
-    logger.warn(`cannot open menu "${id}": no such menu found`);
+    const msg = `cannot open menu "${id}": no such menu found`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     if (soundEnabled) {
       playSound.error();
     }
     return;
   } else if (!menu.hasItems()) {
-    logger.warn(`cannot open menu "${id}": menu has no items`);
+    const msg = `cannot open menu "${id}": menu has no items`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     if (soundEnabled) {
       playSound.error();
     }
@@ -115,7 +123,9 @@ function closeCurrentMenu() {
   const parentMenuId = menuState.stack.at(-2);
 
   if (undefined === currentMenuId) {
-    logger.warn(`cannot close current menu: menu isn't opened`);
+    const msg = `cannot close current menu: menu isn't opened`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     playSound.error();
     return;
   }
@@ -143,7 +153,9 @@ function navigateToNextItem() {
   const menu = menuState.getRenderedMenu();
 
   if (undefined === menu) {
-    logger.warn(`cannot navigate to next menu item: no menu is currently opened`);
+    const msg = `cannot navigate to next menu item: no menu is currently opened`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     return;
   }
 
@@ -162,7 +174,9 @@ function navigateToPreviousItem() {
   const menu = menuState.getRenderedMenu();
 
   if (undefined === menu) {
-    logger.warn(`cannot navigate to previous menu item: no menu is currently opened`);
+    const msg = `cannot navigate to previous menu item: no menu is currently opened`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     return;
   }
 
@@ -181,14 +195,18 @@ async function pressFocusedItem() {
   const menu = menuState.getRenderedMenu();
 
   if (undefined === menu) {
-    logger.warn(`cannot press focused menu item: no menu is currently opened`);
+    const msg = `cannot press focused menu item: no menu is currently opened`;
+    logger.warn(msg);
+    toast.showWarning(msg);
     return;
   }
 
   try {
     await menu.pressFocusedItem();
   } catch (error: any) {
-    logger.error(`Failed to press focused menu item: ${error.message}`);
+    const msg = `failed to press focused menu item: ${error.message}`;
+    logger.error(msg);
+    toast.showError(msg);
     playSound.error();
   }
 }
@@ -260,8 +278,6 @@ function removeItemFromMenu(menuId: string, itemId: string) {
     });
   }
 }
-
-// TODO add methods to add and remove items from menus at specific indices
 
 const menuService = {
   addMenu,
