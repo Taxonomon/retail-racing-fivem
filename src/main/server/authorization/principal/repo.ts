@@ -10,6 +10,15 @@ async function insert(principal: NewPrincipal): Promise<Principal | undefined> {
     .executeTakeFirst();
 }
 
+async function findByIds(ids: number[]): Promise<Principal[]> {
+  return await databaseState.db
+    .withSchema('txn')
+    .selectFrom('principals')
+    .selectAll()
+    .where('id', 'in', ids)
+    .execute();
+}
+
 async function findByIdentifier(identifier: string): Promise<Principal | undefined> {
   return await databaseState.db
     .withSchema('txn')
@@ -21,7 +30,8 @@ async function findByIdentifier(identifier: string): Promise<Principal | undefin
 
 const principalsRepo = {
   insert,
-  findByIdentifier
+  findByIds,
+  findByIdentifier,
 };
 
 export default principalsRepo;

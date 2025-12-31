@@ -6,6 +6,12 @@ import {PastNickname} from "../past-nicknames/schema";
 import playerState from "../state";
 import logger from "../../logging/logger";
 import playerIdentifiers from "../identifiers";
+import {PlayerPrincipal} from "../../authorization/player-principal/schema";
+import playerPrincipalsRepo from "../../authorization/player-principal/repo";
+import {ConnectedPlayer} from "./connected-player";
+import principalsRepo from "../../authorization/principal/repo";
+import permissionsRepo from "../../authorization/permission/repo";
+import principalPermissionsRepo from "../../authorization/principal-permission/repo";
 
 /**
  * <a href="https://docs.fivem.net/docs/scripting-reference/events/list/playerConnecting/">
@@ -39,22 +45,32 @@ const deferralUtils = {
   }
 };
 
-on('playerConnecting', async (
+export default function registerOnPlayerConnectingListener() {
+  on('playerConnecting', async (
+    playerName: string,
+    setKickReason: (reason: string) => void,
+    deferrals: ConnectionDeferrals
+  ) => {
+    // this is a temporary net id, assigned during the connection process.
+    // will be switched with a final net id on playerJoining.
+    const netId = globalThis.source;
+    await handleConnectingPlayer(netId, playerName, setKickReason, deferrals);
+  });
+}
+
+async function handleConnectingPlayer(
+  netId: number,
   playerName: string,
   setKickReason: (reason: string) => void,
   deferrals: ConnectionDeferrals
-) => {
-  // this is a temporary net id, assigned during the connection process.
-  // will be switched with a final net id on playerJoining.
-  const netId = globalThis.source;
-
+) {
   try {
     await deferralUtils.defer(deferrals);
 
     await deferralUtils.updateMessage(deferrals, 'Checking if server is full...');
     const numberOfSlots = GetConvarInt('sv_maxclients', 48);
 
-    if (playerState.connected >= numberOfSlots) {
+    if (playerState.connectedPlayers.length >= numberOfSlots) {
       logger.info(`Rejecting connecting player "${playerName}": server is full`);
       await deferralUtils.endAsFailure(deferrals, 'Server is full');
       return;
@@ -71,81 +87,91 @@ on('playerConnecting', async (
     }
 
     let player: Player | undefined = await playersRepo.findByLicense2(license2);
+    const now = new Date();
 
-    if (undefined === player) {
-      await handleNewPlayer(playerName, license2, deferrals);
-    } else {
-      await handleReturningPlayer(player, playerName, deferrals);
+    let persistedPlayer = undefined === player
+      ? await handleNewPlayer(license2, playerName, now)
+      : await handleReturningPlayer(player, playerName, now);
+
+    if (undefined === persistedPlayer) {
+      await deferralUtils.endAsFailure(
+        deferrals,
+        'Failed to handle player connection (internal server error)'
+      );
+      return;
     }
+
+    const connectedPlayer = await toConnectedPlayer(netId, persistedPlayer);
+    playerState.connectedPlayers.push(connectedPlayer);
+    logger.trace(`added new connected player to playerState: ${JSON.stringify(connectedPlayer)}`);
+
+    await deferralUtils.endAsSuccess(deferrals);
   } catch (error: any) {
     const errorMsg = 0 === error.message?.toString().trim().length ? error.stack : error.message;
     logger.error(`Failed to handle connecting player "${playerName}": ${errorMsg}`);
-    await deferralUtils.endAsFailure(deferrals, 'Failed to handle player connection (internal server error)');
+    await deferralUtils.endAsFailure(
+      deferrals,
+      'Failed to handle player connection (internal server error)'
+    );
   }
-});
+}
 
-async function handleNewPlayer(
-  playerName: string,
-  license2: string,
-  deferrals: ConnectionDeferrals
-): Promise<void> {
-  const now = new Date();
-
-  const newPlayer: Player | undefined = await playersRepo.insert({
+async function handleNewPlayer(license2: string, playerName: string, now: Date) {
+  return await playersRepo.insert({
     license2,
     first_joined: now,
     last_seen: now,
     nickname: playerName
   });
-
-  if (undefined === newPlayer) {
-    await deferralUtils.endAsFailure(deferrals, 'Failed to update player information (database error)');
-    return;
-  }
-
-  logger.info(`"${playerName}" joined for the first time`);
-  await acceptConnection(deferrals);
 }
 
-async function handleReturningPlayer(
-  player: Player,
-  playerName: string,
-  deferrals: ConnectionDeferrals
-): Promise<void> {
-  const now = new Date();
-  const previousNickname = player.nickname;
-
-  const updatedPlayer: Player | undefined = await playersRepo.updateById(player.id, {
+async function handleReturningPlayer(player: Player, playerName: string, now: Date) {
+  const updatedPlayer = await playersRepo.updateById(player.id, {
     nickname: playerName,
     last_seen: now
   });
 
-  if (undefined === updatedPlayer) {
-    await deferralUtils.endAsFailure(deferrals, 'Failed to update player information (database error)');
-    return;
+  if (undefined !== updatedPlayer) {
+    await updatePlayerNicknameHistory(player, player.nickname, playerName, now);
   }
 
-  if (playerName !== previousNickname) {
+  return updatedPlayer;
+}
+
+async function updatePlayerNicknameHistory(player: Player, oldNickname: string, newNickname: string, now: Date) {
+  if (newNickname !== oldNickname) {
     const newPastNickname: PastNickname | undefined = await pastNicknamesRepo.insert({
       player: player.id,
-      nickname: previousNickname,
+      nickname: oldNickname,
       active_until: now
     });
 
     if (undefined === newPastNickname) {
-      await deferralUtils.endAsFailure(deferrals, 'Failed to update player nickname history (database error)');
-      return;
+      throw new Error(
+        'failed to update player nickname history (PastNickname db query returned undefined)'
+      );
     }
   }
-
-  logger.info(
-    `"${playerName}" joined `
-    + `(last seen as "${previousNickname}" on ${player.last_seen.toISOString()})`
-  );
-  await acceptConnection(deferrals);
 }
 
-async function acceptConnection(deferrals: ConnectionDeferrals) {
-  playerState.connected += 1;
-  await deferralUtils.endAsSuccess(deferrals);
+async function toConnectedPlayer(netId: number, player: Player): Promise<ConnectedPlayer> {
+  // fetch permissions and principal identifiers from db for player, and persist all as one object in state
+  const principalIdentifiers: Set<string> = new Set();
+  const permissionIdentifiers: Set<string> = new Set();
+  const playerPrincipals = await playerPrincipalsRepo.findByPlayer(player);
+
+  if (undefined !== playerPrincipals) {
+    const principalIds = playerPrincipals.map(pp => pp.principal);
+    const principals = await principalsRepo.findByIds(principalIds);
+    const permissions = await principalPermissionsRepo.findPermissionsByPrincipalIds(principalIds);
+    principals.forEach(principal => principalIdentifiers.add(principal.identifier));
+    permissions.forEach(permission => permissionIdentifiers.add(permission.identifier));
+  }
+
+  return {
+    ...player,
+    netId,
+    principals: Array.from(principalIdentifiers),
+    permissions: Array.from(permissionIdentifiers)
+  };
 }

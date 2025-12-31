@@ -1,5 +1,3 @@
-import './on-resource-start';
-import './player/connection/connect';
-import './player/connection/drop';
-import './player/kick';
-import './callback/inbound';
+import registerOnResourceStartListener from "./on-resource-start";
+
+registerOnResourceStartListener();

@@ -21,7 +21,7 @@ async function findByIdentifier(identifier: string): Promise<Permission | undefi
 
 const permissionsRepo = {
   insert,
-  findByIdentifier
+  findByIdentifier,
 };
 
 export default permissionsRepo;

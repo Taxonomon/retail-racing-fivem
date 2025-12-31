@@ -18,7 +18,17 @@ function init() {
   });
 
   logger.info('Initializing database api from connection pool');
-  databaseState.db = new Kysely<DatabaseSchema>({ dialect });
+  databaseState.db = new Kysely<DatabaseSchema>({
+    dialect,
+    log(event) {
+      if (event.level === 'query') {
+        logger.trace(
+          `executed database query "${event.query.sql}" `
+          + `with params "${event.query.parameters.toString()}"`
+        );
+      }
+    }
+  });
 }
 
 const databaseConnection = { init };

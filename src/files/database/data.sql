@@ -44,3 +44,8 @@ INSERT INTO txn.principal_permissions (principal, permission) VALUES
       WHERE identifier = 'track:import'
     )
   );
+
+SELECT permissions.*
+FROM txn.permissions
+LEFT JOIN txn.principal_permissions ON permissions.id = principal_permissions.permission
+WHERE principal_permissions.principal IN (1);
