@@ -10,7 +10,7 @@ export interface TracksTable {
   added_by: ColumnType<number, number, never>;
   enabled: boolean;
   data: string; // jsonb in database // TODO change type of TracksTable.data to appropriate jsonb type
-  hash: ColumnType<string, string, never>;
+  hash_md5: ColumnType<string, string, never>;
 }
 
 export type Track = Selectable<TracksTable>;

@@ -11,6 +11,7 @@ import raceParser from "../rockstar-job/race/parse";
 import {Track} from "./schema";
 import logger from "../logging/logger";
 import playerUtils from "../player/utils";
+import {LOG_LEVELS} from "../../common/logging/level";
 
 const EXPECTED_JOB_ID_LENGTH = 22;
 const REGEX_ROCKSTAR_JOB_ID = /[a-zA-Z0-9-_)]+$/;
@@ -89,8 +90,11 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
     throw new Error('job "${jobId}" is not a lap race');
   }
 
-  // TODO check if track of same hash already exists
-  // TODO if imported track is of same hash as any existing track, but of different rockstar id, spew out a warning
+  const trackOfSameHash: Track | undefined = await tracksRepo.findByHashMd5(jobHash);
+
+  if (undefined !== trackOfSameHash) {
+    throw new Error(`track of job id "${jobId}" has already been imported (matching hash)`);
+  }
 
   const track: Track | undefined = await tracksRepo.insert({
     name: jobName,
@@ -101,7 +105,7 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
     enabled: true,
     data: jobJson,
     rockstar_job_id: jobId,
-    hash: jobHash
+    hash_md5: jobHash
   });
 
   if (undefined === track) {
@@ -113,6 +117,11 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
   logger.info(
     `imported new track "${jobName}" by "${jobAuthor}" `
     + `(rockstar job id: ${jobId}, imported by "${playerUtils.getPlayerNameFromNetId(playerId)}")`
+  );
+  logger.logClientMessage(
+    playerId,
+    LOG_LEVELS.INFO,
+    `imported new track "${jobName}" by "${jobAuthor}" from job id "${jobId}"`
   );
 }
 

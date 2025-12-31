@@ -19,9 +19,19 @@ async function findByRockstarJobId(rockstarJobId: string): Promise<Track | undef
     .executeTakeFirst();
 }
 
+async function findByHashMd5(hashMd5: string): Promise<Track | undefined> {
+  return await databaseState.db
+    .withSchema('txn')
+    .selectFrom('tracks')
+    .selectAll()
+    .where('hash_md5', '=', hashMd5)
+    .executeTakeFirst();
+}
+
 const tracksRepo = {
   insert,
-  findByRockstarJobId
+  findByRockstarJobId,
+  findByHashMd5
 };
 
 export default tracksRepo;

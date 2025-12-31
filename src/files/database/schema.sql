@@ -88,3 +88,25 @@ CREATE TABLE txn.player_principals (
   CONSTRAINT player_principals_uk_player_principal
     UNIQUE (player, principal)
 );
+
+CREATE TABLE txn.tracks (
+  id bigint GENERATED ALWAYS AS IDENTITY,
+  name text NOT NULL,
+  author text NOT NULL,
+  description text,
+  rockstar_job_id text NOT NULL,
+  added_at timestamptz NOT NULL,
+  added_by bigint,
+  enabled bool NOT NULL,
+  data jsonb NOT NULL,
+  hash_md5 text NOT NULL,
+  CONSTRAINT tracks_pk_id
+    PRIMARY KEY (id),
+  CONSTRAINT tracks_fk_added_by
+    FOREIGN KEY (added_by)
+    REFERENCES txn.players (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL,
+  CONSTRAINT tracks_uk_hash_md5
+    UNIQUE (hash_md5)
+);
