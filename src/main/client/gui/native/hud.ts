@@ -1,0 +1,54 @@
+// HUD components taken from:
+// https://forum.cfx.re/t/remove-money-default-hud/852617/2
+
+import nativeGuiState from "./state";
+
+const HUD_COMPONENT_HUD = 0;
+const HUD_COMPONENT_WANTED_STARTS = 1;
+const HUD_COMPONENT_CASH = 3;
+const HUD_COMPONENT_MP_CASH = 4;
+const HUD_COMPONENT_MP_MESSAGE = 5;
+const HUD_COMPONENT_VEHICLE_NAME = 6;
+const HUD_COMPONENT_AREA_NAME = 7;
+const HUD_COMPONENT_VEHICLE_CLASS = 8;
+const HUD_COMPONENT_STREET_NAME = 9;
+const HUD_COMPONENT_HELP_TEXT = 10;
+const HUD_COMPONENT_FLOATING_HELP_TEXT_1 = 11;
+const HUD_COMPONENT_FLOATING_HELP_TEXT_2 = 12;
+const HUD_COMPONENT_CASH_CHANGE = 13;
+const HUD_COMPONENT_RETICLE = 14;
+const HUD_COMPONENT_SUBTITLE_TEXT = 15;
+const HUD_COMPONENT_RADIO_STATIONS = 16;
+const HUD_COMPONENT_SAVING_GAME = 17;
+const HUD_COMPONENT_GAME_STREAM = 18;
+const HUD_COMPONENT_WEAPON_WHEEL = 19;
+const HUD_COMPONENT_WEAPON_WHEEL_STATS = 20;
+
+// no idea what these are used for but they exist
+
+const MAX_HUD_COMPONENTS = 21;
+const MAX_HUD_WEAPONS = 22;
+const MAX_SCRIPTED_HUD_COMPONENTS = 141;
+
+const UNWANTED_HUD_ELEMENTS = [
+  HUD_COMPONENT_CASH,
+  HUD_COMPONENT_MP_CASH,
+  HUD_COMPONENT_VEHICLE_NAME,
+  HUD_COMPONENT_AREA_NAME,
+  HUD_COMPONENT_VEHICLE_CLASS,
+  HUD_COMPONENT_STREET_NAME,
+  HUD_COMPONENT_CASH_CHANGE,
+  HUD_COMPONENT_RADIO_STATIONS,
+  HUD_COMPONENT_WEAPON_WHEEL,
+  HUD_COMPONENT_WEAPON_WHEEL_STATS
+];
+
+export default function startHidingUnwantedNativeGuiHudElements() {
+  nativeGuiState.hideUnwantedHudElements.start(async () => {
+    UNWANTED_HUD_ELEMENTS.forEach((id) => {
+      if (IsHudComponentActive(id)) {
+        HideHudComponentThisFrame(id);
+      }
+    });
+  });
+}

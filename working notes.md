@@ -14,8 +14,5 @@ a race is basically a synchronized hotlap between multiple people for a specific
 
 ### TODO 2026-01-01:
 
-- block district/car/money texts
 - speedometer
-- weather selection
-- pre-configured time-of-day selection
 - basic vehicle spawn menu (with blacklist locked behind permission)

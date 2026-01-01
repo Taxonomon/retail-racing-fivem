@@ -14,6 +14,7 @@ import initializeTimeMenu from "./time/menu";
 import wantedLevelService from "./wanted-level/menu";
 import initializeWeatherMenu from "./weather/menu";
 import callbackService from "./callback/outbound";
+import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -30,6 +31,7 @@ async function handleOnClientResourceStart() {
   registerMessageFromServerEventListener();
 
   // menus
+  // TODO consider registering per-gamemode menus (freemode, hotlap, race, etc.)
   initializeMainMenu();
   initializeTimeMenu();
   initializeTrafficMenu();
@@ -46,6 +48,7 @@ async function handleOnClientResourceStart() {
   startReceivingPingUpdates();
   startUpdatingBreadcrumps();
   startTrackingPlayerCoordinates();
+  startHidingUnwantedNativeGuiHudElements();
   wantedLevelService.disable();
 
   // all done
