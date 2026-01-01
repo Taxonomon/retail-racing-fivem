@@ -26,3 +26,6 @@ INSERT INTO txn.principal_permissions (principal, permission) VALUES
     (SELECT id FROM txn.principals WHERE identifier = 'administrator'),
     (SELECT id FROM txn.permissions WHERE identifier = 'track:import')
   );
+
+SELECT *
+FROM txn.tracks;

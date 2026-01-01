@@ -12,6 +12,7 @@ import {Track} from "./schema";
 import logger from "../logging/logger";
 import playerUtils from "../player/utils";
 import {LOG_LEVELS} from "../../common/logging/level";
+import playerState from "../player/state";
 
 const EXPECTED_JOB_ID_LENGTH = 22;
 const REGEX_ROCKSTAR_JOB_ID = /[a-zA-Z0-9-_)]+$/;
@@ -36,7 +37,9 @@ export default function registerTrackImportCommand() {
   });
 }
 
-async function importTrack(playerId: number, args: string[], rawCommand: string): Promise<void> {
+async function importTrack(netId: number, args: string[], rawCommand: string): Promise<void> {
+  const player = playerState.getConnectedPlayer(netId);
+
   if (trackState.importRunning) {
     throw new Error('another import is currently running');
   }
@@ -68,23 +71,8 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
   const jobType = jobParser.type(jobJson);
   const raceType = raceParser.raceType(jobJson);
 
-  if (undefined === jobType) {
-    throw new Error(`missing job type for job id "${jobId}"`);
-  }
-
-  if (!rockstarJobType.isSupported(jobType)) {
-    // @ts-ignore
-    throw new Error(`unsupported job type "${jobType.name}" for job id "${jobId}"`);
-  }
-
-  if (undefined === raceType) {
-    throw new Error(`missing race type for job id "${jobId}"`);
-  }
-
-  if (!rockstarRaceType.isSupported(raceType)) {
-    // @ts-ignore
-    throw new Error(`unsupported race type "${raceType.id}" for job id "${jobId}"`);
-  }
+  validateJobType(jobId, jobType);
+  validateRaceType(jobId, raceType);
 
   if (!raceParser.isLapRace(jobJson)) {
     throw new Error('job "${jobId}" is not a lap race');
@@ -101,7 +89,7 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
     author: jobAuthor,
     description: jobDescription,
     added_at: new Date(),
-    added_by: -1, // TODO fix
+    added_by: player.id,
     enabled: true,
     data: jobJson,
     rockstar_job_id: jobId,
@@ -116,13 +104,9 @@ async function importTrack(playerId: number, args: string[], rawCommand: string)
 
   logger.info(
     `imported new track "${jobName}" by "${jobAuthor}" `
-    + `(rockstar job id: ${jobId}, imported by "${playerUtils.getPlayerNameFromNetId(playerId)}")`
+    + `(rockstar job id: ${jobId}, imported by "${playerUtils.getPlayerNameFromNetId(netId)}")`
   );
-  logger.logClientMessage(
-    playerId,
-    LOG_LEVELS.INFO,
-    `imported new track "${jobName}" by "${jobAuthor}" from job id "${jobId}"`
-  );
+  logger.logClientMessage(netId, LOG_LEVELS.INFO, `imported new track "${jobName}" by "${jobAuthor}"`);
 }
 
 function validateJobId(jobId: string): void {
@@ -132,6 +116,28 @@ function validateJobId(jobId: string): void {
 
   if (!REGEX_ROCKSTAR_JOB_ID.test(jobId)) {
     throw new Error(`job id "${jobId}" not of expected R* job id format`);
+  }
+}
+
+function validateJobType(jobId: string, jobType: JobType | undefined) {
+  if (undefined === jobType) {
+    throw new Error(`missing job type for job id "${jobId}"`);
+  }
+
+  if (!rockstarJobType.isSupported(jobType)) {
+    // @ts-ignore
+    throw new Error(`unsupported job type "${jobType.name}" for job id "${jobId}"`);
+  }
+}
+
+function validateRaceType(jobId: string, raceType: RaceType | undefined) {
+  if (undefined === raceType) {
+    throw new Error(`missing race type for job id "${jobId}"`);
+  }
+
+  if (!rockstarRaceType.isSupported(raceType)) {
+    // @ts-ignore
+    throw new Error(`unsupported race type "${raceType.id}" for job id "${jobId}"`);
   }
 }
 

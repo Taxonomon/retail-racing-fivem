@@ -6,6 +6,8 @@ import playSound from "../../../sound";
 import logger from "../../../logging/logger";
 import Item, {ItemConstructorProps} from "./item";
 import toast from "../../toasts/service";
+import {ItemIconType} from "../../../../common/gui/menu/item-icon-type";
+import menuInputService from "../input";
 
 export type OpenMenuOptions = {
   withSound?: boolean;
@@ -104,6 +106,12 @@ function openMenu(id: string, options?: OpenMenuOptions) {
     data: menu.renderProps()
   });
 
+  // if no menu has been opened so far, toggle certain menu inputs while any menu is opened
+  if (0 === menuState.stack.length) {
+    menuInputService.disableMenuInputsBlockedWhileMenuIsOpened();
+    menuInputService.enableMenuInputsNotBlockedWhileMenuIsOpened();
+  }
+
   // if a child menu was closed, it was popped off the stack, leaving the parent menu on top of the stack.
   // now if this parent menu is trying to be opened, it shouldn't be added to the stack again if it's already
   // at the top of the stack.
@@ -139,12 +147,17 @@ function closeCurrentMenu() {
     openMenu(parentMenuId, { withSound: false });
   } else {
     menuState.mainMenuLastClosedAt = GetGameTimer();
+    menuInputService.enableMenuInputsNotBlockedWhileMenuIsClosed();
+    menuInputService.disableMenuInputsBlockedWhileMenuIsClosed();
   }
 }
 
 function closeAllMenus() {
   sendNuiMessage({ id: NUI_MSG_IDS.MENU.CLEAR });
   menuState.stack = [];
+  menuState.mainMenuLastClosedAt = GetGameTimer();
+  menuInputService.enableMenuInputsNotBlockedWhileMenuIsClosed();
+  menuInputService.disableMenuInputsBlockedWhileMenuIsClosed();
   playSound.back();
   logger.debug(`closed all currently opened menus`);
 }
@@ -279,6 +292,31 @@ function removeItemFromMenu(menuId: string, itemId: string) {
   }
 }
 
+function setItemIcon(menuId: string, itemId: string, icon: ItemIconType) {
+  const menu = menuState.getMenu(menuId);
+
+  if (undefined === menu) {
+    logger.warn(`cannot set icon of item "${itemId}": no such menu "${menuId}" found`);
+    return;
+  }
+
+  const item = menu.getItem(itemId);
+
+  if (undefined === item) {
+    logger.warn(`cannot set icon of item "${itemId}": no such item found in menu "${menuId}"`);
+    return;
+  }
+
+  item.icon = icon;
+
+  sendNuiMessage({
+    id: NUI_MSG_IDS.MENU.RENDER,
+    data: menu.renderProps()
+  });
+
+  logger.debug(`set icon of item "${itemId}" of menu "${menuId}" to "${icon}"`);
+}
+
 const menuService = {
   addMenu,
   setMainMenu,
@@ -290,7 +328,9 @@ const menuService = {
   navigateToNextItem,
   navigateToPreviousItem,
   pressFocusedItem,
-  addItemToMenu
+  addItemToMenu,
+  removeItemFromMenu,
+  setItemIcon
 };
 
 export default menuService;

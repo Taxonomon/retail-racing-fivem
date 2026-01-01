@@ -2,6 +2,8 @@ import wait from "../../../common/wait";
 import logger from "../../logging/logger";
 import guiState from "../state";
 import playSound from "../../sound";
+import {controlActionService} from "../../input/control-action";
+import menuInputService, {MENU_INPUT_BINDINGS} from "../menu/input";
 
 export type NativeTextInputProps = {
   title: string;
@@ -31,6 +33,8 @@ async function showAndWait(props: NativeTextInputProps) {
   }
 
   guiState.isNativeTextInputShown = true;
+  menuInputService.disableMenuInputBindings(MENU_INPUT_BINDINGS.PRESS_ITEM);
+
   let length = props.maxLength ?? MAX_LENGTH;
   let result: NativeTextInputResult;
 
@@ -89,6 +93,8 @@ async function showAndWait(props: NativeTextInputProps) {
   }
 
   guiState.isNativeTextInputShown = false;
+  await wait.oneFrame();
+  menuInputService.enableMenuInputBindings(MENU_INPUT_BINDINGS.PRESS_ITEM);
   return result;
 }
 

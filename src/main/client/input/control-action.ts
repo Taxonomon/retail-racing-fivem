@@ -86,7 +86,7 @@ export const CONTROL_ACTIONS = {
 };
 
 function disableControlActions(...controlActions: ControlAction[]) {
-  controlActions.forEach(controlAction => inputState.disabledControlActions.add(controlAction));
+  controlActions.forEach(ca => inputState.disabledControlActions.add(ca));
 }
 
 function enableControlActions(...controlActions: ControlAction[]) {

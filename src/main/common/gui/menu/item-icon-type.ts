@@ -1,6 +1,7 @@
 export enum ItemIconType {
   SUB_MENU,
-  TOGGLE,
+  TOGGLE_OFF,
+  TOGGLE_ON,
   LABEL,
   ACTION,
 }

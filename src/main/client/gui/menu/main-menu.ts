@@ -6,7 +6,7 @@ import wait from "../../../common/wait";
 import playSound from "../../sound";
 import toast from "../toasts/service";
 
-function initialize() {
+export default function initializeMainMenu() {
   menuService.addMenu({
     id: MENU_IDS.MAIN,
     title: 'Main Menu',
@@ -35,8 +35,3 @@ function initialize() {
   });
   menuService.setMainMenu(MENU_IDS.MAIN);
 }
-
-
-const mainMenu = { initialize };
-
-export default mainMenu;

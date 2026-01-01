@@ -6,12 +6,11 @@ import {PastNickname} from "../past-nicknames/schema";
 import playerState from "../state";
 import logger from "../../logging/logger";
 import playerIdentifiers from "../identifiers";
-import {PlayerPrincipal} from "../../authorization/player-principal/schema";
 import playerPrincipalsRepo from "../../authorization/player-principal/repo";
 import {ConnectedPlayer} from "./connected-player";
 import principalsRepo from "../../authorization/principal/repo";
-import permissionsRepo from "../../authorization/permission/repo";
 import principalPermissionsRepo from "../../authorization/principal-permission/repo";
+import {GameMode} from "../../game-mode/game-mode";
 
 /**
  * <a href="https://docs.fivem.net/docs/scripting-reference/events/list/playerConnecting/">
@@ -172,6 +171,7 @@ async function toConnectedPlayer(netId: number, player: Player): Promise<Connect
     ...player,
     netId,
     principals: Array.from(principalIdentifiers),
-    permissions: Array.from(permissionIdentifiers)
+    permissions: Array.from(permissionIdentifiers),
+    gameMode: GameMode.FREEMODE
   };
 }

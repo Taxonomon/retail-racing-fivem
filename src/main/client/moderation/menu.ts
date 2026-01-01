@@ -5,11 +5,11 @@ import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
 import triggerServerCallback from "../callback/outbound";
 
-async function initialize() {
+export default async function initializeModerationMenu() {
   const accessResult = await triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.MODERATION);
 
   if (undefined !== accessResult.error) {
-    logger.warn(`error whilst checking access to moderation menu: ${accessResult.error.message}`);
+    logger.warn(`error whilst checking access to moderation menu: ${accessResult.error}`);
     return;
   } else if (!accessResult.data) {
     logger.debug(`client is not permitted access to moderation menu`);
@@ -33,7 +33,3 @@ async function initialize() {
 function pressModerationItem() {
   menuService.openMenu(MENU_IDS.MODERATION.MAIN);
 }
-
-const moderationMenu = { initialize };
-
-export default moderationMenu;

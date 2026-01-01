@@ -44,7 +44,11 @@ export abstract class InputBinding {
   }
 
   updateInputState() {
-    if (!this.disabled && this.isInputPressed()) {
+    if (this.disabled) {
+      return;
+    }
+
+    if (this.isInputPressed()) {
       if (!this.pressed) {
         logger.debug(`pressed input "${this.name}"`);
         this.pressed = true;

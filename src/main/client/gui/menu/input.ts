@@ -4,8 +4,9 @@ import {CONTROL_ACTIONS, controlActionService} from "../../input/control-action"
 import inputState from "../../input/state";
 import {ControlActionInputBinding} from "../../input/binding/control-action";
 import {InputBinding} from "../../input/binding/abstract";
+import logger from "../../logging/logger";
 
-const MENU_INPUTS = {
+export const MENU_INPUT_BINDINGS = {
   OPEN_MAIN_MENU: new ControlActionInputBinding({
     name: 'MENU_OPEN_MAIN_MENU',
     performActionOn: 'hold',
@@ -41,23 +42,23 @@ const MENU_INPUTS = {
 };
 
 const MENU_BINDINGS_TO_DISABLE_WHILE_MENU_OPENED: InputBinding[] = [
-  MENU_INPUTS.OPEN_MAIN_MENU
+  MENU_INPUT_BINDINGS.OPEN_MAIN_MENU
 ];
 
 const MENU_BINDINGS_TO_DISABLE_WHILE_MENU_CLOSED: InputBinding[] = [
-  MENU_INPUTS.CLOSE_MENU,
-  MENU_INPUTS.PRESS_ITEM,
-  MENU_INPUTS.NAVIGATE_UP,
-  MENU_INPUTS.NAVIGATE_DOWN
+  MENU_INPUT_BINDINGS.CLOSE_MENU,
+  MENU_INPUT_BINDINGS.PRESS_ITEM,
+  MENU_INPUT_BINDINGS.NAVIGATE_UP,
+  MENU_INPUT_BINDINGS.NAVIGATE_DOWN
 ];
 
 function setUp() {
   inputState.bindings.push(
-    MENU_INPUTS.OPEN_MAIN_MENU,
-    MENU_INPUTS.NAVIGATE_UP,
-    MENU_INPUTS.NAVIGATE_DOWN,
-    MENU_INPUTS.PRESS_ITEM,
-    MENU_INPUTS.CLOSE_MENU
+    MENU_INPUT_BINDINGS.OPEN_MAIN_MENU,
+    MENU_INPUT_BINDINGS.NAVIGATE_UP,
+    MENU_INPUT_BINDINGS.NAVIGATE_DOWN,
+    MENU_INPUT_BINDINGS.PRESS_ITEM,
+    MENU_INPUT_BINDINGS.CLOSE_MENU
   );
 
   menuState.blockControlActions.start(() => {
@@ -105,16 +106,47 @@ function setUp() {
       );
     }
   });
-
-  menuState.blockInputBindings.start(() => {
-    // menu bindings can be toggled on demand and don't need to be disabled every frame
-    MENU_BINDINGS_TO_DISABLE_WHILE_MENU_OPENED.forEach(b => b.disabled = menuState.isAnyMenuOpen());
-    MENU_BINDINGS_TO_DISABLE_WHILE_MENU_CLOSED.forEach(b => b.disabled = !menuState.isAnyMenuOpen());
-  }, 50);
 }
 
-const menuInput = {
-  setUp
+
+function disableMenuInputsBlockedWhileMenuIsClosed() {
+  disableMenuInputBindings(...MENU_BINDINGS_TO_DISABLE_WHILE_MENU_CLOSED);
+}
+
+function disableMenuInputsBlockedWhileMenuIsOpened() {
+  disableMenuInputBindings(...MENU_BINDINGS_TO_DISABLE_WHILE_MENU_OPENED);
+}
+
+function enableMenuInputsNotBlockedWhileMenuIsClosed() {
+  enableMenuInputBindings(...MENU_BINDINGS_TO_DISABLE_WHILE_MENU_OPENED);
+}
+
+function enableMenuInputsNotBlockedWhileMenuIsOpened() {
+  enableMenuInputBindings(...MENU_BINDINGS_TO_DISABLE_WHILE_MENU_CLOSED);
+}
+
+function disableMenuInputBindings(...bindings: InputBinding[]) {
+  bindings.forEach(b => {
+    logger.debug(`disabled menu input binding "${b.name}"`);
+    b.disabled = true;
+  });
+}
+
+function enableMenuInputBindings(...bindings: InputBinding[]) {
+  bindings.forEach(b => {
+    logger.debug(`enabled menu input binding "${b.name}"`);
+    b.disabled = false;
+  });
+}
+
+const menuInputService = {
+  setUp,
+  disableMenuInputBindings,
+  enableMenuInputBindings,
+  disableMenuInputsBlockedWhileMenuIsClosed,
+  disableMenuInputsBlockedWhileMenuIsOpened,
+  enableMenuInputsNotBlockedWhileMenuIsOpened,
+  enableMenuInputsNotBlockedWhileMenuIsClosed
 };
 
-export default menuInput;
+export default menuInputService;

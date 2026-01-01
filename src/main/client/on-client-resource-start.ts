@@ -1,32 +1,39 @@
-import menuInput from "./gui/menu/input";
+import menuInputService from "./gui/menu/input";
 import {controlActionService} from "./input/control-action";
 import inputBindingListener from "./input/binding/listener";
 import logger from "./logging/logger";
-import mainMenu from "./gui/menu/main-menu";
-import moderationMenu from "./moderation/menu";
-import administrationMenu from "./administration/menu";
 import startUpdatingBreadcrumps from "./gui/breadcrumps/service";
 import startReceivingPingUpdates from "./player/ping";
 import registerMessageFromServerEventListener from "./logging/msg-from-server";
+import startTrackingPlayerCoordinates from "./player/coords";
+import initializeModerationMenu from "./moderation/menu";
+import initializeMainMenu from "./gui/menu/main-menu";
+import initializeAdministrationMenu from "./administration/menu";
+import initializeTrafficMenu from "./traffic/menu";
+import initializeTimeMenu from "./time/menu";
 
 on('onClientResourceStart', async (resource: string) => {
   if (resource === GetCurrentResourceName()) {
-    startReceivingPingUpdates();
-    startUpdatingBreadcrumps();
-
     // register event listeners
     // TODO refactor all other event listeners to follow the "register via function call" practice
     registerMessageFromServerEventListener();
 
     // menus
-    mainMenu.initialize();
-    await moderationMenu.initialize();
-    await administrationMenu.initialize();
+    initializeMainMenu();
+    initializeTimeMenu();
+    initializeTrafficMenu();
+    await initializeModerationMenu();
+    await initializeAdministrationMenu();
 
     // inputs
-    menuInput.setUp();
+    menuInputService.setUp();
     controlActionService.startBlockingDisabledControlActions();
     inputBindingListener.start();
+
+    // start doing other stuff
+    startReceivingPingUpdates();
+    startUpdatingBreadcrumps();
+    startTrackingPlayerCoordinates();
 
     // all done
     logger.info(`txn client script started`);

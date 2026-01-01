@@ -1,7 +1,6 @@
 import {AddToastProps, ToastType} from "../../../common/gui/toasts/add-toast-props";
 import sendNuiMessage from "../send-nui-message";
 import {NUI_MSG_IDS} from "../../../common/gui/nui-message";
-import EVENT_NAMES from "../../../common/event-names";
 
 function showToast(type: ToastType, text: string) {
   sendNuiMessage({

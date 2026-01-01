@@ -7,7 +7,6 @@ class MenuState {
   stack: string[] = [];
   mainMenu?: string;
   blockControlActions: Tick = new Tick('block menu-impeding control actions', logger);
-  blockInputBindings: Tick = new Tick('block menu-impeding input bindings', logger);
   mainMenuLastClosedAt: number = -1;
 
   hasMenu(id: string) {

@@ -13,7 +13,7 @@ const CLASSES = {
   ERROR: 'error'
 };
 
-const HIDE_TOASTS_AFTER_MS = 5000;
+const HIDE_TOASTS_AFTER_MS = 8000;
 
 function loadRootNode() {
   toastState.rootNode = $(`.${CLASSES.TOASTS}`);

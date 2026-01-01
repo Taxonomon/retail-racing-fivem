@@ -104,6 +104,10 @@ export default class Menu {
   indexOfItem(id: string) {
     return this.items.findIndex(item => item.id === id);
   }
+
+  getItem(itemId: string) {
+    return this.items.find(item => item.id === itemId);
+  }
 }
 
 export type MenuConstructorProps = {

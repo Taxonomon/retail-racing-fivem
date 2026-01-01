@@ -5,7 +5,7 @@ import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
 import triggerServerCallback from "../callback/outbound";
 
-async function initialize() {
+export default async function initializeAdministrationMenu() {
   const accessResult = await triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.ADMINISTRATION);
 
   if (undefined !== accessResult.error) {
@@ -38,7 +38,3 @@ async function initialize() {
 function pressAdministrationItem() {
   menuService.openMenu(MENU_IDS.ADMINISTRATION.MAIN);
 }
-
-const administrationMenu = { initialize };
-
-export default administrationMenu;

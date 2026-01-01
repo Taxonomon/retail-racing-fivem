@@ -7,8 +7,12 @@ class PlayerState {
   pings: Map<string, number> = new Map(); // key = netId, value = pingMs
   updatePings: Tick = new Tick('update player pings', logger);
 
-  getConnectedPlayer(netId: number): ConnectedPlayer | undefined {
-    return this.connectedPlayers.find(connectedPlayer => netId === connectedPlayer.netId);
+  getConnectedPlayer(netId: number): ConnectedPlayer {
+    const result = this.connectedPlayers.find(connectedPlayer => netId === connectedPlayer.netId);
+    if (undefined === result) {
+      throw new Error(`no connected player found for net id ${netId}`);
+    }
+    return result;
   }
 
   removeConnectedPlayer(netId: number) {
