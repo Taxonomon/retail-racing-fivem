@@ -19,3 +19,6 @@ a race is basically a synchronized hotlap between multiple people for a specific
 - speedometer
 - weather selection
 - pre-configured time-of-day selection
+- kick ppl on server resource restart
+- basic vehicle spawn menu (with blacklist locked behind permission)
+- display menu icons
