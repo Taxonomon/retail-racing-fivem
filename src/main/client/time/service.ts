@@ -5,7 +5,7 @@ import toast from "../gui/toasts/service";
 /**
  * Reflects the ingame day, not the real-life one.
  */
-type TimeOfDay = {
+export type TimeOfDay = {
   hour: number;
   minute: number;
   second: number;
@@ -13,19 +13,22 @@ type TimeOfDay = {
 
 function freezeTime() {
   if (!timeState.frozen) {
-    const timeOfDay = getTimeOfDay();
+    timeState.frozenTimeOfDay = getTimeOfDay();
     timeState.freezeTime.start(() => {
-      NetworkOverrideClockTime(timeOfDay.hour, timeOfDay.minute, timeOfDay.second);
+      if (undefined !== timeState.frozenTimeOfDay) {
+        setTimeOfDay(timeState.frozenTimeOfDay);
+      }
     }, 100);
     timeState.frozen = true;
-    logger.info(`froze time of day at ${formattedString(timeOfDay)}`);
-    toast.showInfo(`Froze current time of day at ${formattedString(timeOfDay)}`);
+    logger.info(`froze time of day at ${formattedString(timeState.frozenTimeOfDay)}`);
+    toast.showInfo(`Froze current time of day at ${formattedString(timeState.frozenTimeOfDay)}`);
   }
 }
 
 function unfreezeTime() {
   if (timeState.frozen) {
     timeState.freezeTime.stop();
+    timeState.frozenTimeOfDay = undefined;
     timeState.frozen = false;
     logger.info(`resumed time of day`);
     toast.showInfo('Resumed current time of day');
@@ -54,7 +57,11 @@ function setHour(rawHour: string) {
   const timeOfDay = getTimeOfDay();
   timeOfDay.hour = hour;
 
-  NetworkOverrideClockTime(timeOfDay.hour, timeOfDay.minute, timeOfDay.second);
+  if (timeState.frozen) {
+    timeState.frozenTimeOfDay = timeOfDay;
+  }
+
+  setTimeOfDay(timeOfDay);
   logger.info(`set time of day to ${formattedString(timeOfDay)}`);
   toast.showInfo(`Set time of day to ${formattedString(timeOfDay)}`);
 }

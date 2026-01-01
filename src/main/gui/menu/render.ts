@@ -3,6 +3,8 @@ import menuState from "./state";
 import logger from "../logging/logger";
 import {MenuRenderProps} from "../../common/gui/menu/menu-render-props";
 import {ItemRenderProps} from "../../common/gui/menu/item-render-props";
+import {ItemIconType} from "../../common/gui/menu/item-icon-type";
+import ICONS from "../icons";
 
 const CLASSES = {
   MENU: 'menu',
@@ -14,7 +16,8 @@ const CLASSES = {
   DESCRIPTION: 'description',
   ICON: 'icon',
   FOCUSED: 'focused',
-  ITEMS: 'items'
+  ITEMS: 'items',
+  MATERIAL_SYMBOLS_OUTLINED: 'material-symbols-outlined'
 };
 
 function loadRootNode() {
@@ -85,13 +88,24 @@ function descriptionHtml(description: string) {
 }
 
 function itemHtml(props: ItemRenderProps) {
-  // TODO set item icon based on item type
   return `
     <div class="${CLASSES.ITEM} ${props.focused ? CLASSES.FOCUSED : ''}">
       <div class="${CLASSES.TEXT}">${props.title}</div>
-      <div class="${CLASSES.ICON}"></div>
+      <span class="${CLASSES.ICON} ${CLASSES.MATERIAL_SYMBOLS_OUTLINED}">${getIconFromIconType(props.icon)}</span>
     </div>
   `;
+}
+
+function getIconFromIconType(itemIconType: ItemIconType) {
+  switch (itemIconType) {
+    case ItemIconType.SUB_MENU: return ICONS.KEYBOARD_DOUBLE_ARROW_RIGHT;
+    case ItemIconType.LABEL: return ICONS.INFO;
+    case ItemIconType.TOGGLE_ON: return ICONS.CHECK_BOX;
+    case ItemIconType.TOGGLE_OFF: return ICONS.CHECK_BOX_OUTLINE_BLANK;
+    case ItemIconType.SELECTED: return ICONS.CHECK;
+    case ItemIconType.INPUT: return ICONS.BORDER_COLOR;
+    default: return '';
+  }
 }
 
 const menu = {

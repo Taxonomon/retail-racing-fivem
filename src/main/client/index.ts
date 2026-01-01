@@ -1,2 +1,4 @@
-import './on-client-resource-start';
 import './callback/outbound';
+import registerOnClientResourceStartListener from "./on-client-resource-start";
+
+registerOnClientResourceStartListener();

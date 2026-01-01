@@ -6,13 +6,15 @@ import {CallbackResult} from "../../common/callback/result";
 import {ActiveCallbackRequest} from "../../common/callback/request";
 import {nanoid} from "nanoid/non-secure";
 
-onNet(
-  EVENT_NAMES.CALLBACK.SERVER.RESPONSE,
-  (requestId: string, identifier: string, response: CallbackResult) => {
-    logger.trace(`received net event "${EVENT_NAMES.CALLBACK.SERVER.RESPONSE}"`);
-    handleServerCallbackResponse(requestId, identifier, response);
-  }
-);
+function registerServerCallbackResponseListener() {
+  onNet(
+    EVENT_NAMES.CALLBACK.SERVER.RESPONSE,
+    (requestId: string, identifier: string, response: CallbackResult) => {
+      logger.trace(`received net event "${EVENT_NAMES.CALLBACK.SERVER.RESPONSE}"`);
+      handleServerCallbackResponse(requestId, identifier, response);
+    }
+  );
+}
 
 function handleServerCallbackResponse(requestId: string, identifier: string, response: CallbackResult) {
   const activeCallbackRequest = callbackState.activeCallbackRequests.find((request) =>
@@ -35,7 +37,7 @@ function handleServerCallbackResponse(requestId: string, identifier: string, res
   );
 }
 
-export default async function triggerServerCallback(
+async function triggerServerCallback(
   identifier: string,
   data?: any,
   timeoutMs: number = 5000
@@ -55,10 +57,8 @@ export default async function triggerServerCallback(
   while (undefined === callbackRequest.response) {
     if (GetGameTimer() - callbackRequest.startedAt >= timeoutMs) {
       return {
-        error: new Error(
-        `callback request "${identifier}" (request id ${callbackRequest.requestId}) `
+        error: `callback request "${identifier}" (request id ${callbackRequest.requestId}) `
           + `timed out after ${timeoutMs} ms`
-        )
       };
     } else {
       await wait.oneFrame();
@@ -73,3 +73,10 @@ export default async function triggerServerCallback(
 function generateRequestId() {
   return nanoid();
 }
+
+const callbackService = {
+  registerServerCallbackResponseListener,
+  triggerServerCallback
+};
+
+export default callbackService;

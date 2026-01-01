@@ -3,8 +3,14 @@ import logger from "../../logging/logger";
 import {LOG_LEVELS} from "../../../common/logging/level";
 import playerUtils from "../utils";
 
-on('playerDropped', async (reason: string) => {
-  const netId = globalThis.source;
+export default function registerPlayerDroppedListener() {
+  on('playerDropped', async (reason: string) => {
+    const netId = globalThis.source;
+    handleDroppedPlayer(netId, reason);
+  });
+}
+
+function handleDroppedPlayer(netId: number, reason: string) {
   const connectedPlayer = playerState.getConnectedPlayer(netId);
   const playerName = connectedPlayer?.nickname ?? playerUtils.getPlayerNameFromNetId(netId);
 
@@ -19,4 +25,6 @@ on('playerDropped', async (reason: string) => {
 
   logger.logClientMessage(-1, LOG_LEVELS.INFO, `"${playerName}" disconnected`);
   logger.info(`"${playerName}" disconnected (${reason})`);
-});
+}
+
+

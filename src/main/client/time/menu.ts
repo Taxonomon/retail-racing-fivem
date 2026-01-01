@@ -36,7 +36,7 @@ export default function initializeTimeMenu() {
         id: ITEM_IDS.SET_CUSTOM_HOUR,
         title: 'Set Custom Hour',
         description: 'Change the time of day to a specific hour.',
-        icon: ItemIconType.ACTION,
+        icon: ItemIconType.INPUT,
         onPressed: pressSetCustomHourItem
       }
     ]

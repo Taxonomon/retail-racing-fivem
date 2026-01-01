@@ -11,31 +11,43 @@ import initializeMainMenu from "./gui/menu/main-menu";
 import initializeAdministrationMenu from "./administration/menu";
 import initializeTrafficMenu from "./traffic/menu";
 import initializeTimeMenu from "./time/menu";
+import wantedLevelService from "./wanted-level/menu";
+import initializeWeatherMenu from "./weather/menu";
+import callbackService from "./callback/outbound";
 
-on('onClientResourceStart', async (resource: string) => {
-  if (resource === GetCurrentResourceName()) {
-    // register event listeners
-    // TODO refactor all other event listeners to follow the "register via function call" practice
-    registerMessageFromServerEventListener();
+export default function registerOnClientResourceStartListener() {
+  on('onClientResourceStart', async (resource: string) => {
+    if (resource === GetCurrentResourceName()) {
+      await handleOnClientResourceStart();
+    }
+  });
+}
 
-    // menus
-    initializeMainMenu();
-    initializeTimeMenu();
-    initializeTrafficMenu();
-    await initializeModerationMenu();
-    await initializeAdministrationMenu();
+async function handleOnClientResourceStart() {
+  // register event listeners
+  // TODO refactor all other event listeners to follow the "register via function call" practice
+  callbackService.registerServerCallbackResponseListener();
+  registerMessageFromServerEventListener();
 
-    // inputs
-    menuInputService.setUp();
-    controlActionService.startBlockingDisabledControlActions();
-    inputBindingListener.start();
+  // menus
+  initializeMainMenu();
+  initializeTimeMenu();
+  initializeTrafficMenu();
+  initializeWeatherMenu();
+  await initializeModerationMenu();
+  await initializeAdministrationMenu();
 
-    // start doing other stuff
-    startReceivingPingUpdates();
-    startUpdatingBreadcrumps();
-    startTrackingPlayerCoordinates();
+  // inputs
+  menuInputService.setUp();
+  controlActionService.startBlockingDisabledControlActions();
+  inputBindingListener.start();
 
-    // all done
-    logger.info(`txn client script started`);
-  }
-});
+  // start doing other stuff
+  startReceivingPingUpdates();
+  startUpdatingBreadcrumps();
+  startTrackingPlayerCoordinates();
+  wantedLevelService.disable();
+
+  // all done
+  logger.info(`txn client script started`);
+}

@@ -2,6 +2,7 @@ import {registerServerCallback} from "../callback/inbound";
 import CALLBACK_NAMES from "../../common/callback/callback-names";
 import authorizationService from "./service";
 import PERMISSIONS from "./permission/permissions";
+import logger from "../logging/logger";
 
 export default function registerAuthorizationCallbacks() {
   registerServerCallback(

@@ -4,9 +4,10 @@ import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
 import triggerServerCallback from "../callback/outbound";
+import callbackService from "../callback/outbound";
 
 export default async function initializeModerationMenu() {
-  const accessResult = await triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.MODERATION);
+  const accessResult = await callbackService.triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.MODERATION);
 
   if (undefined !== accessResult.error) {
     logger.warn(`error whilst checking access to moderation menu: ${accessResult.error}`);

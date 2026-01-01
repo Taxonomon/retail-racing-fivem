@@ -3,5 +3,7 @@ export enum ItemIconType {
   TOGGLE_OFF,
   TOGGLE_ON,
   LABEL,
-  ACTION,
+  SELECTED,
+  INPUT,
+  NONE
 }

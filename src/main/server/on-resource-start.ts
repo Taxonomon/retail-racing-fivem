@@ -7,10 +7,11 @@ import registerTrackImportCommand from "./track/import";
 import registerOnPlayerJoinListener from "./player/connection/join";
 import registerOnPlayerConnectingListener from "./player/connection/connect";
 import registerClientCallbackRequestListener from "./callback/inbound";
-import registerPlayerSelfKickListener from "./player/kick";
+import registerOnPlayerDroppedListener from "./player/connection/drop";
+import kickPlayerSerice from "./player/kick";
 
 export default function registerOnResourceStartListener() {
-  on('onResourceStart', async (resource: string) => {
+  on('onServerResourceStart', async (resource: string) => {
     if (resource === GetCurrentResourceName()) {
       await handleResourceStart();
     }
@@ -18,7 +19,8 @@ export default function registerOnResourceStartListener() {
 }
 
 async function handleResourceStart() {
-  // TODO kick all players with reason: main server script restarting
+  // prevent illegal states by kicking all players on (re)start
+  kickPlayerSerice.kickAllPlayers('main server script restarting');
 
   // set up db
   databaseConnection.init();
@@ -27,7 +29,8 @@ async function handleResourceStart() {
   // register server listeners
   registerOnPlayerConnectingListener();
   registerOnPlayerJoinListener();
-  registerPlayerSelfKickListener();
+  registerOnPlayerDroppedListener()
+  kickPlayerSerice.registerPlayerSelfKickListener();
   registerClientCallbackRequestListener();
 
   // register server callbacks
