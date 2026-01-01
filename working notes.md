@@ -12,7 +12,15 @@ track can be loaded and unloaded client-side whenever, but only 1 track can be l
 
 a race is basically a synchronized hotlap between multiple people for a specific amount of time (or laps)
 
-### TODO 2026-01-01:
+### TODOs:
 
 - speedometer
 - basic vehicle spawn menu (with blacklist locked behind permission)
+- y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
+- player settings
+  - db table and repo
+    - player id and jsonb of settings
+  - load on join, emit to client
+  - let client update settings via menu (with cooldown)
+  - client emits settings to server to persist in db
+  - e.g. speedometer unit/precision, weather/time/traffic settings

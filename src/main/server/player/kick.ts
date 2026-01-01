@@ -1,6 +1,7 @@
 import EVENT_NAMES from "../../common/event-names";
 import logger from "../logging/logger";
 import playerState from "./state";
+import playerUtils from "./utils";
 
 function registerPlayerSelfKickListener() {
   onNet(EVENT_NAMES.PLAYER.KICK.SELF, (reason: string) => {
@@ -9,8 +10,9 @@ function registerPlayerSelfKickListener() {
 }
 
 function kickPlayer(netId: string, reason: string) {
+  const playerName = playerUtils.getPlayerNameFromNetId(Number(netId));
   DropPlayer(netId, reason);
-  logger.info(`kicked player "${netId}": ${reason}`);
+  logger.info(`kicked player "${playerName}" (net id ${netId}): ${reason}`);
 }
 
 function kickAllPlayers(reason: string) {

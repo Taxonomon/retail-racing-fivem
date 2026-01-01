@@ -11,5 +11,6 @@ export const NUI_MSG_IDS = {
   BREADCRUMPS: 'txn:gui:breadcrumps',
   TOASTS: {
     ADD: 'txn:gui:toasts:add'
-  }
+  },
+  HUD: 'txn:gui:hud'
 };

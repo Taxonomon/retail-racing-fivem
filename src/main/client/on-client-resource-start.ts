@@ -15,6 +15,8 @@ import wantedLevelService from "./wanted-level/menu";
 import initializeWeatherMenu from "./weather/menu";
 import callbackService from "./callback/outbound";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
+import startTrackingPlayerSpeed from "./player/speed";
+import startUpdatingHud from "./gui/hud/service";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -47,6 +49,8 @@ async function handleOnClientResourceStart() {
   // start doing other stuff
   startReceivingPingUpdates();
   startUpdatingBreadcrumps();
+  startUpdatingHud();
+  startTrackingPlayerSpeed();
   startTrackingPlayerCoordinates();
   startHidingUnwantedNativeGuiHudElements();
   wantedLevelService.disable();

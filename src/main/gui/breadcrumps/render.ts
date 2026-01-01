@@ -10,7 +10,7 @@ const CLASSES = {
   PING: 'ping'
 };
 
-function init() {
+function loadRootNode() {
   breadcrumpsState.rootNode = $(`.${CLASSES.BREADCRUMPS}`);
 }
 
@@ -39,6 +39,6 @@ function render(props: BreadCrumpsProps) {
   );
 }
 
-const breadcrumps = { loadRootNode: init, render };
+const breadcrumps = { loadRootNode, render };
 
 export default breadcrumps;

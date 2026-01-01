@@ -11,7 +11,7 @@ export default function startUpdatingBreadcrumps() {
       sendNuiMessage({
         id: NUI_MSG_IDS.BREADCRUMPS,
         data: {
-          pingMs: playerState.pingMs ?? Number.NaN,
+          pingMs: playerState.pingMs,
           fps: 1 / GetFrameTime()
         } satisfies BreadCrumpsProps
       });

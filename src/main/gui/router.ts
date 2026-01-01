@@ -3,13 +3,15 @@ import menu from "./menu/render";
 import logger from "./logging/logger";
 import breadcrumps from "./breadcrumps/render";
 import toasts from "./toasts/render";
+import hud from "./hud/render";
 
 // @ts-ignore
 const ROUTES = new Map([
   [ NUI_MSG_IDS.MENU.RENDER, menu.render ],
   [ NUI_MSG_IDS.MENU.CLEAR, menu.clear ],
   [ NUI_MSG_IDS.BREADCRUMPS, breadcrumps.render ],
-  [ NUI_MSG_IDS.TOASTS.ADD, toasts.addToast ]
+  [ NUI_MSG_IDS.TOASTS.ADD, toasts.addToast ],
+  [ NUI_MSG_IDS.HUD, hud.render ]
 ]);
 
 class MessageRouter {

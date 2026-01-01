@@ -110,3 +110,16 @@ CREATE TABLE txn.tracks (
   CONSTRAINT tracks_uk_hash_md5
     UNIQUE (hash_md5)
 );
+
+CREATE TABLE txn.player_settings (
+  id bigint GENERATED ALWAYS AS IDENTITY,
+  player bigint NOT NULL,
+  settings jsonb NOT NULL,
+  CONSTRAINT player_settings_pk_id
+    PRIMARY KEY (id),
+  CONSTRAINT player_settings_fk_player
+    FOREIGN KEY (player)
+    REFERENCES txn.players (id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+);
