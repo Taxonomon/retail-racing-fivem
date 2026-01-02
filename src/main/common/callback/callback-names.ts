@@ -7,6 +7,11 @@ const CALLBACK_NAMES = {
   },
   TRACK: {
     IMPORT: 'txn:callback:track:import'
+  },
+  PLAYER: {
+    SETTINGS: {
+      FETCH: 'txn:callback:player:settings:fetch'
+    }
   }
 };
 

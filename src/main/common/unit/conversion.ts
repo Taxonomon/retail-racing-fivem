@@ -19,7 +19,7 @@ const RATIOS: UnitConversionRatio[] = [
   }
 ];
 
-export default function convert(value: number, from: Unit, to: Unit) {
+function convert(value: number, from: Unit, to: Unit) {
   if (from === to) {
     return value;
   }
@@ -32,3 +32,7 @@ export default function convert(value: number, from: Unit, to: Unit) {
 
   return value * ratio.factor;
 }
+
+const unitConverter = { convert };
+
+export default unitConverter;

@@ -13,7 +13,10 @@ const EVENT_NAMES = {
     KICK: {
       SELF: 'txn:player:kick:self'
     },
-    PING: 'txn:player:ping'
+    PING: 'txn:player:ping',
+    SETTINGS: {
+      UPDATE: 'txn:player:settings:update'
+    }
   },
   MESSAGE: {
     FROM: {

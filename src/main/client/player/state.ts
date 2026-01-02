@@ -9,7 +9,7 @@ class PlayerState {
   coords?: Vector3;
   speed?: UnitValue;
   pingMs?: number;
-  // TODO keep connected players with netId, dbId and permissions/principals in state while they're connected
+  settings: Map<string, any> = new Map();
 }
 
 const playerState = new PlayerState();

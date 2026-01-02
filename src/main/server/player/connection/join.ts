@@ -1,6 +1,7 @@
 import logger from "../../logging/logger";
 import playerState from "../state";
 import playerUtils from "../utils";
+import {ConnectedPlayer} from "./connected-player";
 
 export default function registerOnPlayerJoinListener() {
   on('playerJoining', async (oldNetId: string) => {
@@ -23,11 +24,9 @@ function handleJoiningPlayer(oldNetId: number, newNetId: number) {
     return;
   }
 
-  connectedPlayer.netId = newNetId;
-  logger.debug(`finalized net id of joined player "${playerName}" (${oldNetId} to ${newNetId})`);
+  finalizeNetId(connectedPlayer, newNetId);
 
-  const newPlayer = connectedPlayer.first_joined.getTime() === connectedPlayer.last_seen.getTime();
-  if (newPlayer) {
+  if (connectedPlayer.first_joined.getTime() === connectedPlayer.last_seen.getTime()) {
     logger.info(`player "${connectedPlayer.nickname}" joined for the first time`);
   } else {
     logger.info(
@@ -35,6 +34,12 @@ function handleJoiningPlayer(oldNetId: number, newNetId: number) {
       + `(last seen on ${connectedPlayer.last_seen.toISOString()})`
     );
   }
+}
+
+function finalizeNetId(connectedPlayer: ConnectedPlayer, newNetId: number) {
+  const oldNetId = connectedPlayer.netId;
+  connectedPlayer.netId = newNetId;
+  logger.debug(`finalized net id of joined player "${connectedPlayer.nickname}" (${oldNetId} to ${newNetId})`);
 }
 
 

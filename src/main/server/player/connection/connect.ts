@@ -11,6 +11,7 @@ import {ConnectedPlayer} from "./connected-player";
 import principalsRepo from "../../authorization/principal/repo";
 import principalPermissionsRepo from "../../authorization/principal-permission/repo";
 import {GameMode} from "../../game-mode/game-mode";
+import playerSettingsRepo from "../settings/repo";
 
 /**
  * <a href="https://docs.fivem.net/docs/scripting-reference/events/list/playerConnecting/">
@@ -64,6 +65,7 @@ async function handleConnectingPlayer(
   deferrals: ConnectionDeferrals
 ) {
   try {
+    // TODO refactor: split handleConnectingPlayer into multiple smaller, more readable functions
     await deferralUtils.defer(deferrals);
 
     await deferralUtils.updateMessage(deferrals, 'Checking if server is full...');
@@ -88,6 +90,8 @@ async function handleConnectingPlayer(
     let player: Player | undefined = await playersRepo.findByLicense2(license2);
     const now = new Date();
 
+    await deferralUtils.updateMessage(deferrals, 'Persisting player information...');
+
     let persistedPlayer = undefined === player
       ? await handleNewPlayer(license2, playerName, now)
       : await handleReturningPlayer(player, playerName, now);
@@ -99,6 +103,10 @@ async function handleConnectingPlayer(
       );
       return;
     }
+
+    await createPlayerSettingsEntryIfNeeded(persistedPlayer);
+
+    await deferralUtils.updateMessage(deferrals, 'Finalizing connection...');
 
     const connectedPlayer = await toConnectedPlayer(netId, persistedPlayer);
     playerState.connectedPlayers.push(connectedPlayer);
@@ -150,6 +158,17 @@ async function updatePlayerNicknameHistory(player: Player, oldNickname: string, 
         'failed to update player nickname history (PastNickname db query returned undefined)'
       );
     }
+  }
+}
+
+async function createPlayerSettingsEntryIfNeeded(player: Player) {
+  const existingPlayerSettings = await playerSettingsRepo.findByPlayer(player);
+  if (undefined === existingPlayerSettings) {
+    await playerSettingsRepo.insert({
+      player: player.id,
+      settings: JSON.stringify({})
+    });
+    logger.debug(`created new player settings entry for connecting player "${player.nickname}"`);
   }
 }
 

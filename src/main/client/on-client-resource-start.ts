@@ -16,7 +16,10 @@ import initializeWeatherMenu from "./weather/menu";
 import callbackService from "./callback/outbound";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 import startTrackingPlayerSpeed from "./player/speed";
-import startUpdatingHud from "./gui/hud/service";
+import startUpdatingGui from "./gui/hud/service";
+import playerSettingsService from "./player/settings/service";
+import hudService from "./gui/hud/service";
+import initializeHudMenu from "./gui/hud/menu";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -38,6 +41,7 @@ async function handleOnClientResourceStart() {
   initializeTimeMenu();
   initializeTrafficMenu();
   initializeWeatherMenu();
+  initializeHudMenu();
   await initializeModerationMenu();
   await initializeAdministrationMenu();
 
@@ -46,10 +50,13 @@ async function handleOnClientResourceStart() {
   controlActionService.startBlockingDisabledControlActions();
   inputBindingListener.start();
 
-  // start doing other stuff
+  // fetch & apply player settings
+  await playerSettingsService.fetchAndApplyInitialSettings();
+
+  // do other stuff
   startReceivingPingUpdates();
   startUpdatingBreadcrumps();
-  startUpdatingHud();
+  hudService.startUpdatingGui();
   startTrackingPlayerSpeed();
   startTrackingPlayerCoordinates();
   startHidingUnwantedNativeGuiHudElements();

@@ -5,6 +5,7 @@ import {PrincipalsTable} from "../authorization/principal/schema";
 import {PrincipalPermissionsTable} from "../authorization/principal-permission/schema";
 import {PlayerPrincipalsTable} from "../authorization/player-principal/schema";
 import {TracksTable} from "../track/schema";
+import {PlayerSettingsTable} from "../player/settings/schema";
 
 export interface DatabaseSchema {
   players: PlayersTable;
@@ -14,4 +15,5 @@ export interface DatabaseSchema {
   principal_permissions: PrincipalPermissionsTable;
   player_principals: PlayerPrincipalsTable;
   tracks: TracksTable;
+  player_settings: PlayerSettingsTable;
 }
