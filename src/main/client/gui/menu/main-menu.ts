@@ -12,36 +12,7 @@ export default function initializeMainMenu() {
     title: 'Main Menu',
     // other features will add their items separately
     // the ones below are common default items
-    items: [
-      {
-        id: 'about',
-        title: 'About',
-        description: 'txn menu v1.0.0 by Taxonomon',
-        icon: ItemIconType.LABEL
-      },
-      {
-        id: 'kill-yourself',
-        title: 'Kill Yourself',
-        description: `A replica of Retail GTA's "The Easy Way Out".`,
-        icon: ItemIconType.NONE,
-        onPressed: () => {
-          SetEntityHealth(GetPlayerPed(-1), 0);
-          playSound.select();
-        }
-      },
-      {
-        id: 'disconnect',
-        title: 'Disconnect',
-        description: 'Disconnects you from the server.',
-        icon: ItemIconType.NONE,
-        onPressed: async () => {
-          playSound.select();
-          toast.showInfo('Bye bye!');
-          await wait.millis(1000); // wait a little for the sound to finish playing
-          emitNet(EVENT_NAMES.PLAYER.KICK.SELF, 'quit via menu')
-        }
-      }
-    ],
+    items: []
   });
   menuService.setMainMenu(MENU_IDS.MAIN);
 }

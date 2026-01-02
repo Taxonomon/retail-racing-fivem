@@ -29,6 +29,12 @@ export default async function initializeModerationMenu() {
     },
     { before: 'about' }
   );
+
+  menuService.addMenu({
+    id: MENU_IDS.MODERATION.MAIN,
+    title: 'Moderation',
+    items: []
+  });
 }
 
 function pressModerationItem() {

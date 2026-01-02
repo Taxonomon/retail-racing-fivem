@@ -55,6 +55,7 @@ function pressFreezeTimeOfDayItem() {
     timeService.freezeTime();
     menuService.setItemIcon(MENU_IDS.TIME.MAIN, ITEM_IDS.FREEZE_TIME_OF_DAY, ItemIconType.TOGGLE_ON);
   }
+  menuService.refreshMenu();
   playSound.select();
 }
 

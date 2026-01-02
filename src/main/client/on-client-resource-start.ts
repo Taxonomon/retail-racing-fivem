@@ -21,6 +21,7 @@ import playerSettingsService from "./player/settings/service";
 import hudService from "./gui/hud/service";
 import initializeHudMenu from "./gui/hud/menu";
 import initializePlayerSettingsMenu from "./player/settings/menu";
+import initializeDefaultMenuItems from "./gui/menu/default-items";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -46,6 +47,7 @@ async function handleOnClientResourceStart() {
   initializeHudMenu();
   await initializeModerationMenu();
   await initializeAdministrationMenu();
+  initializeDefaultMenuItems();
 
   // inputs
   menuInputService.setUp();

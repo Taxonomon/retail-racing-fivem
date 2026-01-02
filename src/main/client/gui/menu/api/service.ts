@@ -241,10 +241,18 @@ function addItemToMenu(menuId: string, item: ItemConstructorProps, options?: Add
     indexToInsert = -1 === afterIndex ? -1 : afterIndex + 1;
   }
 
-  indexToInsert = -1 === indexToInsert ? 0 : indexToInsert;
-  menu.items.splice(indexToInsert, 0, new Item(item));
+  const newItem = new Item(item);
+  let insertedIndex = -1;
+
+  if (-1 === indexToInsert) {
+    insertedIndex = menu.items.push(newItem);
+  } else {
+    menu.items.splice(indexToInsert, 0, new Item(item));
+    insertedIndex = indexToInsert;
+  }
+
   logger.debug(
-    `inserted item "${item.id}" at index ${indexToInsert}/${menu.items.length - 1} `
+    `inserted item "${item.id}" at index ${insertedIndex}/${menu.items.length - 1} `
     + `of menu "${menuId}"`
   );
 }
