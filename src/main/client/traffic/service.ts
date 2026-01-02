@@ -3,6 +3,12 @@ import toast from "../gui/toasts/service";
 import logger from "../logging/logger";
 import {Vector3} from "../../common/vector";
 import playerState from "../player/state";
+import playerSettingsService from "../player/settings/service";
+import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
+import menuService from "../gui/menu/api/service";
+import MENU_IDS from "../gui/menu/menu-ids";
+import {DISABLE_TRAFFIC_ITEM_ID} from "./menu";
+import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 
 const DISABLE_RADIUS = 5000;
 const VEHICLE_SCENARIOS: string[] = [
@@ -56,11 +62,14 @@ const VEHICLE_SCENARIOS: string[] = [
   'WORLD_VEHICLE_DISTANT_EMPTY_GROUND'
 ];
 
-function toggleTraffic(toggled: boolean) {
-  if (toggled) {
-    enableTraffic();
-  } else {
+function applyInitialSettings() {
+  const disabled = playerSettingsService.getBooleanSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, false);
+  if (disabled) {
     disableTraffic();
+    menuService.setItemIcon(MENU_IDS.SETTINGS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_ON);
+  } else {
+    enableTraffic();
+    menuService.setItemIcon(MENU_IDS.SETTINGS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_OFF);
   }
 }
 
@@ -75,6 +84,7 @@ function enableTraffic() {
   toggleVehicleScenarios(true);
 
   trafficState.disabled = false;
+  playerSettingsService.updateSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, trafficState.disabled);
 
   logger.info(`enabled traffic`);
   toast.showInfo('Enabled traffic');
@@ -97,6 +107,7 @@ function disableTraffic() {
   toggleVehicleScenarios(false);
 
   trafficState.disabled = true;
+  playerSettingsService.updateSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, trafficState.disabled);
 
   logger.info(`disabled traffic`);
   toast.showInfo('Disabled traffic (some traffic may still be visible in far away distance)');
@@ -139,9 +150,9 @@ function disablePedestriansThisFrame(coords: Vector3, radius: number) {
 }
 
 const trafficService = {
-  toggleTraffic,
   enableTraffic,
-  disableTraffic
+  disableTraffic,
+  applyInitialSettings
 };
 
 export default trafficService;

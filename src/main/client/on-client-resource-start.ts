@@ -21,6 +21,7 @@ import hudService from "./gui/hud/service";
 import initializeHudMenu from "./gui/hud/menu";
 import initializePlayerSettingsMenu from "./player/settings/menu";
 import initializeDefaultMenuItems from "./gui/menu/default-items";
+import playerSettingsMenu from "./player/settings/menu";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -39,11 +40,12 @@ async function handleOnClientResourceStart() {
   // menus
   // TODO consider registering per-gamemode menus (freemode, hotlap, race, etc.)
   initializeMainMenu();
+  playerSettingsMenu.initializeMenu();
   initializeTimeMenu();
   initializeTrafficMenu();
   initializeWeatherMenu();
-  initializePlayerSettingsMenu();
   initializeHudMenu();
+  playerSettingsMenu.initializeSaveItem();
   await initializeModerationMenu();
   await initializeAdministrationMenu();
   initializeDefaultMenuItems();

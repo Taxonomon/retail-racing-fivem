@@ -6,19 +6,19 @@ const MENU_IDS = {
   VEHICLE: {
     MAIN: 'vehicle'
   },
-  WEATHER: {
-    MAIN: 'weather'
-  },
-  TIME: {
-    MAIN: 'time'
-  },
   SETTINGS: {
     MAIN: 'settings',
+    TIME: {
+      MAIN: 'settings-time'
+    },
     HUD: {
       MAIN: 'settings-hud',
       SPEED_UNIT: {
         MAIN: 'settings-speed-unit-main'
       }
+    },
+    WEATHER: {
+      MAIN: 'settings-weather-main'
     }
   },
   MODERATION: {

@@ -9,7 +9,7 @@ import logger from "../logging/logger";
 import toast from "../gui/toasts/service";
 
 export default function initializeWeatherMenu() {
-  menuService.addItemToMenu(MENU_IDS.MAIN, {
+  menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
     id: 'select-weather',
     title: 'Select Weather',
     description: 'Permanently change the current weather.',
@@ -18,7 +18,7 @@ export default function initializeWeatherMenu() {
   });
 
   menuService.addMenu({
-    id: MENU_IDS.WEATHER.MAIN,
+    id: MENU_IDS.SETTINGS.WEATHER.MAIN,
     title: 'Select Weather',
     items: SELECTABLE_WEATHER_TYPES.map(weatherType => {
       return {
@@ -33,7 +33,7 @@ export default function initializeWeatherMenu() {
 }
 
 function pressSelectWeatherSubMenuItem() {
-  menuService.openMenu(MENU_IDS.WEATHER.MAIN);
+  menuService.openMenu(MENU_IDS.SETTINGS.WEATHER.MAIN);
 }
 
 async function pressSetWeatherItem(item: Item) {
@@ -45,7 +45,7 @@ async function pressSetWeatherItem(item: Item) {
     toast.showInfo(`Changed weather to "${weatherName}"`);
     SELECTABLE_WEATHER_TYPES.forEach(weatherType => {
       const icon = weatherTypeId === weatherType.id ? ItemIconType.SELECTED : ItemIconType.NONE;
-      menuService.setItemIcon(MENU_IDS.WEATHER.MAIN, weatherType.id, icon);
+      menuService.setItemIcon(MENU_IDS.SETTINGS.WEATHER.MAIN, weatherType.id, icon);
     });
     menuService.refreshMenu();
     playSound.select();

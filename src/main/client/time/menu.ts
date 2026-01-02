@@ -14,7 +14,7 @@ const ITEM_IDS = {
 };
 
 export default function initializeTimeMenu() {
-  menuService.addItemToMenu(MENU_IDS.MAIN, {
+  menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
     id: 'time',
     title: 'Time',
     icon: ItemIconType.SUB_MENU,
@@ -22,7 +22,7 @@ export default function initializeTimeMenu() {
   });
 
   menuService.addMenu({
-    id: MENU_IDS.TIME.MAIN,
+    id: MENU_IDS.SETTINGS.TIME.MAIN,
     title: 'Time',
     items: [
       {
@@ -44,16 +44,24 @@ export default function initializeTimeMenu() {
 }
 
 function pressTimeItem() {
-  menuService.openMenu(MENU_IDS.TIME.MAIN);
+  menuService.openMenu(MENU_IDS.SETTINGS.TIME.MAIN);
 }
 
 function pressFreezeTimeOfDayItem() {
   if (timeState.frozen) {
     timeService.unfreezeTime();
-    menuService.setItemIcon(MENU_IDS.TIME.MAIN, ITEM_IDS.FREEZE_TIME_OF_DAY, ItemIconType.TOGGLE_OFF);
+    menuService.setItemIcon(
+      MENU_IDS.SETTINGS.TIME.MAIN,
+      ITEM_IDS.FREEZE_TIME_OF_DAY,
+      ItemIconType.TOGGLE_OFF
+    );
   } else {
     timeService.freezeTime();
-    menuService.setItemIcon(MENU_IDS.TIME.MAIN, ITEM_IDS.FREEZE_TIME_OF_DAY, ItemIconType.TOGGLE_ON);
+    menuService.setItemIcon(
+      MENU_IDS.SETTINGS.TIME.MAIN,
+      ITEM_IDS.FREEZE_TIME_OF_DAY,
+      ItemIconType.TOGGLE_ON
+    );
   }
   menuService.refreshMenu();
   playSound.select();

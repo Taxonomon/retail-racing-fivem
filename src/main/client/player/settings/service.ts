@@ -3,12 +3,13 @@ import toast from "../../gui/toasts/service";
 import callbackService from "../../callback/outbound";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import playerState from "../state";
-import EVENT_NAMES from "../../../common/event-names";
 import hudService from "../../gui/hud/service";
+import trafficService from "../../traffic/service";
 
 async function fetchAndApplyInitialSettings() {
   await fetchFromServer();
   hudService.applyInitialSettings();
+  trafficService.applyInitialSettings();
 }
 
 async function fetchFromServer() {
@@ -30,13 +31,9 @@ async function fetchFromServer() {
   }
 }
 
-async function updateSetting(key: string, value: any) {
+function updateSetting(key: string, value: any) {
   playerState.settings.set(key, value);
   logger.info(`updated player setting "${key}" to "${value}"`);
-}
-
-async function persistSettings() {
-  emitNet(EVENT_NAMES.PLAYER.SETTINGS.UPDATE, Object.fromEntries(playerState.settings));
 }
 
 function getStringSetting(key: string, fallback: string): string {
@@ -54,14 +51,29 @@ function getBooleanSetting(key: string, fallback: boolean): boolean {
   return undefined !== value ? value as boolean : fallback;
 }
 
+async function saveSettings() {
+  const rawSettings = Object.fromEntries(playerState.settings);
+  logger.debug(`will save player settings: ${JSON.stringify(rawSettings)}`);
+
+  const result = await callbackService.triggerServerCallback(
+    CALLBACK_NAMES.PLAYER.SETTINGS.SAVE,
+    rawSettings
+  );
+
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  logger.info(`saved player settings on server`);
+}
+
 const playerSettingsService = {
   fetchAndApplyInitialSettings,
-  fetchFromServer,
   updateSetting,
   getStringSetting,
   getNumberSetting,
   getBooleanSetting,
-  persistSettings
+  saveSettings,
 };
 
 export default playerSettingsService;

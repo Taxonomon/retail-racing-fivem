@@ -9,6 +9,9 @@ import PLAYER_SETTING_NAMES from "../../../common/player/setting-names";
 import {KILOMETERS_PER_HOUR, METERS_PER_SECOND, MILES_PER_HOUR, Unit, UNITS} from "../../../common/unit/unit";
 import unitConverter from "../../../common/unit/conversion";
 import logger from "../../logging/logger";
+import menuService from "../menu/api/service";
+import MENU_IDS from "../menu/menu-ids";
+import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 
 export const SELECTABLE_HUD_SPEED_UNITS: Unit[] = [
   METERS_PER_SECOND,
@@ -40,9 +43,10 @@ function startUpdatingGui() {
 function applyInitialSettings() {
   // get unit
   const setting = playerSettingsService.getStringSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, '');
-  const unit = UNITS.find(u => u.symbol === setting);
+  const unit = UNITS.find(u => u.identifier === setting);
   if (undefined !== unit) {
     hudState.unit = unit;
+    menuService.setItemIcon(MENU_IDS.SETTINGS.HUD.SPEED_UNIT.MAIN, unit.identifier, ItemIconType.SELECTED);
     logger.debug(`set initial hud speed unit to "${hudState.unit.symbol}"`);
   }
 
@@ -50,7 +54,7 @@ function applyInitialSettings() {
   const precision = playerSettingsService.getNumberSetting(PLAYER_SETTING_NAMES.HUD.SPEED.PRECISION, -1);
   if (precision !== -1) {
     hudState.precision = precision;
-    logger.debug(`set initial hud speed precision to "${hudState.unit.symbol}"`);
+    logger.debug(`set initial hud speed precision to "${hudState.precision}"`);
   }
 }
 

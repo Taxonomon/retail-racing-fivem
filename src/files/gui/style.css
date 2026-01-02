@@ -132,6 +132,13 @@ html, body {
   color: var(--color-mono-900);
 }
 
+.drop-shadow-1px {
+  text-shadow:
+    0 var(--1-px-vh) black,
+    var(--1-px-vh) 0 black,
+    var(--1-px-vh) var(--1-px-vh) black;
+}
+
 .drop-shadow-2px {
   text-shadow:
     0 var(--1-px-vh) black,

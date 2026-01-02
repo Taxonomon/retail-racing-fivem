@@ -16,10 +16,4 @@ a race is basically a synchronized hotlap between multiple people for a specific
 
 - basic vehicle spawn menu (with blacklist locked behind permission)
 - y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
-- player settings
-  - db table and repo
-    - player id and jsonb of settings
-  - load on join, emit to client
-  - let client update settings via menu (with cooldown)
-  - settings -> save: client emits settings to server to persist in db
-  - e.g. speedometer unit/precision, weather/time/traffic settings
+- save and apply weather settings

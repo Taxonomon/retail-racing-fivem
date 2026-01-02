@@ -5,11 +5,11 @@ import trafficState from "./state";
 import trafficService from "./service";
 import playSound from "../sound";
 
-const DISABLE_TRAFFIC_ITEM_ID = 'disable-traffic';
+export const DISABLE_TRAFFIC_ITEM_ID = 'disable-traffic'
 
 export default function initializeTrafficMenu() {
-  menuService.addItemToMenu(MENU_IDS.MAIN, {
-    id: 'disable-traffic',
+  menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
+    id: DISABLE_TRAFFIC_ITEM_ID,
     title: 'Disable Traffic',
     description: 'Disables all traffic and pedestrians.',
     icon: ItemIconType.TOGGLE_OFF,
@@ -20,10 +20,10 @@ export default function initializeTrafficMenu() {
 function pressToggleTrafficItem() {
   if (trafficState.disabled) {
     trafficService.enableTraffic();
-    menuService.setItemIcon(MENU_IDS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_OFF);
+    menuService.setItemIcon(MENU_IDS.SETTINGS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_OFF);
   } else {
     trafficService.disableTraffic();
-    menuService.setItemIcon(MENU_IDS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_ON);
+    menuService.setItemIcon(MENU_IDS.SETTINGS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_ON);
   }
   menuService.refreshMenu();
   playSound.select();

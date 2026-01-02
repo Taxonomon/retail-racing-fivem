@@ -6,12 +6,10 @@ import startUpdatingPlayerPings from "./player/ping";
 import registerTrackImportCommand from "./track/import";
 import registerOnPlayerJoinListener from "./player/connection/join";
 import registerOnPlayerConnectingListener from "./player/connection/connect";
-import registerClientCallbackRequestListener from "./callback/inbound";
 import registerOnPlayerDroppedListener from "./player/connection/drop";
+import registerPlayerSettingsCallbacks from "./player/settings/callback";
 import kickPlayerSerice from "./player/kick";
 import callback from "./callback/inbound";
-import registerFetchPlayerSettingsCallback from "./player/settings/callback";
-import registerPlayerSettingsUpdateListener from "./player/settings/update";
 
 export default function registerOnResourceStartListener() {
   on('onServerResourceStart', async (resource: string) => {
@@ -33,13 +31,12 @@ async function handleResourceStart() {
   registerOnPlayerConnectingListener();
   registerOnPlayerJoinListener();
   registerOnPlayerDroppedListener();
-  registerPlayerSettingsUpdateListener();
   kickPlayerSerice.registerPlayerSelfKickListener();
   callback.registerClientCallbackRequestListener();
 
   // register server callbacks
   registerAuthorizationCallbacks();
-  registerFetchPlayerSettingsCallback();
+  registerPlayerSettingsCallbacks();
 
   // register commands
   registerTrackImportCommand();
