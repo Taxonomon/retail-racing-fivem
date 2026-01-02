@@ -79,6 +79,14 @@ async function pressSelectHudSpeedUnitItem(item: Item) {
     await hudService.setSpeedUnit(item.id);
     logger.info(`set HUD speed unit to "${item.title}"`);
     toast.showInfo(`Set HUD speed unit to ${item.title}`);
+    SELECTABLE_HUD_SPEED_UNITS.forEach(unit => {
+      menuService.setItemIcon(
+        MENU_IDS.SETTINGS.HUD.SPEED_UNIT.MAIN,
+        unit.identifier,
+        item.id === unit.identifier ? ItemIconType.SELECTED : ItemIconType.NONE
+      );
+    });
+    menuService.refreshMenu();
     playSound.select();
   } catch (error: any) {
     logger.error(`failed to set HUD speed unit: ${error.message}`);

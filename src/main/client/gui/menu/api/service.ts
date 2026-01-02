@@ -173,11 +173,7 @@ function navigateToNextItem() {
   }
 
   menu.navigateToNextItem();
-
-  sendNuiMessage({
-    id: NUI_MSG_IDS.MENU.RENDER,
-    data: menu.renderProps()
-  });
+  refreshMenu();
 
   playSound.navigate();
   logger.debug(`navigated to next item in current menu`);
@@ -194,11 +190,7 @@ function navigateToPreviousItem() {
   }
 
   menu.navigateToPreviousItem();
-
-  sendNuiMessage({
-    id: NUI_MSG_IDS.MENU.RENDER,
-    data: menu.renderProps()
-  });
+  refreshMenu();
 
   playSound.navigate();
   logger.debug(`navigated to previous item in current menu`);
@@ -255,14 +247,6 @@ function addItemToMenu(menuId: string, item: ItemConstructorProps, options?: Add
     `inserted item "${item.id}" at index ${indexToInsert}/${menu.items.length - 1} `
     + `of menu "${menuId}"`
   );
-
-  // refresh the menu if it's currently rendered
-  if (menuState.isMenuRendered(menuId)) {
-    sendNuiMessage({
-      id: NUI_MSG_IDS.MENU.RENDER,
-      data: menu.renderProps()
-    });
-  }
 }
 
 function removeItemFromMenu(menuId: string, itemId: string) {
@@ -282,14 +266,6 @@ function removeItemFromMenu(menuId: string, itemId: string) {
 
   menu.items.splice(index, 1);
   logger.debug(`removed item "${itemId}" from menu "${menuId}"`);
-
-  // refresh the menu if it's currently rendered
-  if (menuState.isMenuRendered(menuId)) {
-    sendNuiMessage({
-      id: NUI_MSG_IDS.MENU.RENDER,
-      data: menu.renderProps()
-    });
-  }
 }
 
 function setItemIcon(menuId: string, itemId: string, icon: ItemIconType) {
@@ -308,13 +284,22 @@ function setItemIcon(menuId: string, itemId: string, icon: ItemIconType) {
   }
 
   item.icon = icon;
+  logger.debug(`set icon of item "${itemId}" of menu "${menuId}" to "${icon}"`);
+}
+
+function refreshMenu() {
+  const menu = menuState.getRenderedMenu();
+
+  if (undefined === menu) {
+    logger.warn(`cannot refresh menu: no menu is currently rendered`);
+    return;
+  }
 
   sendNuiMessage({
     id: NUI_MSG_IDS.MENU.RENDER,
     data: menu.renderProps()
   });
-
-  logger.debug(`set icon of item "${itemId}" of menu "${menuId}" to "${icon}"`);
+  logger.debug(`refreshed currently rendered menu`);
 }
 
 const menuService = {
@@ -330,7 +315,8 @@ const menuService = {
   pressFocusedItem,
   addItemToMenu,
   removeItemFromMenu,
-  setItemIcon
+  setItemIcon,
+  refreshMenu
 };
 
 export default menuService;

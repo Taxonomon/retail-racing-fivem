@@ -25,5 +25,6 @@ function pressToggleTrafficItem() {
     trafficService.disableTraffic();
     menuService.setItemIcon(MENU_IDS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_ON);
   }
+  menuService.refreshMenu();
   playSound.select();
 }

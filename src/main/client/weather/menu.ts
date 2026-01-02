@@ -43,11 +43,12 @@ async function pressSetWeatherItem(item: Item) {
   try {
     await weatherService.setPermanentWeather(weatherTypeId);
     toast.showInfo(`Changed weather to "${weatherName}"`);
-    playSound.select();
     SELECTABLE_WEATHER_TYPES.forEach(weatherType => {
       const icon = weatherTypeId === weatherType.id ? ItemIconType.SELECTED : ItemIconType.NONE;
       menuService.setItemIcon(MENU_IDS.WEATHER.MAIN, weatherType.id, icon);
     });
+    menuService.refreshMenu();
+    playSound.select();
   } catch (error: any) {
     logger.warn(`cannot set weather to "${weatherName}": ${error.message}`);
     toast.showError(`Cannot set weather: ${error.message}`);
