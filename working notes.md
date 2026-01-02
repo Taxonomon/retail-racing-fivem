@@ -23,4 +23,3 @@ a race is basically a synchronized hotlap between multiple people for a specific
   - let client update settings via menu (with cooldown)
   - settings -> save: client emits settings to server to persist in db
   - e.g. speedometer unit/precision, weather/time/traffic settings
-- proper menu order

@@ -32,8 +32,11 @@ async function fetchFromServer() {
 
 async function updateSetting(key: string, value: any) {
   playerState.settings.set(key, value);
-  emitNet(EVENT_NAMES.PLAYER.SETTINGS.UPDATE, Object.fromEntries(playerState.settings));
   logger.info(`updated player setting "${key}" to "${value}"`);
+}
+
+async function persistSettings() {
+  emitNet(EVENT_NAMES.PLAYER.SETTINGS.UPDATE, Object.fromEntries(playerState.settings));
 }
 
 function getStringSetting(key: string, fallback: string): string {
@@ -57,7 +60,8 @@ const playerSettingsService = {
   updateSetting,
   getStringSetting,
   getNumberSetting,
-  getBooleanSetting
+  getBooleanSetting,
+  persistSettings
 };
 
 export default playerSettingsService;

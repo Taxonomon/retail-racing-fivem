@@ -9,13 +9,17 @@ import toast from "../toasts/service";
 import Item from "../menu/api/item";
 
 export default function initializeHudMenu() {
-  menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
-    id: 'hud',
-    title: 'HUD',
-    description: 'Adjust the Heads-Up-Display on the bottom right of the screen.',
-    icon: ItemIconType.SUB_MENU,
-    onPressed: () => menuService.openMenu(MENU_IDS.SETTINGS.HUD.MAIN)
-  });
+  menuService.addItemToMenu(
+    MENU_IDS.SETTINGS.MAIN,
+    {
+      id: 'hud',
+      title: 'HUD',
+      description: 'Adjust the Heads-Up-Display on the bottom right of the screen.',
+      icon: ItemIconType.SUB_MENU,
+      onPressed: () => menuService.openMenu(MENU_IDS.SETTINGS.HUD.MAIN),
+    },
+    { first: true }
+  );
 
   menuService.addMenu({
     id: MENU_IDS.SETTINGS.HUD.MAIN,

@@ -16,7 +16,6 @@ import initializeWeatherMenu from "./weather/menu";
 import callbackService from "./callback/outbound";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 import startTrackingPlayerSpeed from "./player/speed";
-import startUpdatingGui from "./gui/hud/service";
 import playerSettingsService from "./player/settings/service";
 import hudService from "./gui/hud/service";
 import initializeHudMenu from "./gui/hud/menu";
