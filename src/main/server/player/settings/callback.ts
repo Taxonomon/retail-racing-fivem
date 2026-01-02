@@ -21,7 +21,7 @@ async function fetchPlayerSettings(netId: number) {
     throw new Error(`no connected player found for net id ${netId}`);
   }
 
-  const playerSettings = await playerSettingsRepo.findByPlayer(player);
+  const playerSettings = await playerSettingsRepo.findByPlayer(player.id);
 
   if (undefined === playerSettings) {
     throw new Error(`no player settings found for net id ${netId} (database result undefined)`);

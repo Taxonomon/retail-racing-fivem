@@ -4,6 +4,7 @@ import playerState from "../state";
 import logger from "../../logging/logger";
 import playerSettingsRepo from "./repo";
 import {LOG_LEVELS} from "../../../common/logging/level";
+import settingNames from "../../../common/player/setting-names";
 
 export default function registerPlayerSettingsUpdateListener() {
   onNet(EVENT_NAMES.PLAYER.SETTINGS.UPDATE, async (settingsRaw: string) => {
@@ -46,10 +47,10 @@ async function handlePlayerSettingsUpdate(netId: number, settingsRaw: string) {
     return;
   }
 
-  const updatedSettings = await playerSettingsRepo.updateByPlayer({
-    ...existingSettings,
-    settings: settingsRaw
-  }, existingSettings.player);
+  const updatedSettings = await playerSettingsRepo.updateByPlayer(
+    connectedPlayer.id,
+    { settings: settingsRaw }
+  );
 
   if (undefined === updatedSettings) {
     logger.error(

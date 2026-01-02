@@ -10,7 +10,8 @@ const CALLBACK_NAMES = {
   },
   PLAYER: {
     SETTINGS: {
-      FETCH: 'txn:callback:player:settings:fetch'
+      FETCH: 'txn:callback:player:settings:fetch',
+      SAVE: 'txn:callback:player:settings:save'
     }
   }
 };

@@ -11,24 +11,24 @@ async function insert(playerSettings: NewPlayerSettings): Promise<PlayerSettings
     .executeTakeFirst();
 }
 
-async function findByPlayer(player: Player | number): Promise<PlayerSettings | undefined> {
+async function findByPlayer(player: number): Promise<PlayerSettings | undefined> {
   return await databaseState.db
     .withSchema('txn')
     .selectFrom('player_settings')
     .selectAll()
-    .where('player', '=', typeof player === 'number' ? player : player.id)
+    .where('player', '=', player)
     .executeTakeFirst();
 }
 
 async function updateByPlayer(
+  player: number,
   playerSettings: PlayerSettingsUpdate,
-  player: Player | number
 ): Promise<PlayerSettings | undefined> {
   return await databaseState.db
     .withSchema('txn')
     .updateTable('player_settings')
     .set(playerSettings)
-    .where('player', '=', typeof player === 'number' ? player : player.id)
+    .where('player', '=', player)
     .returningAll()
     .executeTakeFirst();
 }

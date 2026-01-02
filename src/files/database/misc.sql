@@ -29,3 +29,6 @@ INSERT INTO txn.principal_permissions (principal, permission) VALUES
 
 SELECT *
 FROM txn.tracks;
+
+SELECT *
+FROM txn.player_settings;

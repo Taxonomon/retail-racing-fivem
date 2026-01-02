@@ -21,9 +21,9 @@ async function fetchFromServer() {
       return;
     }
 
-    const settingsJson = JSON.parse(data);
-    playerState.settings = new Map(Object.entries(settingsJson));
-    logger.debug(`fetched player settings from server: ${data}`);
+    // const settingsJson = JSON.parse(data);
+    playerState.settings = new Map(Object.entries(data));
+    logger.debug(`fetched player settings from server: ${JSON.stringify(data)}`);
   } catch (error: any) {
     logger.error(`failed to fetch player settings from server: ${error.message}`);
     toast.showError(`Failed to fetch player settings from server (see logs for details)`);

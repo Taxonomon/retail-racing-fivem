@@ -162,11 +162,11 @@ async function updatePlayerNicknameHistory(player: Player, oldNickname: string, 
 }
 
 async function createPlayerSettingsEntryIfNeeded(player: Player) {
-  const existingPlayerSettings = await playerSettingsRepo.findByPlayer(player);
+  const existingPlayerSettings = await playerSettingsRepo.findByPlayer(player.id);
   if (undefined === existingPlayerSettings) {
     await playerSettingsRepo.insert({
       player: player.id,
-      settings: JSON.stringify({})
+      settings: JSON.stringify(Object.fromEntries(new Map()))
     });
     logger.debug(`created new player settings entry for connecting player "${player.nickname}"`);
   }
