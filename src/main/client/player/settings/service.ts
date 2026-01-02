@@ -5,11 +5,13 @@ import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import playerState from "../state";
 import hudService from "../../gui/hud/service";
 import trafficService from "../../traffic/service";
+import weatherService from "../../weather/service";
 
 async function fetchAndApplyInitialSettings() {
   await fetchFromServer();
   hudService.applyInitialSettings();
   trafficService.applyInitialSettings();
+  await weatherService.applyInitialSettings();
 }
 
 async function fetchFromServer() {

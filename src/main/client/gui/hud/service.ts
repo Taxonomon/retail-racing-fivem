@@ -43,7 +43,7 @@ function startUpdatingGui() {
 function applyInitialSettings() {
   // get unit
   const setting = playerSettingsService.getStringSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, '');
-  const unit = UNITS.find(u => u.identifier === setting);
+  const unit = UNITS.find(u => u.identifier === setting) ?? MILES_PER_HOUR;
   if (undefined !== unit) {
     hudState.unit = unit;
     menuService.setItemIcon(MENU_IDS.SETTINGS.HUD.SPEED_UNIT.MAIN, unit.identifier, ItemIconType.SELECTED);

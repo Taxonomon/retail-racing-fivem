@@ -8,6 +8,7 @@ const CLASSES = {
   WRAPPER: 'wrapper',
   UNIT: 'unit',
   VALUE: 'value',
+  DROP_SHADOW_1C5PX: 'drop-shadow-1c5px',
   DROP_SHADOW_2PX: 'drop-shadow-2px'
 };
 
@@ -28,7 +29,7 @@ function hudHtml(props: HudRenderProps) {
         <span class="${CLASSES.VALUE} ${CLASSES.DROP_SHADOW_2PX}">
           ${props.speed.value.toFixed(props.speed.precision)}
         </span>
-        <span class="${CLASSES.UNIT} ${CLASSES.DROP_SHADOW_2PX}">
+        <span class="${CLASSES.UNIT} ${CLASSES.DROP_SHADOW_1C5PX}">
           ${props.speed.unit.symbol}
         </span>
       </div>

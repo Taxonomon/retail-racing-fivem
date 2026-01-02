@@ -19,6 +19,7 @@ html, body {
   /* will always grow proportionally with viewport height */
   /* conversion formula: ((px / 1440) * 100)vh */
   --1-px-vh: 0.069vh;
+  --1c5-px-vh: 0.104vh;
   --2-px-vh: 0.138vh;
   --3-px-vh: 0.208vh;
   --4-px-vh: 0.276vh;
@@ -137,6 +138,13 @@ html, body {
     0 var(--1-px-vh) black,
     var(--1-px-vh) 0 black,
     var(--1-px-vh) var(--1-px-vh) black;
+}
+
+.drop-shadow-1c5px {
+  text-shadow:
+    0 var(--1c5-px-vh) black,
+    var(--1c5-px-vh) 0 black,
+    var(--1c5-px-vh) var(--1c5-px-vh) black;
 }
 
 .drop-shadow-2px {

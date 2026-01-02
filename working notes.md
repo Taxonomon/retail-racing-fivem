@@ -16,4 +16,3 @@ a race is basically a synchronized hotlap between multiple people for a specific
 
 - basic vehicle spawn menu (with blacklist locked behind permission)
 - y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
-- save and apply weather settings
