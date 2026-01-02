@@ -19,20 +19,19 @@ export const SELECTABLE_HUD_SPEED_UNITS: Unit[] = [
 function startUpdatingGui() {
   hudState.updateHud.start(() => {
     const speed = playerState.speed;
-    const unit = hudState.unit;
-    const precision = hudState.precision;
 
-    if (undefined !== speed && undefined !== unit) {
+    if (undefined !== speed) {
+      const data: HudRenderProps = {
+        type: WALKING,
+        speed: {
+          unit: hudState.unit,
+          precision: hudState.precision,
+          value: unitConverter.convert(speed.value, speed.unit, hudState.unit)
+        }
+      };
       sendNuiMessage({
         id: NUI_MSG_IDS.HUD,
-        data: {
-          type: WALKING,
-          speed: {
-            unit,
-            precision,
-            value: unitConverter.convert(speed.value, speed.unit, unit)
-          }
-        } satisfies HudRenderProps
+        data
       });
     }
   });
@@ -59,7 +58,7 @@ async function setSpeedUnit(unitRaw?: string) {
   let unit: Unit | undefined;
 
   if (undefined !== unitRaw) {
-    unit = SELECTABLE_HUD_SPEED_UNITS.find(u => u.identifier = unitRaw);
+    unit = SELECTABLE_HUD_SPEED_UNITS.find(u => u.identifier === unitRaw);
   }
 
   if (undefined === unit) {

@@ -20,10 +20,20 @@ export default function initializeMainMenu() {
         icon: ItemIconType.LABEL
       },
       {
+        id: 'kill-yourself',
+        title: 'Kill Yourself',
+        description: `A replica of Retail GTA's "The Easy Way Out".`,
+        icon: ItemIconType.NONE,
+        onPressed: () => {
+          SetEntityHealth(GetPlayerPed(-1), 0);
+          playSound.select();
+        }
+      },
+      {
         id: 'disconnect',
         title: 'Disconnect',
         description: 'Disconnects you from the server.',
-        icon: ItemIconType.ACTION,
+        icon: ItemIconType.NONE,
         onPressed: async () => {
           playSound.select();
           toast.showInfo('Bye bye!');

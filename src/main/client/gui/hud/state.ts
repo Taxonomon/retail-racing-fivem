@@ -4,7 +4,7 @@ import {METERS_PER_SECOND, Unit} from "../../../common/unit/unit";
 
 class HudState {
   updateHud: Tick = new Tick('update hud', logger);
-  unit?: Unit;
+  unit: Unit = METERS_PER_SECOND;
   precision: number = 1;
 }
 
