@@ -13,7 +13,13 @@ const MENU_IDS = {
     MAIN: 'time'
   },
   SETTINGS: {
-    MAIN: 'settings'
+    MAIN: 'settings',
+    HUD: {
+      MAIN: 'settings-hud',
+      SPEED_UNIT: {
+        MAIN: 'settings-speed-unit-main'
+      }
+    }
   },
   MODERATION: {
     MAIN: 'moderation'

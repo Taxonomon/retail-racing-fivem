@@ -4,10 +4,11 @@ import callbackService from "../../callback/outbound";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import playerState from "../state";
 import EVENT_NAMES from "../../../common/event-names";
+import hudService from "../../gui/hud/service";
 
 async function fetchAndApplyInitialSettings() {
   await fetchFromServer();
-  // TODO apply all existing settings
+  hudService.applyInitialSettings();
 }
 
 async function fetchFromServer() {

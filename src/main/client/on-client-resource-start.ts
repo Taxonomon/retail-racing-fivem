@@ -20,6 +20,7 @@ import startUpdatingGui from "./gui/hud/service";
 import playerSettingsService from "./player/settings/service";
 import hudService from "./gui/hud/service";
 import initializeHudMenu from "./gui/hud/menu";
+import initializePlayerSettingsMenu from "./player/settings/menu";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -41,6 +42,7 @@ async function handleOnClientResourceStart() {
   initializeTimeMenu();
   initializeTrafficMenu();
   initializeWeatherMenu();
+  initializePlayerSettingsMenu();
   initializeHudMenu();
   await initializeModerationMenu();
   await initializeAdministrationMenu();
