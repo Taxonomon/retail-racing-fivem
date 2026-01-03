@@ -9,9 +9,21 @@ import logger from "../logging/logger";
 import toast from "../gui/toasts/service";
 
 const ITEM_IDS = {
+  SELECT_TIME: 'select-time',
   FREEZE_TIME_OF_DAY: 'freeze-time-of-day',
   SET_CUSTOM_HOUR: 'set-custom-hour'
 };
+
+type SelectableHour = {
+  label: string;
+  hour: number;
+};
+const SELECTABLE_HOURS: SelectableHour[] = [
+  { label: 'Midnight', hour: 0 },
+  { label: 'Morning', hour: 6 },
+  { label: 'Noon', hour: 12 },
+  { label: 'Evening', hour: 18 }
+];
 
 export default function initializeTimeMenu() {
   menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
@@ -26,8 +38,15 @@ export default function initializeTimeMenu() {
     title: 'Time',
     items: [
       {
+        id: ITEM_IDS.SELECT_TIME,
+        title: 'Select Time',
+        description: 'Select a specific time of day.',
+        icon: ItemIconType.SUB_MENU,
+        onPressed: () => menuService.openMenu(MENU_IDS.SETTINGS.TIME.SELECT_TIME.MAIN)
+      },
+      {
         id: ITEM_IDS.FREEZE_TIME_OF_DAY,
-        title: 'Freeze Time of Day',
+        title: 'Freeze Time',
         description: 'Freezes the current time of day.',
         icon: ItemIconType.TOGGLE_OFF,
         onPressed: pressFreezeTimeOfDayItem
@@ -40,6 +59,18 @@ export default function initializeTimeMenu() {
         onPressed: pressSetCustomHourItem
       }
     ]
+  });
+
+  menuService.addMenu({
+    id: MENU_IDS.SETTINGS.TIME.SELECT_TIME.MAIN,
+    title: 'Select Time of Day',
+    items: SELECTABLE_HOURS.map(selectableHour => ({
+      id: selectableHour.hour.toString(),
+      title: selectableHour.label,
+      description: `Sets the current time of day to "${selectableHour.label}".`,
+      icon: ItemIconType.NONE,
+      onPressed: () => pressSelectTimeItem(selectableHour)
+    }))
   });
 }
 
@@ -81,8 +112,21 @@ async function pressSetCustomHourItem() {
     timeService.setHour(hourResult.value ?? '');
     playSound.select();
   } catch (error: any) {
-    logger.warn(`could not change time of day to custom hour: ${error.message}`);
-    toast.showError(`Could not change time of day to custom hour: ${error.message}`);
+    const msg = `Could not change time of day to custom hour: ${error.message}`
+    logger.warn(msg);
+    toast.showError(msg);
+    playSound.error();
+  }
+}
+
+function pressSelectTimeItem(selectableHour: SelectableHour) {
+  try {
+    timeService.setHour(selectableHour.hour.toString());
+    playSound.select();
+  } catch (error: any) {
+    const msg = `Could not set time of day to "${selectableHour.label}": ${error.message}`;
+    logger.warn(msg);
+    toast.showError(msg);
     playSound.error();
   }
 }

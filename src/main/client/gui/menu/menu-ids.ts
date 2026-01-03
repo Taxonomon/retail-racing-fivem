@@ -9,7 +9,10 @@ const MENU_IDS = {
   SETTINGS: {
     MAIN: 'settings',
     TIME: {
-      MAIN: 'settings-time'
+      MAIN: 'settings-time',
+      SELECT_TIME: {
+        MAIN: 'settings-time-select-time'
+      }
     },
     HUD: {
       MAIN: 'settings-hud',

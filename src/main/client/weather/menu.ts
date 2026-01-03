@@ -11,7 +11,7 @@ import toast from "../gui/toasts/service";
 export default function initializeWeatherMenu() {
   menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
     id: 'select-weather',
-    title: 'Select Weather',
+    title: 'Weather',
     description: 'Permanently change the current weather.',
     icon: ItemIconType.SUB_MENU,
     onPressed: pressSelectWeatherSubMenuItem
