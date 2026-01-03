@@ -55,3 +55,5 @@ Race components:
     - console logs are done in service methods
     - menu just takes boolean result and spits out "check logs" if failure
   - register menu in one file as well
+- reject invalid/too short/long nicknames on player connect
+- check if weather is stored in player settings and if yes, if it's set immediately on spawn
