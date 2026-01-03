@@ -17,7 +17,7 @@ async function initialize() {
     description: 'Select a vehicle to spawn.',
     icon: ItemIconType.SUB_MENU,
     onPressed: () => menuService.openMenu(MENU_IDS.VEHICLE.SPAWN.MAIN)
-  });
+  }, { first: true });
 
   menuService.addMenu({
     id: MENU_IDS.VEHICLE.SPAWN.MAIN,

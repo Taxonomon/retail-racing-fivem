@@ -49,3 +49,9 @@ Race components:
   - during hot lap: let client pick a checkpoint to tp to (resets hot lap)
   - respawn at cp, reset hot lap (resets hot lap)
   - change time/weather/traffic (resets hot lap)
+- clean up the entire client/vehicle directory/logic
+  - one service to perform actual stuff
+    - boolean return values to indicate success/failure
+    - console logs are done in service methods
+    - menu just takes boolean result and spits out "check logs" if failure
+  - register menu in one file as well

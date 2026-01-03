@@ -12,69 +12,68 @@ import playerUtilService from "../../player/util/service";
 import {FRONT_DRIVER} from "../../../common/rockstar-constants/vehicle/seats";
 
 async function spawnByModelId(modelId: string | undefined) {
-  try {
-    if (undefined === modelId) {
-      throw new Error('undefined model id');
-    }
-
-    if (vehicleState.spawnInProgress) {
-      throw new Error('vehicle spawn already in progress');
-    }
-
-    const isBlockedResult = await callbackService.triggerServerCallback(
-      CALLBACK_NAMES.VEHICLE.SPAWN.IS_BLOCKED_MODEL_ID,
-      modelId
-    );
-
-    if (isBlockedResult.error) {
-      throw new Error(`blocked vehicle id check resulted in error: ${isBlockedResult.error}`);
-    }
-
-    if(isBlockedResult.data) {
-      throw new Error(`model id is blocked from spawning`);
-    }
-
-    vehicleState.spawnInProgress = true;
-    const hash = GetHashKey(modelId);
-
-    try {
-      await model.load(hash);
-    } catch (error: any) {
-      throw new Error(`failed to load vehicle model: ${error.message}`);
-    }
-
-    const pedId = PlayerPedId();
-    const currentVehicleRef = vehicleUtilService.getOwnCurrentVehicleRef();
-
-    // take care of the client's current vehicle before spawning a new one
-    if (vehicleUtilService.isClientInVehicle()) {
-      if (vehicleUtilService.isClientDriverOfCurrentVehicle()) {
-        vehicleDeleteService.deleteByRef(currentVehicleRef);
-      } else {
-        vehicleUtilService.makeClientLeaveVehicle(currentVehicleRef, TELEPORT_OUTSIDE_KEEP_DOOR_CLOSED);
-      }
-    }
-
-    const heading = GetEntityHeading(pedId);
-    const { x, y, z } = playerState.coords ?? playerUtilService.getCoords();
-    const newVehicleRef = CreateVehicle(hash, x, y, z, heading, true, true);
-
-    if (0 === newVehicleRef) {
-      throw new Error('vehicle creation native did not return valid reference to new vehicle');
-    }
-
-    SetVehicleEngineOn(newVehicleRef, true, true, false);
-    SetPedIntoVehicle(pedId, newVehicleRef, FRONT_DRIVER.index);
-
-    logger.info(
-      `spawned vehicle "${vehicleUtilService.getLabelFromRef(newVehicleRef)}" `
-      + `from model id "${modelId}"`
-    );
-    vehicleState.spawnInProgress = false;
-  } catch (error: any) {
-    vehicleState.spawnInProgress = false;
-    throw new Error(`vehicle spawn of model id "${modelId}" failed with error: ${error.message}`);
+  if (undefined === modelId) {
+    throw new Error('undefined model id');
   }
+
+  if (vehicleState.spawnInProgress) {
+    throw new Error('vehicle spawn already in progress');
+  }
+
+  const isBlockedResult = await callbackService.triggerServerCallback(
+    CALLBACK_NAMES.VEHICLE.SPAWN.IS_BLOCKED_MODEL_ID,
+    modelId
+  );
+
+  if (isBlockedResult.error) {
+    throw new Error(`blocked vehicle id check resulted in error: ${isBlockedResult.error}`);
+  }
+
+  if(isBlockedResult.data) {
+    throw new Error(`model id is blocked from spawning`);
+  }
+
+  const hash = GetHashKey(modelId);
+
+  try {
+    await model.load(hash);
+  } catch (error: any) {
+    throw new Error(`failed to load vehicle model: ${error.message}`);
+  }
+
+  const pedId = PlayerPedId();
+  const currentVehicleRef = vehicleUtilService.getOwnCurrentVehicleRef();
+
+  // take care of the client's current vehicle before spawning a new one
+  if (vehicleUtilService.isClientInVehicle()) {
+    if (vehicleUtilService.isClientDriverOfCurrentVehicle()) {
+      vehicleDeleteService.deleteByRef(currentVehicleRef);
+    } else {
+      vehicleUtilService.makeClientLeaveVehicle(currentVehicleRef, TELEPORT_OUTSIDE_KEEP_DOOR_CLOSED);
+    }
+  }
+
+  const heading = GetEntityHeading(pedId);
+  const { x, y, z } = playerState.coords ?? playerUtilService.getCoords();
+  const newVehicleRef = CreateVehicle(hash, x, y, z, heading, true, true);
+
+  if (0 === newVehicleRef) {
+    throw new Error('vehicle creation native did not return valid reference to new vehicle');
+  }
+
+  const speed = playerState.speed;
+
+  SetVehicleEngineOn(newVehicleRef, true, true, false);
+  SetPedIntoVehicle(pedId, newVehicleRef, FRONT_DRIVER.index);
+
+  if (undefined !== speed) {
+    SetVehicleForwardSpeed(newVehicleRef, speed.value);
+  }
+
+  logger.info(
+    `spawned vehicle "${vehicleUtilService.getLabelFromRef(newVehicleRef)}" `
+    + `from model id "${modelId}"`
+  );
 }
 
 async function getAllSpawnableVehicles() {
