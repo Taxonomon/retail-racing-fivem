@@ -39,5 +39,10 @@ Race components:
 - expand time menu
   - pre-defined options: morning, noon, evening, night
   - add/remove hour to current time
-- basic vehicle spawn menu (with blacklist locked behind permission)
+- vehicle menu
+  - spawn (with blacklist locked behind permission)
+    - sorted by display name, starting letter, make (if poss), and class
+  - repair
+  - delete
+  - recently spawned (last 10 vehicles, most recent always at the top)
 - y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
