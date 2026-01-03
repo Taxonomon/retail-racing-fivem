@@ -4,7 +4,14 @@ const MENU_IDS = {
     MAIN: 'track'
   },
   VEHICLE: {
-    MAIN: 'vehicle'
+    MAIN: 'vehicle',
+    SPAWN: {
+      MAIN: 'vehicle-spawn',
+      ALL: 'vehicle-spawn-all',
+      BY_BEGINNING_LETTER: 'vehicle-spawn-by-beginning-letter',
+      BY_CLASS: 'vehicle-spawn-by-class',
+      BY_BRAND: 'vehicle-spawn-by-brand'
+    }
   },
   SETTINGS: {
     MAIN: 'settings',
@@ -17,11 +24,11 @@ const MENU_IDS = {
     HUD: {
       MAIN: 'settings-hud',
       SPEED_UNIT: {
-        MAIN: 'settings-speed-unit-main'
+        MAIN: 'settings-speed-unit'
       }
     },
     WEATHER: {
-      MAIN: 'settings-weather-main'
+      MAIN: 'settings-weather'
     }
   },
   MODERATION: {

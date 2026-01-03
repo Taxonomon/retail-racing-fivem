@@ -36,9 +36,6 @@ Race components:
 
 ## TODOs:
 
-- expand time menu
-  - pre-defined options: morning, noon, evening, night
-  - add/remove hour to current time
 - vehicle menu
   - spawn (with blacklist locked behind permission)
     - sorted by display name, starting letter, make (if poss), and class
@@ -46,3 +43,9 @@ Race components:
   - delete
   - recently spawned (last 10 vehicles, most recent always at the top)
 - y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
+- hot lap mode
+  - load track
+  - client chooses car whenever, on change: reset hot lap
+  - during hot lap: let client pick a checkpoint to tp to (resets hot lap)
+  - respawn at cp, reset hot lap (resets hot lap)
+  - change time/weather/traffic (resets hot lap)

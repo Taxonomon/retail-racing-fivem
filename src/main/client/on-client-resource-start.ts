@@ -22,6 +22,8 @@ import initializeHudMenu from "./gui/hud/menu";
 import initializePlayerSettingsMenu from "./player/settings/menu";
 import initializeDefaultMenuItems from "./gui/menu/default-items";
 import playerSettingsMenu from "./player/settings/menu";
+import vehicleMenu from "./vehicle/menu";
+import vehicleSpawnMenu from "./vehicle/spawn/menu";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -33,13 +35,15 @@ export default function registerOnClientResourceStartListener() {
 
 async function handleOnClientResourceStart() {
   // register event listeners
-  // TODO refactor all other event listeners to follow the "register via function call" practice
   callbackService.registerServerCallbackResponseListener();
   registerMessageFromServerEventListener();
 
   // menus
   // TODO consider registering per-gamemode menus (freemode, hotlap, race, etc.)
+  // TODO refactor menu registration to follow a universal standard (this is a mess)
   initializeMainMenu();
+  vehicleMenu.initialize();
+  vehicleSpawnMenu.initialize();
   playerSettingsMenu.initializeMenu();
   initializeTimeMenu();
   initializeTrafficMenu();
