@@ -10,7 +10,7 @@ function registerServerCallbackResponseListener() {
   onNet(
     EVENT_NAMES.CALLBACK.SERVER.RESPONSE,
     (requestId: string, identifier: string, response: CallbackResult) => {
-      logger.trace(`received net event "${EVENT_NAMES.CALLBACK.SERVER.RESPONSE}"`);
+      logger.debug(`received net event "${EVENT_NAMES.CALLBACK.SERVER.RESPONSE}"`);
       handleServerCallbackResponse(requestId, identifier, response);
     }
   );

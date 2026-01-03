@@ -12,7 +12,6 @@ export default function registerOnPlayerJoinListener() {
 
 function handleJoiningPlayer(oldNetId: number, newNetId: number) {
   // update connected player net id
-  logger.trace(`playerState.connectedPlayers: ${JSON.stringify(playerState.connectedPlayers)}`);
   const connectedPlayer = playerState.getConnectedPlayer(oldNetId);
   const playerName = connectedPlayer?.nickname ?? playerUtils.getPlayerNameFromNetId(newNetId);
 

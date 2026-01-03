@@ -27,10 +27,10 @@ function kickAllPlayers(reason: string) {
   netIds.forEach(netId => kickPlayer(netId, reason));
 }
 
-const kickPlayerSerice = {
+const kickPlayerService = {
   registerPlayerSelfKickListener,
   kickPlayer,
   kickAllPlayers
 };
 
-export default kickPlayerSerice;
+export default kickPlayerService;

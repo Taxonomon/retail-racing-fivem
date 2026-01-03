@@ -110,7 +110,6 @@ async function handleConnectingPlayer(
 
     const connectedPlayer = await toConnectedPlayer(netId, persistedPlayer);
     playerState.connectedPlayers.push(connectedPlayer);
-    logger.trace(`added new connected player to playerState: ${JSON.stringify(connectedPlayer)}`);
 
     await deferralUtils.endAsSuccess(deferrals);
   } catch (error: any) {

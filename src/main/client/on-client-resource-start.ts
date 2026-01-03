@@ -43,7 +43,7 @@ async function handleOnClientResourceStart() {
   // TODO refactor menu registration to follow a universal standard (this is a mess)
   initializeMainMenu();
   vehicleMenu.initialize();
-  vehicleSpawnMenu.initialize();
+  await vehicleSpawnMenu.initialize();
   playerSettingsMenu.initializeMenu();
   initializeTimeMenu();
   initializeTrafficMenu();

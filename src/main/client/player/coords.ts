@@ -1,8 +1,8 @@
 import playerState from "./state";
+import playerUtilService from "./util/service";
 
 export default function startTrackingPlayerCoordinates() {
   playerState.trackCoords.start(() => {
-    const [ x, y, z ] = GetEntityCoords(PlayerPedId());
-    playerState.coords = { x, y, z };
+    playerState.coords = playerUtilService.getCoords();
   });
 }

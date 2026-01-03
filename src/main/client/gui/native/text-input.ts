@@ -65,19 +65,19 @@ async function showAndWait(props: NativeTextInputProps) {
   switch (inputState) {
     case InputState.SUCCESS: {
       const value: string = GetOnscreenKeyboardResult();
-      logger.trace(`native text input "${props.title}" succeeded with result: "${value}"`);
+      logger.debug(`native text input "${props.title}" succeeded with result: "${value}"`);
       await wait.oneFrame();
       result = { success: true, value: value };
       break;
     }
     case InputState.CANCELED: {
-      logger.trace(`native text input "${props.title}" got canceled`);
+      logger.debug(`native text input "${props.title}" got canceled`);
       await wait.oneFrame();
       result = { success: false };
       break;
     }
     default: {
-      logger.trace(
+      logger.debug(
         `native text input "${props.title}" got interrupted `
         + `(unknown input state "${inputState}")`
       );

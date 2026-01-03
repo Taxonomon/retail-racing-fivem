@@ -30,7 +30,6 @@ function clear() {
 }
 
 function render(props: MenuRenderProps) {
-  logger.trace(`rendering menu from props: ${JSON.stringify(props)}`);
   menuState.getRootNode().empty().html(menuHtml(props));
 }
 

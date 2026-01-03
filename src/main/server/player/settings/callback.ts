@@ -1,4 +1,4 @@
-import callback from "../../callback/inbound";
+import callbackService from "../../callback/inbound";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import playerState from "../state";
 import playerSettingsRepo from "./repo";
@@ -6,8 +6,8 @@ import playerUtils from "../utils";
 import logger from "../../logging/logger";
 
 export default function registerPlayerSettingsCallbacks() {
-  callback.register(CALLBACK_NAMES.PLAYER.SETTINGS.FETCH, fetchPlayerSettings);
-  callback.register(CALLBACK_NAMES.PLAYER.SETTINGS.SAVE, savePlayerSettings);
+  callbackService.register(CALLBACK_NAMES.PLAYER.SETTINGS.FETCH, fetchPlayerSettings);
+  callbackService.register(CALLBACK_NAMES.PLAYER.SETTINGS.SAVE, savePlayerSettings);
 }
 
 async function fetchPlayerSettings(netId: number) {

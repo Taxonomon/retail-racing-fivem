@@ -89,10 +89,10 @@ export function remove(identifier: string) {
   }
 }
 
-const callback = {
+const callbackService = {
   register,
   remove,
   registerClientCallbackRequestListener
 };
 
-export default callback;
+export default callbackService;

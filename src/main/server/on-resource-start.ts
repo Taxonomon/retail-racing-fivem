@@ -8,8 +8,9 @@ import registerOnPlayerJoinListener from "./player/connection/join";
 import registerOnPlayerConnectingListener from "./player/connection/connect";
 import registerOnPlayerDroppedListener from "./player/connection/drop";
 import registerPlayerSettingsCallbacks from "./player/settings/callback";
-import kickPlayerSerice from "./player/kick";
-import callback from "./callback/inbound";
+import kickPlayerService from "./player/kick";
+import callbackService from "./callback/inbound";
+import blockedVehicleService from "./vehicle/blocked/service";
 
 export default function registerOnResourceStartListener() {
   on('onServerResourceStart', async (resource: string) => {
@@ -21,7 +22,7 @@ export default function registerOnResourceStartListener() {
 
 async function handleResourceStart() {
   // prevent illegal states by kicking all players on (re)start
-  kickPlayerSerice.kickAllPlayers('main server script restarting');
+  kickPlayerService.kickAllPlayers('main server script restarting');
 
   // set up db
   databaseConnection.init();
@@ -31,12 +32,13 @@ async function handleResourceStart() {
   registerOnPlayerConnectingListener();
   registerOnPlayerJoinListener();
   registerOnPlayerDroppedListener();
-  kickPlayerSerice.registerPlayerSelfKickListener();
-  callback.registerClientCallbackRequestListener();
+  kickPlayerService.registerPlayerSelfKickListener();
+  callbackService.registerClientCallbackRequestListener();
 
   // register server callbacks
   registerAuthorizationCallbacks();
   registerPlayerSettingsCallbacks();
+  blockedVehicleService.registerCallbacks();
 
   // register commands
   registerTrackImportCommand();

@@ -11,6 +11,7 @@ export const MENU_INPUT_BINDINGS = {
     name: 'MENU_OPEN_MAIN_MENU',
     performActionOn: 'hold',
     action: menuService.openMainMenu,
+    disabled: false,
     controlAction: CONTROL_ACTIONS.INPUT_INTERACTION_MENU
   }),
   NAVIGATE_UP: new ControlActionInputBinding({
@@ -18,6 +19,7 @@ export const MENU_INPUT_BINDINGS = {
     performActionOn: 'press',
     repeatActionOnHold: true,
     action: menuService.navigateToPreviousItem,
+    disabled: true,
     controlAction: CONTROL_ACTIONS.INPUT_FRONTEND_UP
   }),
   NAVIGATE_DOWN: new ControlActionInputBinding({
@@ -25,18 +27,21 @@ export const MENU_INPUT_BINDINGS = {
     performActionOn: 'press',
     repeatActionOnHold: true,
     action: menuService.navigateToNextItem,
+    disabled: true,
     controlAction: CONTROL_ACTIONS.INPUT_FRONTEND_DOWN
   }),
   PRESS_ITEM: new ControlActionInputBinding({
     name: 'MENU_PRESS_ITEM',
     performActionOn: 'press',
     action: menuService.pressFocusedItem,
+    disabled: true,
     controlAction: CONTROL_ACTIONS.INPUT_FRONTEND_ACCEPT
   }),
   CLOSE_MENU: new ControlActionInputBinding({
     name: 'MENU_CLOSE_MENU',
     performActionOn: 'press',
     action: menuService.closeCurrentMenu,
+    disabled: true,
     controlAction: CONTROL_ACTIONS.INPUT_FRONTEND_RRIGHT
   })
 };
@@ -77,19 +82,7 @@ function setUp() {
         CONTROL_ACTIONS.INPUT_VEH_CIN_CAM,
         CONTROL_ACTIONS.INPUT_VEH_DUCK
       );
-      controlActionService.enableControlActions(
-        CONTROL_ACTIONS.INPUT_FRONTEND_ACCEPT,
-        CONTROL_ACTIONS.INPUT_FRONTEND_CANCEL,
-        CONTROL_ACTIONS.INPUT_FRONTEND_UP,
-        CONTROL_ACTIONS.INPUT_FRONTEND_DOWN
-      );
     } else {
-      controlActionService.disableControlActions(
-        CONTROL_ACTIONS.INPUT_FRONTEND_ACCEPT,
-        CONTROL_ACTIONS.INPUT_FRONTEND_CANCEL,
-        CONTROL_ACTIONS.INPUT_FRONTEND_UP,
-        CONTROL_ACTIONS.INPUT_FRONTEND_DOWN
-      );
       // some control actions like cinematic cam needs to surpass a certain timeout after
       // the main menu has been closed before being re-enabled again.
       if (GetGameTimer() - menuState.mainMenuLastClosedAt >= 250) {

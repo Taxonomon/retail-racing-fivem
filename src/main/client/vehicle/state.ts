@@ -1,5 +1,5 @@
 class VehicleState {
-
+  spawnInProgress: boolean = false;
 }
 
 const vehicleState = new VehicleState();

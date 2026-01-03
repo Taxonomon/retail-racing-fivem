@@ -1,8 +1,16 @@
 import menuService from "../../gui/menu/api/service";
 import MENU_IDS from "../../gui/menu/menu-ids";
 import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
+import vehicleSpawnService from "./service";
+import nativeTextInput from "../../gui/native/text-input";
+import toast from "../../gui/toasts/service";
+import logger from "../../logging/logger";
+import playSound from "../../sound";
+import {SpawnableVehicle} from "./types";
+import vehicleUtilService from "../util/service";
+import vehicleState from "../state";
 
-function initialize() {
+async function initialize() {
   menuService.addItemToMenu(MENU_IDS.VEHICLE.MAIN, {
     id: 'spawn',
     title: 'Spawn Vehicle',
@@ -53,12 +61,62 @@ function initialize() {
     ]
   });
 
-  // now onto registering all those "by-X" sub menus...
+  const spawnableVehicles: SpawnableVehicle[] = await vehicleSpawnService.getAllSpawnableVehicles();
+  const sortedByLabel = SpawnableVehicle.sortByLabel(spawnableVehicles);
+
+  menuService.addMenu({
+    id: MENU_IDS.VEHICLE.SPAWN.ALL,
+    title: 'All Vehicles',
+    items: sortedByLabel.map(vehicle => ({
+      id: vehicle.model,
+      title: vehicle.label,
+      description: `${vehicle.brand} ${vehicle.label} (${vehicle.model})`,
+      icon: ItemIconType.NONE,
+      onPressed: () => pressSpawnVehicleItem(vehicle)
+    }))
+  });
+
   // TODO implement "spawn vehicle by X" sub menus
 }
 
-function pressSpawnVehicleByModelIdItem() {
-  // TODO implement "spawn vehicle by mode id"
+async function pressSpawnVehicleByModelIdItem() {
+  const inputResult = await nativeTextInput.showAndWait({
+    title: 'Spawn vehicle by model id (max 32 characters)',
+    maxLength: 32
+  });
+
+  if (!inputResult.success) {
+    return;
+  }
+
+  const modelId = inputResult.value;
+
+  vehicleState.spawnInProgress = true;
+
+  try {
+    await vehicleSpawnService.spawnByModelId(modelId);
+    const vehicleName = vehicleUtilService.getLabelFromHash(GetHashKey(modelId!));
+    toast.showInfo(`Spawned vehicle "${vehicleName}" (${modelId})`);
+    playSound.select();
+  } catch (error: any) {
+    const msg = `Failed to spawn vehicle "${modelId}": ${error.message}`;
+    logger.error(msg);
+    toast.showError(msg);
+    playSound.error();
+  }
+}
+
+async function pressSpawnVehicleItem(vehicle: SpawnableVehicle) {
+  try {
+    await vehicleSpawnService.spawnByModelId(vehicle.model);
+    toast.showInfo(`Spawned vehicle "${vehicle.label}" (${vehicle.model})`);
+    playSound.select();
+  } catch (error: any) {
+    const msg = `Failed to spawn vehicle "${vehicle.model}": ${error.message}`;
+    logger.error(msg);
+    toast.showError(msg);
+    playSound.error();
+  }
 }
 
 const vehicleSpawnMenu = { initialize };
