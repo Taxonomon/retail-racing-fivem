@@ -43,10 +43,6 @@ Race components:
       - client has disconnected
       - client has changed game mode
       - client has triggered the respective menu item to delete all their vehicles
-  - repair
-  - delete
-    - keep track of all spawned vehicles and periodically wipe them
-    - (client can spawn things while dying, which get left over)
   - recently spawned (last 10 vehicles, most recent always at the top)
 - y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
 - hot lap mode
@@ -57,5 +53,3 @@ Race components:
   - change time/weather/traffic (resets hot lap)
 - reject invalid/too short/long nicknames on player connect
 - put confirmation button abt player nickname on connection deferral (justl like 8g)
-- check if weather is stored in player settings and if yes, if it's set immediately on spawn
-- re-write menu api service to throw errors instead of logging them away
