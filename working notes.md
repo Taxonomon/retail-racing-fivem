@@ -69,3 +69,4 @@ Race components:
 ### Chores
 
 - refactor server to adhere more to exported functions (where possible)
+- normalize log messages (capitalization, error in console, hint to error in toast)
