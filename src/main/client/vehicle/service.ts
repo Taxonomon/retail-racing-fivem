@@ -1,19 +1,16 @@
-import {FRONT_DRIVER, VEHICLE_SEATS, VehicleSeat} from "../../common/rockstar-constants/vehicle/seats";
 import vehicleState from "./state";
 import logger from "../logging/logger";
 import callbackService from "../callback/outbound";
 import CALLBACK_NAMES from "../../common/callback/callback-names";
-import {
-  LeaveVehicleFlag,
-  TELEPORT_OUTSIDE_KEEP_DOOR_CLOSED
-} from "../../common/rockstar-constants/vehicle/leave-vehicle-flags";
 import playerState from "../player/state";
 import {getClientCoordinates} from "../player/service";
 import {loadModelByHash} from "../../common/model";
-import {VEHICLE_CLASSES} from "../../common/rockstar-constants/vehicle/classes";
 import {getBooleanPlayerSetting, getStringArrayPlayerSetting, updatePlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
 import {updateKeepVehicleCleanItemIcon, updateRecentlySpawnedVehiclesMenu} from "./menu";
+import {FRONT_DRIVER, VEHICLE_SEATS, VehicleSeat} from "../../common/rockstar/vehicle-seat";
+import {LeaveVehicleFlag, TELEPORT_OUTSIDE_KEEP_DOOR_CLOSED} from "../../common/rockstar/leave-vehicle-flag";
+import {VEHICLE_CLASSES} from "../../common/rockstar/vehicle-class";
 
 const CAR_NOT_FOUND = 'CARNOTFOUND';
 const REGEX_STARTS_WITH_NUMBER = /^\d/;

@@ -13,7 +13,6 @@ import {
 import logger from "../logging/logger";
 import playSound from "../sound";
 import nativeTextInput from "../gui/native/text-input";
-import {FRONT_DRIVER} from "../../common/rockstar-constants/vehicle/seats";
 import vehicleState from "./state";
 import {getStringArrayPlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
@@ -26,6 +25,7 @@ import {
   setMenuItemIcon
 } from "../gui/menu/api/service";
 import Item from "../gui/menu/api/item";
+import {FRONT_DRIVER} from "../../common/rockstar/vehicle-seat";
 
 const VEHICLE_MENU_ITEM_IDS = {
   MAIN: {
