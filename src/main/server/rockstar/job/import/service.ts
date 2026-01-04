@@ -3,7 +3,6 @@ import {LAND, RaceType, STUNT} from "../../../../common/rockstar/race-type";
 import registerAuthorizedCommand from "../../../command/authorized-command";
 import PERMISSIONS from "../../../authorization/permission/permissions";
 import playerState from "../../../player/state";
-import {findRockstarJobByJobId, insertRockstarJob, RockstarJob} from "../../../rockstar-job/database";
 import {
   parseIsLapRace,
   parseJobAuthor,
@@ -16,6 +15,7 @@ import {hashWithMd5} from "../../../../common/hash";
 import logger from "../../../logging/logger";
 import {LOG_LEVELS} from "../../../../common/logging/level";
 import {wait} from "../../../../common/wait";
+import {findRockstarJobByJobId, insertRockstarJob, RockstarJob} from "../database";
 
 const EXPECTED_JOB_ID_LENGTH = 22;
 const REGEX_ROCKSTAR_JOB_ID = /[a-zA-Z0-9-_)]+$/;
