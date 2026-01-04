@@ -3,7 +3,7 @@ import databaseHealth from "./database/health";
 import logger from "./logging/logger";
 import registerAuthorizationCallbacks from "./authorization/callback";
 import startUpdatingPlayerPings from "./player/ping";
-import registerTrackImportCommand from "./track/import";
+import registerTrackImportCommand from "./track/service";
 import registerOnPlayerJoinListener from "./player/connection/join";
 import registerOnPlayerConnectingListener from "./player/connection/connect";
 import registerOnPlayerDroppedListener from "./player/connection/drop";

@@ -18,7 +18,7 @@ export default class Menu {
     return {
       id: this.id,
       title: this.title,
-      items: this.displaybleItems().map((item) => item.renderProps()),
+      items: this.displayableItems().map((item) => item.renderProps()),
       focusedItemIndex: this.items.findIndex((item) => item.focused) + 1,
       numberOfTotalItems: this.items.length
     } satisfies MenuRenderProps;
@@ -39,7 +39,15 @@ export default class Menu {
     if (undefined === focusedItemIndex || focusedItemIndex === this.items.length - 1) {
       this.focusItemAtIndex(0);
     } else {
-      this.focusItemAtIndex(focusedItemIndex + 1);
+      let nextIndex = focusedItemIndex + 1;
+      while (undefined === this.items[nextIndex] || this.items[nextIndex].disabled) {
+        if (nextIndex >= this.items.length) {
+          nextIndex = 0;
+        } else {
+          nextIndex += 1;
+        }
+      }
+      this.focusItemAtIndex(nextIndex);
     }
   }
 
@@ -47,10 +55,16 @@ export default class Menu {
     const focusedItemIndex = this.items.findIndex((item) => item.focused);
     if (undefined === focusedItemIndex) {
       this.focusItemAtIndex(0);
-    } else if (focusedItemIndex === 0) {
-      this.focusItemAtIndex(this.items.length - 1);
     } else {
-      this.focusItemAtIndex(focusedItemIndex - 1);
+      let previousIndex = focusedItemIndex - 1;
+      while (undefined === this.items[previousIndex] || this.items[previousIndex].disabled) {
+        if (previousIndex <= 0) {
+          previousIndex = this.items.length - 1;
+        } else {
+          previousIndex -= 1;
+        }
+      }
+      this.focusItemAtIndex(previousIndex);
     }
   }
 
@@ -60,13 +74,14 @@ export default class Menu {
     }
   }
 
-  displaybleItems() {
+  displayableItems() {
+    if (0 === this.items.length || -1 === this.items.findIndex(i => !i.disabled)) {
+      throw new Error('no displayable items');
+    }
+
     let focusedItemIndex = this.items.findIndex((item) => item.focused);
 
     if (-1 === focusedItemIndex) {
-      if (0 === this.items.length) {
-        throw new Error(`no displayable items`);
-      }
       this.focusItemAtIndex(0);
       focusedItemIndex = 0;
     }

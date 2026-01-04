@@ -4,8 +4,8 @@ import {PermissionsTable} from "../authorization/permission/schema";
 import {PrincipalsTable} from "../authorization/principal/schema";
 import {PrincipalPermissionsTable} from "../authorization/principal-permission/schema";
 import {PlayerPrincipalsTable} from "../authorization/player-principal/schema";
-import {TracksTable} from "../track/schema";
 import {PlayerSettingsTable} from "../player/settings/schema";
+import {RockstarJobsTable} from "../rockstar-job/database";
 
 export interface DatabaseSchema {
   players: PlayersTable;
@@ -14,6 +14,6 @@ export interface DatabaseSchema {
   permissions: PermissionsTable;
   principal_permissions: PrincipalPermissionsTable;
   player_principals: PlayerPrincipalsTable;
-  tracks: TracksTable;
+  rockstar_jobs: RockstarJobsTable;
   player_settings: PlayerSettingsTable;
 }

@@ -8,7 +8,7 @@ import {initializeTrafficPlayerSettingsMenu} from "../../traffic/menu";
 import {initializeWeatherPlayerSettingsMenu} from "../../weather/menu";
 import {initializeHudPlayerSettingsMenu} from "../../gui/hud/menu";
 import {initializeVehiclePlayerSettingsMenu} from "../../vehicle/menu";
-import {savePlayerSettings} from "./service";
+import {SAVE_PLAYER_SETTINGS_INTERVAL_MS, savePlayerSettings} from "./service";
 import {addItemToMenu, addMenu, openMenu} from "../../gui/menu/api/service";
 import Item from "../../gui/menu/api/item";
 
@@ -28,7 +28,10 @@ export function initializePlayerSettingsMenu() {
       {
         id: 'save',
         title: 'Save',
-        description: `Persist your settings on the server.`,
+        description:
+          `Persist your settings on the server.<br><br>`
+          + `(Unsaved settings will be saved to the server automatically every `
+          + `${SAVE_PLAYER_SETTINGS_INTERVAL_MS / 1000} seconds.)`,
         icon: ItemIconType.NONE,
         onPressed: pressSaveSettingsItem
       }

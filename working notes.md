@@ -43,7 +43,6 @@ Race components:
       - client has disconnected
       - client has changed game mode
       - client has triggered the respective menu item to delete all their vehicles
-  - recently spawned (last 10 vehicles, most recent always at the top)
 - y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
 - hot lap mode
   - load track
@@ -53,7 +52,4 @@ Race components:
   - change time/weather/traffic (resets hot lap)
 - reject invalid/too short/long nicknames on player connect
 - put confirmation button abt player nickname on connection deferral (justl like 8g)
-- allow menu to be refreshed while rendered
-  - check if focused === disabled, and if so, reset focused to index 0
-  - if no more items in menu, close it and log warning
-- check why recently spawned vehicles doesn't properly reorder when spawning a previously spawned vehicle further down the list
+- weather still isn't getting set properly when applying player settings on join

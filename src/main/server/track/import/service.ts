@@ -1,18 +1,8 @@
-import registerAuthorizedCommand from "../command/authorized-command";
-import PERMISSIONS from "../authorization/permission/permissions";
-import trackState from "./state";
-import tracksRepo from "./repo";
-import rockstarJobType, {JobType} from "../../common/rockstar-job/job-type";
-import rockstarRaceType, {RaceType} from "../../common/rockstar-job/race/race-type";
-import jobParser from "../rockstar-job/parse";
-import hashUtils from "../../common/hash";
-import raceParser from "../rockstar-job/race/parse";
-import {Track} from "./schema";
-import logger from "../logging/logger";
-import playerUtils from "../player/utils";
-import {LOG_LEVELS} from "../../common/logging/level";
-import playerState from "../player/state";
-import {wait} from "../../common/wait";
+import registerAuthorizedCommand from "../../command/authorized-command";
+import PERMISSIONS from "../../authorization/permission/permissions";
+import playerState from "../../player/state";
+import trackState from "../state";
+import tracksRepo from "../repo";
 
 const EXPECTED_JOB_ID_LENGTH = 22;
 const REGEX_ROCKSTAR_JOB_ID = /[a-zA-Z0-9-_)]+$/;
@@ -21,19 +11,11 @@ const URL_RANGE_Y = 500;
 const JSON_LANGUAGES = ["en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"];
 const TIMEOUT_BETWEEN_FETCHES_MS = 100;
 
-type FetchRockstarJobJsonProps = {
-  jobId: string;
-  urlRangeX: number;
-  urlRangeY: number;
-  languages: string[];
-  timeoutBetweenFetchesMs: number;
-};
-
-export default function registerTrackImportCommand() {
+export function registerTrackImportCommand() {
   registerAuthorizedCommand({
     name: 'importTrack',
     handler: importTrack,
-    permissions: [ PERMISSIONS.TRACK.IMPORT ]
+    permissions: [ PERMISSIONS.JOB.IMPORT ]
   });
 }
 
@@ -149,8 +131,7 @@ async function fetchRockstarJobJson(jobId: string): Promise<any> {
           jobId,
           // e.g. http://prod.cloud.rockstargames.com/ugc/gta5mission/0000/abcdefg/0_0_en.json
           // yes it's actually https and not http
-          `http://prod.cloud.rockstargames.com`
-          + `/ugc/gta5mission/0000/${jobId}/${x}_${y}_${language}.json`
+
         );
 
         if (undefined !== json) {
@@ -169,9 +150,7 @@ async function performFetch(jobId: string, url: string) {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-          + ' AppleWebKit/537.36 (KHTML, like Gecko)'
-          + ' Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent':
       }
     });
     return 200 === response.status ? response.json() : undefined;

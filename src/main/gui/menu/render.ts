@@ -17,6 +17,7 @@ const CLASSES = {
   ICON: 'icon',
   FOCUSED: 'focused',
   ITEMS: 'items',
+  DISABLED: 'disabled',
   MATERIAL_SYMBOLS_OUTLINED: 'material-symbols-outlined'
 };
 
@@ -88,7 +89,7 @@ function descriptionHtml(description: string) {
 
 function itemHtml(props: ItemRenderProps) {
   return `
-    <div class="${CLASSES.ITEM} ${props.focused ? CLASSES.FOCUSED : ''}">
+    <div class="${CLASSES.ITEM} ${props.focused ? CLASSES.FOCUSED : ''} ${props.disabled ? CLASSES.DISABLED : ''}">
       <div class="${CLASSES.TEXT}">${props.title}</div>
       <span class="${CLASSES.ICON} ${CLASSES.MATERIAL_SYMBOLS_OUTLINED}">${getIconFromIconType(props.icon)}</span>
     </div>

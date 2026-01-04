@@ -10,6 +10,10 @@ html, body {
   --color-mono-200: rgba(30, 30, 30, 0.8);
   --color-mono-300: rgba(60, 60, 60, 0.8);
   --color-mono-400: rgba(90, 90, 90, 0.8);
+  --color-mono-500: rgba(120, 120, 120, 0.8);
+  --color-mono-600: rgba(150, 150, 150, 0.8);
+  --color-mono-700: rgba(180, 180, 180, 0.8);
+  --color-mono-800: rgba(210, 210, 210, 0.8);
   --color-mono-900: rgba(255, 255, 255, 1.0);
   --color-error-0: rgba(255, 77, 25, 0.8);
   --color-warning-0: rgba(255, 179, 0, 0.8);
@@ -104,6 +108,11 @@ html, body {
   animation-duration: 1s;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
+}
+
+.menu .items .disabled {
+  background-color: var(--color-mono-200);
+  color: var(--color-mono-500);
 }
 
 .menu .items .separator {

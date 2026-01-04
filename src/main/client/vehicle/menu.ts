@@ -19,12 +19,13 @@ import {getStringArrayPlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
 import {
   addItemToMenu,
-  addMenu,
+  addMenu, closeCurrentMenu,
   openMenu,
   refreshMenu, removeAllItemsFromMenu,
   setMenuItemDisabled,
   setMenuItemIcon
 } from "../gui/menu/api/service";
+import Item from "../gui/menu/api/item";
 
 const VEHICLE_MENU_ITEM_IDS = {
   MAIN: {
@@ -52,7 +53,7 @@ export async function initializeVehicleMenu() {
     title: 'Vehicle',
     description: 'Browse, spawn or customize vehicles.',
     icon: ItemIconType.SUB_MENU,
-    onPressed: () => openMenu(MENU_IDS.VEHICLE.MAIN)
+    onPressed: (item: Item) => openSubMenuItem(item, MENU_IDS.VEHICLE.MAIN)
   }, { first: true });
 
   addMenu({
@@ -64,7 +65,7 @@ export async function initializeVehicleMenu() {
         title: 'Spawn',
         description: 'Browse and spawn any of the available vehicles on the server.',
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(MENU_IDS.VEHICLE.SPAWN.MAIN)
+        onPressed: (item: Item) => openSubMenuItem(item, MENU_IDS.VEHICLE.SPAWN.MAIN)
       },
       {
         id: VEHICLE_MENU_ITEM_IDS.MAIN.REPAIR,
@@ -96,7 +97,7 @@ async function initializeVehicleSpawnMenu() {
         title: 'All',
         description: 'Browse all available vehicles, sorted by name alphabetically.',
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(MENU_IDS.VEHICLE.SPAWN.ALL)
+        onPressed: (item: Item) => openSubMenuItem(item, MENU_IDS.VEHICLE.SPAWN.ALL)
       },
       {
         id: VEHICLE_MENU_ITEM_IDS.SPAWN.BY_MODEL_ID,
@@ -110,28 +111,28 @@ async function initializeVehicleSpawnMenu() {
         title: 'By Beginning Letter',
         description: `Browse all available vehicles, categorized by their name's beginning letter.`,
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(MENU_IDS.VEHICLE.SPAWN.BY_BEGINNING_LETTER)
+        onPressed: (item: Item) => openSubMenuItem(item, MENU_IDS.VEHICLE.SPAWN.BY_BEGINNING_LETTER)
       },
       {
         id: VEHICLE_MENU_ITEM_IDS.SPAWN.BY_BRAND,
         title: 'By Brand',
         description: `Browse all available vehicles, categorized by their brand.`,
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(MENU_IDS.VEHICLE.SPAWN.BY_BRAND)
+        onPressed: (item: Item) => openSubMenuItem(item, MENU_IDS.VEHICLE.SPAWN.BY_BRAND)
       },
       {
         id: VEHICLE_MENU_ITEM_IDS.SPAWN.BY_CLASS,
         title: 'By Class',
         description: `Browse all available vehicles, categorized by their vehicle class.`,
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(MENU_IDS.VEHICLE.SPAWN.BY_CLASS)
+        onPressed: (item: Item) => openSubMenuItem(item, MENU_IDS.VEHICLE.SPAWN.BY_CLASS)
       },
       {
         id: VEHICLE_MENU_ITEM_IDS.SPAWN.RECENTLY_SPAWNED,
         title: 'Recently Spawned',
         description: 'A history of all recently spawned vehicles (max. 10 vehicles).',
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(MENU_IDS.VEHICLE.SPAWN.RECENTLY_SPAWNED),
+        onPressed: (item: Item) => openSubMenuItem(item, MENU_IDS.VEHICLE.SPAWN.RECENTLY_SPAWNED),
         disabled: true // will be enabled if recently spawned vehicles exist
       }
     ]
@@ -175,7 +176,7 @@ async function initializeVehicleSpawnMenu() {
         title: beginningLetter,
         description: `All vehicles starting with the letter "${beginningLetter}".`,
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(letterMenuId)
+        onPressed: (item: Item) => openSubMenuItem(item, letterMenuId)
       });
 
       addMenu({
@@ -207,7 +208,7 @@ async function initializeVehicleSpawnMenu() {
         title: brand,
         description: `All vehicles of the brand "${brand}".`,
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(brandMenuId)
+        onPressed: (item: Item) => openSubMenuItem(item, brandMenuId)
       });
 
       addMenu({
@@ -239,13 +240,13 @@ async function initializeVehicleSpawnMenu() {
         title: clazz,
         description: `All vehicles of the "${clazz}" class.`,
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => openMenu(classMenuId)
+        onPressed: (item: Item) => openSubMenuItem(item, classMenuId)
       });
 
       addMenu({
         id: classMenuId,
         title: clazz,
-        items: vehicles.map(vehicle => ({
+        items: SpawnableVehicle.sortByLabel(vehicles).map(vehicle => ({
           id: vehicle.model,
           title: vehicle.label,
           description: `${vehicle.brand} ${vehicle.label} (${vehicle.model})`,
@@ -399,6 +400,7 @@ async function pressSpawnRecentlySpawnedVehicleItem(vehicle: SpawnableVehicle) {
       preserveSpeed: true
     });
     toast.showInfo(`Spawned "${vehicle.label}"`);
+    closeCurrentMenu();
     updateRecentlySpawnedVehiclesMenu();
     refreshMenu();
     playSound.select();
@@ -406,5 +408,15 @@ async function pressSpawnRecentlySpawnedVehicleItem(vehicle: SpawnableVehicle) {
     logger.error(`Failed to spawn vehicle "${vehicle.model}": ${error.message}`);
     toast.showError(`Failed to spawn vehicle "${vehicle.model}" (see logs for details)`);
     playSound.error();
+  }
+}
+
+function openSubMenuItem(item: Item, subMenuId: string) {
+  try {
+    openMenu(subMenuId);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}"): ${error.message}`);
+    toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
   }
 }

@@ -8,8 +8,7 @@ import {applyTrafficPlayerSettings} from "../../traffic/service";
 import {applyWeatherPlayerSettings} from "../../weather/service";
 import {applyVehiclePlayerSettings} from "../../vehicle/service";
 
-const ARRAY_SETTING_DELIMITER = ',';
-const SAVE_PLAYER_SETTINGS_INTERVAL_MS = 3000;
+export const SAVE_PLAYER_SETTINGS_INTERVAL_MS = 30000;
 
 export async function fetchAndApplyPlayerSettings() {
   await fetchFromServer();
@@ -25,16 +24,17 @@ async function fetchFromServer() {
     const { data, error } = await callbackService.triggerServerCallback(CALLBACK_NAMES.PLAYER.SETTINGS.FETCH);
 
     if (undefined !== error) {
-      logger.error(`failed to fetch player settings from server: ${error}`);
+      logger.error(`Failed to fetch player settings from server: ${error}`);
       toast.showError(`Failed to fetch player settings from server (see logs for details)`);
       return;
     }
 
-    // const settingsJson = JSON.parse(data);
-    playerState.settings = new Map(Object.entries(data));
-    logger.debug(`fetched player settings from server: ${JSON.stringify(data)}`);
+    const settings = new Map(Object.entries(data));
+    playerState.settings = settings;
+    playerState.lastSavedSettings = settings;
+    logger.debug(`Fetched player settings from server: ${JSON.stringify(data)}`);
   } catch (error: any) {
-    logger.error(`failed to fetch player settings from server: ${error.message}`);
+    logger.error(`Failed to fetch player settings from server: ${error.message}`);
     toast.showError(`Failed to fetch player settings from server (see logs for details)`);
   }
 }
@@ -69,15 +69,22 @@ export async function startSavingPlayerSettingsPeriodically() {
     const currentSettingsString = JSON.stringify(Object.fromEntries(playerState.settings));
     const lastSubmittedSettingsString = JSON.stringify(Object.fromEntries(playerState.lastSavedSettings));
 
+    logger.trace(`startSavingPlayerSettingsPeriodically: `
+      + `currentSettingsString=${currentSettingsString}, `
+      + `lastSubmittedSettingsStrin=${lastSubmittedSettingsString}`
+    );
+
     if (currentSettingsString !== lastSubmittedSettingsString) {
+      logger.debug(`Detected changes in player settings; will try to save settings now`);
       try {
-        logger.debug(`Detected changes in player settings; will try to save settings now`);
         await savePlayerSettings();
-        playerState.lastSavedSettings = playerState.settings;
+        playerState.lastSavedSettings = new Map(playerState.settings);
         logger.debug(`Saved player settings`);
       } catch (error: any) {
         logger.error(`Failed to save player settings: ${error.message}`);
       }
+    } else {
+      logger.debug(`No changes in player settings detected`);
     }
   }, SAVE_PLAYER_SETTINGS_INTERVAL_MS);
 }

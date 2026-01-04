@@ -380,6 +380,6 @@ export function addRecentlySpawnedVehicle(modelId: string) {
   }
 
   recentlySpawnedModelIds.splice(0, 0, modelId);
-  updatePlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED, recentlySpawnedModelIds);
+  updatePlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED, recentlySpawnedModelIds.slice(0, 10));
   updateRecentlySpawnedVehiclesMenu();
 }

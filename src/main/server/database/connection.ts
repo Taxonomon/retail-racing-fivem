@@ -24,7 +24,10 @@ function init() {
       if (event.level === 'query') {
         logger.trace(
           `executed database query "${event.query.sql}" `
-          + `with params "${event.query.parameters.toString()}"`
+          + `with params "${typeof event.query.parameters === 'object' 
+            ? JSON.stringify(event.query.parameters) 
+            : event.query.parameters
+          }"`
         );
       }
     }

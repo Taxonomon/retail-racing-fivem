@@ -7,8 +7,8 @@ const PERMISSIONS = {
       OPEN: 'menu:administration:open'
     }
   },
-  TRACK: {
-    IMPORT: 'track:import'
+  JOB: {
+    IMPORT: 'job:import'
   }
 };
 
