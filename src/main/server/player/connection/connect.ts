@@ -1,4 +1,3 @@
-import wait from "../../../common/wait";
 import {Player} from "../schema";
 import playersRepo from "../repo";
 import pastNicknamesRepo from "../past-nicknames/repo";
@@ -12,6 +11,7 @@ import principalsRepo from "../../authorization/principal/repo";
 import principalPermissionsRepo from "../../authorization/principal-permission/repo";
 import {GameMode} from "../../game-mode/game-mode";
 import playerSettingsRepo from "../settings/repo";
+import {waitOneFrame} from "../../../common/wait";
 
 /**
  * <a href="https://docs.fivem.net/docs/scripting-reference/events/list/playerConnecting/">
@@ -29,19 +29,19 @@ type ConnectionDeferrals = {
 const deferralUtils = {
   defer: async (deferrals: ConnectionDeferrals) => {
     deferrals.defer();
-    await wait.oneFrame();
+    await waitOneFrame();
   },
   updateMessage: async (deferrals: ConnectionDeferrals, msg: string) => {
     deferrals.update(msg);
-    await wait.oneFrame();
+    await waitOneFrame();
   },
   endAsSuccess: async (deferrals: ConnectionDeferrals) => {
     deferrals.done();
-    await wait.oneFrame();
+    await waitOneFrame();
   },
   endAsFailure: async (deferrals: ConnectionDeferrals, msg: string) => {
     deferrals.done(msg)
-    await wait.oneFrame();
+    await waitOneFrame();
   }
 };
 

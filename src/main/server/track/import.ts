@@ -2,7 +2,6 @@ import registerAuthorizedCommand from "../command/authorized-command";
 import PERMISSIONS from "../authorization/permission/permissions";
 import trackState from "./state";
 import tracksRepo from "./repo";
-import wait from "../../common/wait";
 import rockstarJobType, {JobType} from "../../common/rockstar-job/job-type";
 import rockstarRaceType, {RaceType} from "../../common/rockstar-job/race/race-type";
 import jobParser from "../rockstar-job/parse";
@@ -13,6 +12,7 @@ import logger from "../logging/logger";
 import playerUtils from "../player/utils";
 import {LOG_LEVELS} from "../../common/logging/level";
 import playerState from "../player/state";
+import {wait} from "../../common/wait";
 
 const EXPECTED_JOB_ID_LENGTH = 22;
 const REGEX_ROCKSTAR_JOB_ID = /[a-zA-Z0-9-_)]+$/;
@@ -156,7 +156,7 @@ async function fetchRockstarJobJson(jobId: string): Promise<any> {
         if (undefined !== json) {
           return json;
         } else {
-          await wait.millis(TIMEOUT_BETWEEN_FETCHES_MS);
+          await wait(TIMEOUT_BETWEEN_FETCHES_MS);
         }
       }
     }

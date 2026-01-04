@@ -1,6 +1,7 @@
-const wait = {
-  oneFrame: () => wait.millis(0),
-  millis: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
-};
+export async function waitOneFrame() {
+  await wait(0);
+}
 
-export default wait;
+export async function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

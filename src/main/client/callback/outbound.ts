@@ -1,10 +1,10 @@
 import callbackState from "./state";
 import EVENT_NAMES from "../../common/event-names";
 import logger from "../logging/logger";
-import wait from "../../common/wait";
 import {CallbackResult} from "../../common/callback/result";
 import {ActiveCallbackRequest} from "../../common/callback/request";
 import {nanoid} from "nanoid/non-secure";
+import {waitOneFrame} from "../../common/wait";
 
 function registerServerCallbackResponseListener() {
   onNet(
@@ -61,7 +61,7 @@ async function triggerServerCallback(
           + `timed out after ${timeoutMs} ms`
       };
     } else {
-      await wait.oneFrame();
+      await waitOneFrame();
     }
   }
 

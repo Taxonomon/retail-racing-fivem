@@ -22,7 +22,7 @@ import initializeHudMenu from "./gui/hud/menu";
 import initializePlayerSettingsMenu from "./player/settings/menu";
 import initializeDefaultMenuItems from "./gui/menu/default-items";
 import playerSettingsMenu from "./player/settings/menu";
-import vehicleMenu from "./vehicle/menu";
+import {initializeVehicleMenu} from "./vehicle/menu";
 import vehicleSpawnMenu from "./vehicle/spawn/menu";
 
 export default function registerOnClientResourceStartListener() {
@@ -42,8 +42,7 @@ async function handleOnClientResourceStart() {
   // TODO consider registering per-gamemode menus (freemode, hotlap, race, etc.)
   // TODO refactor menu registration to follow a universal standard (this is a mess)
   initializeMainMenu();
-  vehicleMenu.initialize();
-  await vehicleSpawnMenu.initialize();
+  await initializeVehicleMenu();
   playerSettingsMenu.initializeMenu();
   initializeTimeMenu();
   initializeTrafficMenu();

@@ -1,9 +1,8 @@
-import wait from "../../../common/wait";
 import logger from "../../logging/logger";
 import guiState from "../state";
 import playSound from "../../sound";
-import {controlActionService} from "../../input/control-action";
 import menuInputService, {MENU_INPUT_BINDINGS} from "../menu/input";
+import {waitOneFrame} from "../../../common/wait";
 
 export type NativeTextInputProps = {
   title: string;
@@ -57,7 +56,7 @@ async function showAndWait(props: NativeTextInputProps) {
   );
 
   while(InputState.PENDING === UpdateOnscreenKeyboard()) {
-    await wait.oneFrame();
+    await waitOneFrame();
   }
 
   const inputState = UpdateOnscreenKeyboard();
@@ -66,13 +65,13 @@ async function showAndWait(props: NativeTextInputProps) {
     case InputState.SUCCESS: {
       const value: string = GetOnscreenKeyboardResult();
       logger.debug(`native text input "${props.title}" succeeded with result: "${value}"`);
-      await wait.oneFrame();
+      await waitOneFrame();
       result = { success: true, value: value };
       break;
     }
     case InputState.CANCELED: {
       logger.debug(`native text input "${props.title}" got canceled`);
-      await wait.oneFrame();
+      await waitOneFrame();
       result = { success: false };
       break;
     }
@@ -93,7 +92,7 @@ async function showAndWait(props: NativeTextInputProps) {
   }
 
   guiState.isNativeTextInputShown = false;
-  await wait.oneFrame();
+  await waitOneFrame();
   menuInputService.enableMenuInputBindings(MENU_INPUT_BINDINGS.PRESS_ITEM);
   return result;
 }

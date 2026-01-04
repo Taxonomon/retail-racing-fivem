@@ -2,10 +2,10 @@ import {ItemConstructorProps} from "./api/item";
 import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 import playSound from "../../sound";
 import toast from "../toasts/service";
-import wait from "../../../common/wait";
 import EVENT_NAMES from "../../../common/event-names";
 import menuService from "./api/service";
 import MENU_IDS from "./menu-ids";
+import {wait} from "../../../common/wait";
 
 export default function initializeDefaultMenuItems() {
   const items: ItemConstructorProps[] = [
@@ -33,7 +33,7 @@ export default function initializeDefaultMenuItems() {
       onPressed: async () => {
         playSound.select();
         toast.showInfo('Bye bye!');
-        await wait.millis(1000); // wait a little for the sound to finish playing
+        await wait(1000); // wait a little for the sound to finish playing
         emitNet(EVENT_NAMES.PLAYER.KICK.SELF, 'quit via menu')
       }
     }

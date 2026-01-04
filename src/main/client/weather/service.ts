@@ -1,12 +1,12 @@
 import {SELECTABLE_WEATHER_TYPES, SNOW_TYPES, SUNNY, WeatherType} from "./weather-type";
 import weatherState from "./state";
-import wait from "../../common/wait";
 import logger from "../logging/logger";
 import playerSettingsService from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
 import menuService from "../gui/menu/api/service";
 import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
+import {waitOneFrame} from "../../common/wait";
 
 const SNOW_ASSETS = {
   CORE_SNOW: 'core_snow',
@@ -54,7 +54,7 @@ async function loadSnowAssets() {
   RequestNamedPtfxAsset(SNOW_ASSETS.CORE_SNOW);
 
   while(!HasNamedPtfxAssetLoaded(SNOW_ASSETS.CORE_SNOW)) {
-    await wait.oneFrame();
+    await waitOneFrame();
   }
 
   UseParticleFxAsset(SNOW_ASSETS.CORE_SNOW);

@@ -1,5 +1,5 @@
-import wait from './wait';
 import {CommonLogger} from "./logging/logger";
+import {wait} from "./wait";
 
 export class Tick {
   private _index?: number;
@@ -21,7 +21,7 @@ export class Tick {
       this._index ??= setTick(async () => {
         await handler();
         if (0 !== intervalMs) {
-          await wait.millis(intervalMs);
+          await wait(intervalMs);
         }
       });
       this._startedAt = new Date();
