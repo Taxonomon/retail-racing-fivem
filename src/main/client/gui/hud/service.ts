@@ -4,7 +4,6 @@ import sendNuiMessage from "../send-nui-message";
 import {NUI_MSG_IDS} from "../../../common/gui/nui-message";
 import {HudRenderProps} from "../../../common/gui/hud/render-props";
 import {WALKING} from "../../../common/gui/hud/hud-type";
-import playerSettingsService from "../../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../../common/player/setting-names";
 import {KILOMETERS_PER_HOUR, METERS_PER_SECOND, MILES_PER_HOUR, Unit, UNITS} from "../../../common/unit/unit";
 import unitConverter from "../../../common/unit/conversion";
@@ -12,6 +11,7 @@ import logger from "../../logging/logger";
 import menuService from "../menu/api/service";
 import MENU_IDS from "../menu/menu-ids";
 import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
+import {getNumberPlayerSetting, getStringPlayerSetting, updatePlayerSetting} from "../../player/settings/service";
 
 export const SELECTABLE_HUD_SPEED_UNITS: Unit[] = [
   METERS_PER_SECOND,
@@ -42,7 +42,7 @@ function startUpdatingGui() {
 
 function applyInitialSettings() {
   // get unit
-  const setting = playerSettingsService.getStringSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, '');
+  const setting = getStringPlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, '');
   const unit = UNITS.find(u => u.identifier === setting) ?? MILES_PER_HOUR;
   if (undefined !== unit) {
     hudState.unit = unit;
@@ -51,7 +51,7 @@ function applyInitialSettings() {
   }
 
   // get precision
-  const precision = playerSettingsService.getNumberSetting(PLAYER_SETTING_NAMES.HUD.SPEED.PRECISION, -1);
+  const precision = getNumberPlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.PRECISION, -1);
   if (precision !== -1) {
     hudState.precision = precision;
     logger.debug(`set initial hud speed precision to "${hudState.precision}"`);
@@ -70,7 +70,7 @@ async function setSpeedUnit(unitRaw?: string) {
   }
 
   hudState.unit = unit;
-  await playerSettingsService.updateSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, unitRaw);
+  updatePlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, unitRaw);
 }
 
 async function setSpeedPrecision(precisionRaw?: string) {
@@ -81,7 +81,7 @@ async function setSpeedPrecision(precisionRaw?: string) {
   }
 
   hudState.precision = precision;
-  await playerSettingsService.updateSetting(PLAYER_SETTING_NAMES.HUD.SPEED.PRECISION, precision);
+  updatePlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.PRECISION, precision);
 }
 
 const hudService = {

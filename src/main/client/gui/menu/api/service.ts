@@ -295,6 +295,25 @@ function setItemIcon(menuId: string, itemId: string, icon: ItemIconType) {
   logger.debug(`set icon of item "${itemId}" of menu "${menuId}" to "${icon}"`);
 }
 
+function setItemDisabled(menuId: string, itemId: string, disabled: boolean) {
+  const menu = menuState.getMenu(menuId);
+
+  if (undefined === menu) {
+    logger.warn(`cannot set disabled of item "${itemId}": no such menu "${menuId}" found`);
+    return;
+  }
+
+  const item = menu.getItem(itemId);
+
+  if (undefined === item) {
+    logger.warn(`cannot set disabled of item "${itemId}": no such item found in menu "${menuId}"`);
+    return;
+  }
+
+  item.disabled = disabled;
+  logger.debug(`set disabled of item "${itemId}" of menu "${menuId}" to ${disabled}`);
+}
+
 function refreshMenu() {
   const menu = menuState.getRenderedMenu();
 
@@ -324,7 +343,8 @@ const menuService = {
   addItemToMenu,
   removeItemFromMenu,
   setItemIcon,
-  refreshMenu
+  setItemDisabled,
+  refreshMenu,
 };
 
 export default menuService;

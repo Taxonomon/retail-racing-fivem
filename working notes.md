@@ -58,3 +58,4 @@ Race components:
 - reject invalid/too short/long nicknames on player connect
 - put confirmation button abt player nickname on connection deferral (justl like 8g)
 - check if weather is stored in player settings and if yes, if it's set immediately on spawn
+- player settings: set timeout for saving settings so client can't spam the save button

@@ -6,6 +6,7 @@ class PlayerState {
   connectedPlayers: ConnectedPlayer[] = [];
   pings: Map<string, number> = new Map(); // key = netId, value = pingMs
   updatePings: Tick = new Tick('update player pings', logger);
+  playerSettingsLastSavedAt: Date = new Date();
 
   getConnectedPlayer(netId: number): ConnectedPlayer {
     const result = this.connectedPlayers.find(connectedPlayer => netId === connectedPlayer.netId);

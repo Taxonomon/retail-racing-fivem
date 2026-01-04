@@ -7,14 +7,14 @@ import playSound from "../sound";
 
 export const DISABLE_TRAFFIC_ITEM_ID = 'disable-traffic'
 
-export default function initializeTrafficMenu() {
+export function initializeTrafficPlayerSettingsMenu() {
   menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
     id: DISABLE_TRAFFIC_ITEM_ID,
     title: 'Disable Traffic',
     description: 'Disables all traffic and pedestrians.',
     icon: ItemIconType.TOGGLE_OFF,
     onPressed: pressToggleTrafficItem
-  });
+  }, { first: true });
 }
 
 function pressToggleTrafficItem() {

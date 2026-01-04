@@ -5,13 +5,17 @@ import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import playerState from "../state";
 import hudService from "../../gui/hud/service";
 import trafficService from "../../traffic/service";
-import weatherService from "../../weather/service";
+import {applyWeatherPlayerSettings} from "../../weather/service";
+import {applyInitialVehiclePlayerSettings} from "../../vehicle/service";
 
-async function fetchAndApplyInitialSettings() {
+const ARRAY_SETTING_DELIMITER = ',';
+
+export async function fetchAndApplyPlayerSettings() {
   await fetchFromServer();
   hudService.applyInitialSettings();
   trafficService.applyInitialSettings();
-  await weatherService.applyInitialSettings();
+  await applyWeatherPlayerSettings();
+  applyInitialVehiclePlayerSettings();
 }
 
 async function fetchFromServer() {
@@ -33,27 +37,33 @@ async function fetchFromServer() {
   }
 }
 
-function updateSetting(key: string, value: any) {
+export function updatePlayerSetting(key: string, value: any) {
   playerState.settings.set(key, value);
-  logger.info(`updated player setting "${key}" to "${value}"`);
+  logger.debug(`updated player setting "${key}" to "${value}"`);
 }
 
-function getStringSetting(key: string, fallback: string): string {
+export function getStringPlayerSetting(key: string, fallback: string): string {
   const value: any = playerState.settings.get(key);
   return undefined !== value ? value as string : fallback;
 }
 
-function getNumberSetting(key: string, fallback: number): number {
+export function getStringArrayPlayerSetting(key: string, fallback: string[]): string[] {
+  const value: any = playerState.settings.get(key);
+  return undefined !== value ? (value as string).split(ARRAY_SETTING_DELIMITER) : fallback;
+}
+
+export function getNumberPlayerSetting(key: string, fallback: number): number {
   const value: any = playerState.settings.get(key);
   return undefined !== value ? value as number : fallback;
 }
 
-function getBooleanSetting(key: string, fallback: boolean): boolean {
+export function getBooleanPlayerSetting(key: string, fallback: boolean): boolean {
   const value: any = playerState.settings.get(key);
   return undefined !== value ? value as boolean : fallback;
 }
 
-async function saveSettings() {
+export async function savePlayerSettings() {
+  // TODO implement cooldown so client doesn't spam update queries on the server
   const rawSettings = Object.fromEntries(playerState.settings);
   logger.debug(`will save player settings: ${JSON.stringify(rawSettings)}`);
 
@@ -68,14 +78,3 @@ async function saveSettings() {
 
   logger.info(`saved player settings on server`);
 }
-
-const playerSettingsService = {
-  fetchAndApplyInitialSettings,
-  updateSetting,
-  getStringSetting,
-  getNumberSetting,
-  getBooleanSetting,
-  saveSettings,
-};
-
-export default playerSettingsService;

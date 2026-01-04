@@ -8,7 +8,7 @@ import playSound from "../../sound";
 import toast from "../toasts/service";
 import Item from "../menu/api/item";
 
-export default function initializeHudMenu() {
+export function initializeHudPlayerSettingsMenu() {
   menuService.addItemToMenu(
     MENU_IDS.SETTINGS.MAIN,
     {

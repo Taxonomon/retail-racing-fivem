@@ -5,6 +5,8 @@ import playerSettingsRepo from "./repo";
 import playerUtils from "../utils";
 import logger from "../../logging/logger";
 
+const SAVE_PLAYER_SETTINGS_TIMEOUT_MS = 1000;
+
 export default function registerPlayerSettingsCallbacks() {
   callbackService.register(CALLBACK_NAMES.PLAYER.SETTINGS.FETCH, fetchPlayerSettings);
   callbackService.register(CALLBACK_NAMES.PLAYER.SETTINGS.SAVE, savePlayerSettings);
@@ -29,6 +31,10 @@ async function fetchPlayerSettings(netId: number) {
 }
 
 async function savePlayerSettings(netId: number, settingsRaw: string) {
+  if (Date.now() - playerState.playerSettingsLastSavedAt.getTime() >= SAVE_PLAYER_SETTINGS_TIMEOUT_MS) {
+    throw new Error(`player settings were just saved`);
+  }
+
   const connectedPlayer = playerState.getConnectedPlayer(netId);
   const playerName = playerUtils.getPlayerNameFromNetId(netId);
 

@@ -5,7 +5,7 @@ import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
 import callbackService from "../callback/outbound";
 
-export default async function initializeAdministrationMenu() {
+export async function initializeAdministrationMenu() {
   const accessResult = await callbackService.triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.ADMINISTRATION);
 
   if (undefined !== accessResult.error) {
@@ -25,7 +25,7 @@ export default async function initializeAdministrationMenu() {
       onPressed: pressAdministrationItem,
       icon: ItemIconType.SUB_MENU
     },
-    { after: 'moderation' }
+    { first: true }
   );
 
   menuService.addMenu({

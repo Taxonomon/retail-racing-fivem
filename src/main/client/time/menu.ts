@@ -25,13 +25,13 @@ const SELECTABLE_HOURS: SelectableHour[] = [
   { label: 'Evening', hour: 18 }
 ];
 
-export default function initializeTimeMenu() {
+export function initializeTimePlayerSettingsMenu() {
   menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
     id: 'time',
     title: 'Time',
     icon: ItemIconType.SUB_MENU,
     onPressed: pressTimeItem
-  });
+  }, { first: true});
 
   menuService.addMenu({
     id: MENU_IDS.SETTINGS.TIME.MAIN,

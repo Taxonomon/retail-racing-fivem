@@ -6,6 +6,8 @@ import {
   deleteCurrentClientVehicle,
   getAllSpawnableVehicles,
   getVehicleLabelFromModelId,
+  keepCurrentVehicleClean,
+  repairCurrentVehicle,
   SpawnableVehicle,
   spawnVehicleByModelId
 } from "./service";
@@ -13,6 +15,9 @@ import logger from "../logging/logger";
 import playSound from "../sound";
 import nativeTextInput from "../gui/native/text-input";
 import {FRONT_DRIVER} from "../../common/rockstar-constants/vehicle/seats";
+import vehicleState from "./state";
+import {getStringArrayPlayerSetting} from "../player/settings/service";
+import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
 
 const VEHICLE_MENU_ITEM_IDS = {
   MAIN: {
@@ -25,7 +30,11 @@ const VEHICLE_MENU_ITEM_IDS = {
     BY_MODEL_ID: 'by-model-id',
     BY_BEGINNING_LETTER: 'by-beginning-letter',
     BY_BRAND: 'by-brand',
-    BY_CLASS: 'by-class'
+    BY_CLASS: 'by-class',
+    RECENTLY_SPAWNED: 'recently-spawned'
+  },
+  SETTINGS: {
+    KEEP_VEHICLE_CLEAN: 'keep-vehicle-clean'
   }
 };
 
@@ -36,7 +45,7 @@ export async function initializeVehicleMenu() {
     description: 'Browse, spawn or customize vehicles.',
     icon: ItemIconType.SUB_MENU,
     onPressed: () => menuService.openMenu(MENU_IDS.VEHICLE.MAIN)
-  });
+  }, { first: true });
 
   menuService.addMenu({
     id: MENU_IDS.VEHICLE.MAIN,
@@ -108,6 +117,14 @@ async function initializeVehicleSpawnMenu() {
         description: `Browse all available vehicles, categorized by their vehicle class.`,
         icon: ItemIconType.SUB_MENU,
         onPressed: () => menuService.openMenu(MENU_IDS.VEHICLE.SPAWN.BY_CLASS)
+      },
+      {
+        id: VEHICLE_MENU_ITEM_IDS.SPAWN.RECENTLY_SPAWNED,
+        title: 'Recently Spawned',
+        description: 'A history of all recently spawned vehicles (max. 10 vehicles).',
+        icon: ItemIconType.SUB_MENU,
+        onPressed: () => menuService.openMenu(MENU_IDS.VEHICLE.SPAWN.RECENTLY_SPAWNED),
+        disabled: true // will be enabled if recently spawned vehicles exist
       }
     ]
   });
@@ -226,10 +243,36 @@ async function initializeVehicleSpawnMenu() {
   } catch (error: any) {
     logger.error(`Failed to initialize vehicle spawn menu: ${error.message}`);
   }
+
+  initializeVehiclePlayerSettingsMenu();
+}
+
+export function initializeVehiclePlayerSettingsMenu() {
+  menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
+    id: VEHICLE_MENU_ITEM_IDS.SETTINGS.KEEP_VEHICLE_CLEAN,
+    title: 'Keep Vehicle Clean',
+    description:
+      'Prevents the vehicle from becoming dirty while driving.<br><br>'
+      + '(This setting will persist across all game modes.)',
+    icon: ItemIconType.NONE,
+    onPressed: pressKeepVehicleCleanItem
+  }, { first: true });
+}
+
+export function updateRecentlySpawnedVehiclesMenu() {
+  const modelIds = getStringArrayPlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED, []);
 }
 
 function pressRepairVehicleItem() {
-  // TODO implement pressRepairVehicleItem()
+  try {
+    repairCurrentVehicle();
+    toast.showInfo(`Repaired vehicle`);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Could not repair vehicle: ${error.message}`);
+    toast.showError(`Could not repair vehicle (see logs for details)`);
+    playSound.error();
+  }
 }
 
 function pressDeleteVehicleItem() {
@@ -251,7 +294,8 @@ async function pressSpawnVehicleByModelIdItem() {
   });
 
   if (inputResult.success && undefined !== inputResult.value) {
-    playSound.select();
+    playSound.select(); // to show that process was started
+
     const modelId = inputResult.value;
     const label = getVehicleLabelFromModelId(modelId);
 
@@ -264,6 +308,7 @@ async function pressSpawnVehicleByModelIdItem() {
       toast.showInfo(`Spawned "${label}"`);
       playSound.select();
     } catch (error: any) {
+      logger.error(`Failed to spawn vehicle "${modelId}": ${error.message}`);
       toast.showError(`Failed to spawn vehicle "${modelId}" (see logs for details)`);
       playSound.error();
     }
@@ -271,6 +316,8 @@ async function pressSpawnVehicleByModelIdItem() {
 }
 
 async function pressSpawnVehicleItem(vehicle: SpawnableVehicle) {
+  playSound.select(); // to show that process was started
+
   try {
     await spawnVehicleByModelId(vehicle.model, {
       engineTurnedOnInstantly: true,
@@ -280,7 +327,30 @@ async function pressSpawnVehicleItem(vehicle: SpawnableVehicle) {
     toast.showInfo(`Spawned "${vehicle.label}"`);
     playSound.select();
   } catch (error: any) {
+    logger.error(`Failed to spawn vehicle "${vehicle.model}": ${error.message}`);
     toast.showError(`Failed to spawn vehicle "${vehicle.model}" (see logs for details)`);
     playSound.error();
   }
+}
+
+function pressKeepVehicleCleanItem() {
+  const toggled = !vehicleState.keepVehicleClean;
+  keepCurrentVehicleClean(toggled);
+
+  toast.showInfo(toggled
+    ? 'Will keep current vehicle clean'
+    : 'Stopped keeping current vehicle clean'
+  );
+
+  playSound.select();
+  updateKeepVehicleCleanItemIcon(toggled);
+  menuService.refreshMenu();
+}
+
+export function updateKeepVehicleCleanItemIcon(toggled: boolean) {
+  menuService.setItemIcon(
+    MENU_IDS.SETTINGS.MAIN,
+    VEHICLE_MENU_ITEM_IDS.SETTINGS.KEEP_VEHICLE_CLEAN,
+    toggled ? ItemIconType.TOGGLE_ON : ItemIconType.TOGGLE_OFF
+  );
 }

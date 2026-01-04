@@ -10,7 +10,8 @@ const MENU_IDS = {
       ALL: 'vehicle-spawn-all',
       BY_BEGINNING_LETTER: 'vehicle-spawn-by-beginning-letter',
       BY_CLASS: 'vehicle-spawn-by-class',
-      BY_BRAND: 'vehicle-spawn-by-brand'
+      BY_BRAND: 'vehicle-spawn-by-brand',
+      RECENTLY_SPAWNED: 'vehicle-spawn-recently-spawned'
     }
   },
   SETTINGS: {

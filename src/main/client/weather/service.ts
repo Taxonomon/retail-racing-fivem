@@ -1,12 +1,11 @@
 import {SELECTABLE_WEATHER_TYPES, SNOW_TYPES, SUNNY, WeatherType} from "./weather-type";
 import weatherState from "./state";
 import logger from "../logging/logger";
-import playerSettingsService from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
-import menuService from "../gui/menu/api/service";
-import MENU_IDS from "../gui/menu/menu-ids";
-import {ItemIconType} from "../../common/gui/menu/item-icon-type";
-import {waitOneFrame} from "../../common/wait";
+import {wait, waitOneFrame} from "../../common/wait";
+import {updateWeatherSelectionMenuItemIcons} from "./menu";
+import toast from "../gui/toasts/service";
+import {getStringPlayerSetting, updatePlayerSetting} from "../player/settings/service";
 
 const SNOW_ASSETS = {
   CORE_SNOW: 'core_snow',
@@ -14,24 +13,37 @@ const SNOW_ASSETS = {
   SNOW_FOOTSTEPS: 'SNOW_FOOTSTEPS'
 };
 
-async function applyInitialSettings() {
-  const weatherTypeId = playerSettingsService.getStringSetting(PLAYER_SETTING_NAMES.WEATHER, '');
+export async function applyWeatherPlayerSettings() {
+  const weatherTypeId = getStringPlayerSetting(PLAYER_SETTING_NAMES.WEATHER, '');
   const weatherType = SELECTABLE_WEATHER_TYPES.find(wt => wt.id === weatherTypeId) ?? SUNNY;
-  await setPermanentWeather(weatherType.id);
-  menuService.setItemIcon(MENU_IDS.SETTINGS.WEATHER.MAIN, weatherType.id, ItemIconType.SELECTED);
+
+  logger.debug(`Will apply initial weather type "${weatherType.label}" taken from player settings`);
+
+  // for whatever reason we need to wait a little to let the client load in, else the weather
+  // doesn't really get applied (at least it looks different if you re-apply the same weather
+  // via the menu right after)
+  await wait(1000);
+  await setPermanentWeatherByWeatherTypeId(weatherType.id);
+
+  toast.showInfo(`Set weather to "${weatherType.label}"`);
+  updateWeatherSelectionMenuItemIcons(weatherType.id);
 }
 
-async function setPermanentWeather(weatherTypeId: string) {
+export async function setPermanentWeatherByWeatherTypeId(weatherTypeId: string) {
   const weatherType = SELECTABLE_WEATHER_TYPES.find(wt => wt.id === weatherTypeId);
 
   if (undefined === weatherType) {
     throw new Error(`invalid weather type "${weatherTypeId}"`);
   }
 
-  SetWeatherTypeNowPersist(weatherTypeId);
+  await setPermanentWeatherByWeatherType(weatherType);
+}
+
+export async function setPermanentWeatherByWeatherType(weatherType: WeatherType) {
+  SetWeatherTypeNowPersist(weatherType.id);
   await toggleSnowProperties(isSnowType(weatherType));
-  playerSettingsService.updateSetting(PLAYER_SETTING_NAMES.WEATHER, weatherTypeId);
-  logger.info(`set permanent weather to "${weatherTypeId}"`);
+  updatePlayerSetting(PLAYER_SETTING_NAMES.WEATHER, weatherType.id);
+  logger.info(`Set permanent weather to "${weatherType.id}"`);
 }
 
 function isSnowType(weatherType: WeatherType) {
@@ -59,10 +71,3 @@ async function loadSnowAssets() {
 
   UseParticleFxAsset(SNOW_ASSETS.CORE_SNOW);
 }
-
-const weatherService = {
-  applyInitialSettings,
-  setPermanentWeather
-};
-
-export default weatherService;

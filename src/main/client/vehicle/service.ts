@@ -11,6 +11,9 @@ import playerState from "../player/state";
 import {getClientCoordinates} from "../player/service";
 import {loadModelByHash} from "../../common/model";
 import {VEHICLE_CLASSES} from "../../common/rockstar-constants/vehicle/classes";
+import {getBooleanPlayerSetting, getStringArrayPlayerSetting, updatePlayerSetting} from "../player/settings/service";
+import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
+import {updateKeepVehicleCleanItemIcon, updateRecentlySpawnedVehiclesMenu} from "./menu";
 
 const CAR_NOT_FOUND = 'CARNOTFOUND';
 const REGEX_STARTS_WITH_NUMBER = /^\d/;
@@ -157,6 +160,7 @@ export async function spawnVehicleByModelId(modelId: string, options?: {
     logger.debug(`Preserved previous client speed onto newly created vehicle ${newVehicleRef}`);
   }
 
+  addRecentlySpawnedVehicle(modelId);
   logger.info(
     `Spawned vehicle "${getVehicleLabelFromRef(newVehicleRef)}" `
     + `from model id "${modelId}"`
@@ -300,4 +304,82 @@ export function getVehicleBrandFromHash(vehicleHash: number) {
 export function getVehicleClassFromHash(vehicleHash: number) {
   const classId = GetVehicleClassFromName(vehicleHash);
   return VEHICLE_CLASSES.find(vc => vc.id === classId)?.label;
+}
+
+export function repairCurrentVehicle() {
+  const vehicleRef = getCurrentVehicleRef();
+
+  if (0 === vehicleRef) {
+    throw new Error('no vehicle found to repair');
+  } else if (!isClientDriverOfVehicle(vehicleRef)) {
+    throw new Error(`cannot repair vehicle as a passenger`);
+  }
+
+  repairVehicleByRef(vehicleRef);
+}
+
+export function repairVehicleByRef(vehicleRef: number) {
+  SetVehicleFixed(vehicleRef);
+  SetVehicleDirtLevel(vehicleRef, 0);
+  SetVehicleBodyHealth(vehicleRef, 1000);
+  SetVehicleEngineHealth(vehicleRef, 1000);
+  SetVehiclePetrolTankHealth(vehicleRef, 1000);
+  logger.debug(`Repaired vehicle ${vehicleRef}`);
+}
+
+export function keepCurrentVehicleClean(toggled: boolean) {
+  const start = toggled && !vehicleState.keepVehicleClean;
+  const stop = !toggled && vehicleState.keepVehicleClean;
+
+  if (start) {
+    vehicleState.keepVehicleCleanTick.start(() => {
+      const vehicleRef = getCurrentVehicleRef();
+      if (0 !== vehicleRef && isClientDriverOfVehicle(vehicleRef)) {
+        cleanVehicleByRef(vehicleRef);
+      }
+    }, 1000);
+    logger.info(`Started keeping current vehicle clean`);
+    vehicleState.keepVehicleClean = true;
+  } else if (stop) {
+    vehicleState.keepVehicleCleanTick.stop();
+    vehicleState.keepVehicleClean = false;
+    logger.info(`Stopped keeping current vehicle clean`);
+  }
+
+  updatePlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.KEEP_CURRENT_VEHICLE_CLEAN, toggled);
+}
+
+export function cleanVehicleByRef(vehicleRef: number) {
+  SetVehicleDirtLevel(vehicleRef, 0);
+  WashDecalsFromVehicle(vehicleRef, 1);
+}
+
+export function applyInitialVehiclePlayerSettings() {
+  // keep vehicle clean
+  const keepCurrentVehicleCleanSetting = getBooleanPlayerSetting(
+    PLAYER_SETTING_NAMES.VEHICLE.KEEP_CURRENT_VEHICLE_CLEAN,
+    false
+  );
+  keepCurrentVehicleClean(keepCurrentVehicleCleanSetting);
+  updateKeepVehicleCleanItemIcon(keepCurrentVehicleCleanSetting);
+
+  // recently spawned vehicles
+  updateRecentlySpawnedVehiclesMenu();
+}
+
+export function addRecentlySpawnedVehicle(modelId: string) {
+  const recentlySpawnedModelIds = getStringArrayPlayerSetting(
+    PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED,
+    []
+  );
+
+  const recentlySpawnedIndex = recentlySpawnedModelIds.indexOf(modelId);
+
+  if (recentlySpawnedIndex > -1) {
+    recentlySpawnedModelIds.splice(recentlySpawnedIndex, 1);
+  }
+
+  recentlySpawnedModelIds.splice(0, 0, modelId);
+  updatePlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED, recentlySpawnedModelIds);
+  updateRecentlySpawnedVehiclesMenu();
 }

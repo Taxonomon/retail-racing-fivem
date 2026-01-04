@@ -3,7 +3,7 @@ import toast from "../gui/toasts/service";
 import logger from "../logging/logger";
 import {Vector3} from "../../common/vector";
 import playerState from "../player/state";
-import playerSettingsService from "../player/settings/service";
+import {getBooleanPlayerSetting, updatePlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
 import menuService from "../gui/menu/api/service";
 import MENU_IDS from "../gui/menu/menu-ids";
@@ -63,7 +63,7 @@ const VEHICLE_SCENARIOS: string[] = [
 ];
 
 function applyInitialSettings() {
-  const disabled = playerSettingsService.getBooleanSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, false);
+  const disabled = getBooleanPlayerSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, false);
   if (disabled) {
     disableTraffic();
     menuService.setItemIcon(MENU_IDS.SETTINGS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_ON);
@@ -84,7 +84,7 @@ function enableTraffic() {
   toggleVehicleScenarios(true);
 
   trafficState.disabled = false;
-  playerSettingsService.updateSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, trafficState.disabled);
+  updatePlayerSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, trafficState.disabled);
 
   logger.info(`enabled traffic`);
   toast.showInfo('Enabled traffic');
@@ -107,7 +107,7 @@ function disableTraffic() {
   toggleVehicleScenarios(false);
 
   trafficState.disabled = true;
-  playerSettingsService.updateSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, trafficState.disabled);
+  updatePlayerSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, trafficState.disabled);
 
   logger.info(`disabled traffic`);
   toast.showInfo('Disabled traffic (some traffic may still be visible in far away distance)');

@@ -6,24 +6,13 @@ import startUpdatingBreadcrumps from "./gui/breadcrumps/service";
 import startReceivingPingUpdates from "./player/ping";
 import registerMessageFromServerEventListener from "./logging/msg-from-server";
 import startTrackingPlayerCoordinates from "./player/coords";
-import initializeModerationMenu from "./moderation/menu";
-import initializeMainMenu from "./gui/menu/main-menu";
-import initializeAdministrationMenu from "./administration/menu";
-import initializeTrafficMenu from "./traffic/menu";
-import initializeTimeMenu from "./time/menu";
 import wantedLevelService from "./wanted-level/menu";
-import initializeWeatherMenu from "./weather/menu";
 import callbackService from "./callback/outbound";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 import startTrackingPlayerSpeed from "./player/speed";
-import playerSettingsService from "./player/settings/service";
 import hudService from "./gui/hud/service";
-import initializeHudMenu from "./gui/hud/menu";
-import initializePlayerSettingsMenu from "./player/settings/menu";
-import initializeDefaultMenuItems from "./gui/menu/default-items";
-import playerSettingsMenu from "./player/settings/menu";
-import {initializeVehicleMenu} from "./vehicle/menu";
-import vehicleSpawnMenu from "./vehicle/spawn/menu";
+import {initializeMainMenu} from "./gui/menu/main-menu";
+import {fetchAndApplyPlayerSettings} from "./player/settings/service";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -38,30 +27,14 @@ async function handleOnClientResourceStart() {
   callbackService.registerServerCallbackResponseListener();
   registerMessageFromServerEventListener();
 
-  // menus
-  // TODO consider registering per-gamemode menus (freemode, hotlap, race, etc.)
-  // TODO refactor menu registration to follow a universal standard (this is a mess)
-  initializeMainMenu();
-  await initializeVehicleMenu();
-  playerSettingsMenu.initializeMenu();
-  initializeTimeMenu();
-  initializeTrafficMenu();
-  initializeWeatherMenu();
-  initializeHudMenu();
-  playerSettingsMenu.initializeSaveItem();
-  await initializeModerationMenu();
-  await initializeAdministrationMenu();
-  initializeDefaultMenuItems();
-
   // inputs
   menuInputService.setUp();
   controlActionService.startBlockingDisabledControlActions();
   inputBindingListener.start();
 
-  // fetch & apply player settings
-  await playerSettingsService.fetchAndApplyInitialSettings();
-
   // do other stuff
+  await initializeMainMenu();
+  await fetchAndApplyPlayerSettings();
   startReceivingPingUpdates();
   startUpdatingBreadcrumps();
   hudService.startUpdatingGui();

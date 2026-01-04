@@ -11,6 +11,10 @@ const PLAYER_SETTING_NAMES = {
       UNIT: 'hudSpeedUnit',
       PRECISION: 'hudSpeedPrecision'
     }
+  },
+  VEHICLE: {
+    KEEP_CURRENT_VEHICLE_CLEAN: 'vehicleKeepCurrentVehicleClean',
+    RECENTLY_SPAWNED: 'vehicleRecentlySpawned'
   }
 };
 
