@@ -37,10 +37,16 @@ Race components:
 ## TODOs:
 
 - vehicle menu
-  - spawn (with blacklist locked behind permission)
-    - sorted by display name, starting letter, make (if poss), and class
+  - spawn
+    - give the player an option to not delete old vehicle when spawning a new one (so that someone can align multiple cars next to each other for screenshots etc.)
+    - keep track of all spawned vehicles and wipe them under the following conditions:
+      - client has disconnected
+      - client has changed game mode
+      - client has triggered the respective menu item to delete all their vehicles
   - repair
   - delete
+    - keep track of all spawned vehicles and periodically wipe them
+    - (client can spawn things while dying, which get left over)
   - recently spawned (last 10 vehicles, most recent always at the top)
 - y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
 - hot lap mode
@@ -49,11 +55,5 @@ Race components:
   - during hot lap: let client pick a checkpoint to tp to (resets hot lap)
   - respawn at cp, reset hot lap (resets hot lap)
   - change time/weather/traffic (resets hot lap)
-- clean up the entire client/vehicle directory/logic
-  - one service to perform actual stuff
-    - boolean return values to indicate success/failure
-    - console logs are done in service methods
-    - menu just takes boolean result and spits out "check logs" if failure
-  - register menu in one file as well
 - reject invalid/too short/long nicknames on player connect
 - check if weather is stored in player settings and if yes, if it's set immediately on spawn
