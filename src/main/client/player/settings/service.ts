@@ -63,7 +63,6 @@ export function getBooleanPlayerSetting(key: string, fallback: boolean): boolean
 }
 
 export async function savePlayerSettings() {
-  // TODO implement cooldown so client doesn't spam update queries on the server
   const rawSettings = Object.fromEntries(playerState.settings);
   logger.debug(`will save player settings: ${JSON.stringify(rawSettings)}`);
 

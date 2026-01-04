@@ -31,7 +31,7 @@ async function fetchPlayerSettings(netId: number) {
 }
 
 async function savePlayerSettings(netId: number, settingsRaw: string) {
-  if (Date.now() - playerState.playerSettingsLastSavedAt.getTime() >= SAVE_PLAYER_SETTINGS_TIMEOUT_MS) {
+  if (Date.now() - playerState.playerSettingsLastSavedAt.getTime() < SAVE_PLAYER_SETTINGS_TIMEOUT_MS) {
     throw new Error(`player settings were just saved`);
   }
 
@@ -59,5 +59,6 @@ async function savePlayerSettings(netId: number, settingsRaw: string) {
     throw new Error(`database error (player settings update query returned undefined entity`);
   }
 
+  playerState.playerSettingsLastSavedAt = new Date();
   logger.info(`updated player settings of "${playerName}" (net id ${netId})`);
 }
