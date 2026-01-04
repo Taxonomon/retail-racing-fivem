@@ -53,3 +53,7 @@ Race components:
   - change time/weather/traffic (resets hot lap)
 - reject invalid/too short/long nicknames on player connect
 - put confirmation button abt player nickname on connection deferral (justl like 8g)
+- allow menu to be refreshed while rendered
+  - check if focused === disabled, and if so, reset focused to index 0
+  - if no more items in menu, close it and log warning
+- check why recently spawned vehicles doesn't properly reorder when spawning a previously spawned vehicle further down the list
