@@ -54,22 +54,13 @@ Race components:
 
 ### Lower Prio
 
-- vehicle menu
-  - spawn
-    - option to keep old vehicle when spawning a new one
-    - option to wipe all spawned vehicles (requires client to keep track of them)
-      - wipe them anyway if client:
-        - disconnects
-        - changes game mode (free mode to hot lap/race)
-        - triggers the menu item to explicitly wipe them
+- spawn vehicle menu
+  - option to keep old vehicle when spawning a new one
+  - option to wipe all spawned vehicles (requires client to keep track of them)
+      - wipe them anyway if client either disconnects, changes game mode (free mode to hot lap/race), or if they trigger the menu item to explicitly wipe them
 - y-menu/overview of players
   - access via control action `INPUT_HUD_SPECIAL`
-  - properties:
-    - nickname
-    - ping
-    - game mode (race, hot lap, free mode)
-    - car
-    - track
+  - properties: nickname, ping, game mode, car, track
 
 ### Bugs
 
