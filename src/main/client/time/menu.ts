@@ -1,12 +1,13 @@
-import menuService from "../gui/menu/api/service";
 import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import timeState from "./state";
-import timeService from "./service";
 import playSound from "../sound";
 import nativeTextInput from "../gui/native/text-input";
 import logger from "../logging/logger";
 import toast from "../gui/toasts/service";
+import {addItemToMenu, addMenu, openMenu, refreshMenu, setMenuItemIcon} from "../gui/menu/api/service";
+import Item from "../gui/menu/api/item";
+import {setTimeFrozen, setTimeOfDayHour} from "./service";
 
 const ITEM_IDS = {
   SELECT_TIME: 'select-time',
@@ -26,14 +27,14 @@ const SELECTABLE_HOURS: SelectableHour[] = [
 ];
 
 export function initializeTimePlayerSettingsMenu() {
-  menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
+  addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
     id: 'time',
     title: 'Time',
     icon: ItemIconType.SUB_MENU,
-    onPressed: pressTimeItem
+    onPressed: (item: Item) => pressTimeSubMenuItem(item)
   }, { first: true});
 
-  menuService.addMenu({
+  addMenu({
     id: MENU_IDS.SETTINGS.TIME.MAIN,
     title: 'Time',
     items: [
@@ -42,7 +43,7 @@ export function initializeTimePlayerSettingsMenu() {
         title: 'Select Time',
         description: 'Select a specific time of day.',
         icon: ItemIconType.SUB_MENU,
-        onPressed: () => menuService.openMenu(MENU_IDS.SETTINGS.TIME.SELECT_TIME.MAIN)
+        onPressed: (item: Item) => pressSelectTimeSubMenuItem(item)
       },
       {
         id: ITEM_IDS.FREEZE_TIME_OF_DAY,
@@ -61,7 +62,7 @@ export function initializeTimePlayerSettingsMenu() {
     ]
   });
 
-  menuService.addMenu({
+  addMenu({
     id: MENU_IDS.SETTINGS.TIME.SELECT_TIME.MAIN,
     title: 'Select Time of Day',
     items: SELECTABLE_HOURS.map(selectableHour => ({
@@ -74,27 +75,39 @@ export function initializeTimePlayerSettingsMenu() {
   });
 }
 
-function pressTimeItem() {
-  menuService.openMenu(MENU_IDS.SETTINGS.TIME.MAIN);
+function pressTimeSubMenuItem(item: Item) {
+  const subMenuId = MENU_IDS.SETTINGS.TIME.MAIN;
+  try {
+    openMenu(subMenuId);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}": ${error.message}`);
+    toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
+    playSound.error();
+  }
+}
+
+function pressSelectTimeSubMenuItem(item: Item) {
+  const subMenuId = MENU_IDS.SETTINGS.TIME.SELECT_TIME.MAIN;
+  try {
+    openMenu(subMenuId);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}": ${error.message}`);
+    toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
+    playSound.error();
+  }
 }
 
 function pressFreezeTimeOfDayItem() {
-  if (timeState.frozen) {
-    timeService.unfreezeTime();
-    menuService.setItemIcon(
-      MENU_IDS.SETTINGS.TIME.MAIN,
-      ITEM_IDS.FREEZE_TIME_OF_DAY,
-      ItemIconType.TOGGLE_OFF
-    );
-  } else {
-    timeService.freezeTime();
-    menuService.setItemIcon(
-      MENU_IDS.SETTINGS.TIME.MAIN,
-      ITEM_IDS.FREEZE_TIME_OF_DAY,
-      ItemIconType.TOGGLE_ON
-    );
-  }
-  menuService.refreshMenu();
+  const freeze = !timeState.frozen;
+  setTimeFrozen(freeze);
+  setMenuItemIcon(
+    MENU_IDS.SETTINGS.TIME.MAIN,
+    ITEM_IDS.FREEZE_TIME_OF_DAY,
+    freeze ? ItemIconType.TOGGLE_ON : ItemIconType.TOGGLE_OFF
+  );
+  refreshMenu();
   playSound.select();
 }
 
@@ -104,29 +117,27 @@ async function pressSetCustomHourItem() {
     maxLength: 2
   });
 
-  if (!hourResult.success) {
+  if (!hourResult.success || undefined === hourResult.value) {
     return;
   }
 
   try {
-    timeService.setHour(hourResult.value ?? '');
+    setTimeOfDayHour(hourResult.value);
     playSound.select();
   } catch (error: any) {
-    const msg = `Could not change time of day to custom hour: ${error.message}`
-    logger.warn(msg);
-    toast.showError(msg);
+    logger.error(`Could not change time of day to custom hour: ${error.message}`);
+    toast.showError(`Could not change time of day to custom hour (see logs for details)`);
     playSound.error();
   }
 }
 
 function pressSelectTimeItem(selectableHour: SelectableHour) {
   try {
-    timeService.setHour(selectableHour.hour.toString());
+    setTimeOfDayHour(selectableHour.hour.toString());
     playSound.select();
   } catch (error: any) {
-    const msg = `Could not set time of day to "${selectableHour.label}": ${error.message}`;
-    logger.warn(msg);
-    toast.showError(msg);
+    logger.error(`Could not set time of day to "${selectableHour.label}": ${error.message}`);
+    toast.showError(`Could not set time of day to "${selectableHour.label}" (see logs for details)`);
     playSound.error();
   }
 }

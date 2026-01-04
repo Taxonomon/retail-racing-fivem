@@ -8,10 +8,13 @@ import PLAYER_SETTING_NAMES from "../../../common/player/setting-names";
 import {KILOMETERS_PER_HOUR, METERS_PER_SECOND, MILES_PER_HOUR, Unit, UNITS} from "../../../common/unit/unit";
 import unitConverter from "../../../common/unit/conversion";
 import logger from "../../logging/logger";
-import menuService from "../menu/api/service";
-import MENU_IDS from "../menu/menu-ids";
-import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 import {getNumberPlayerSetting, getStringPlayerSetting, updatePlayerSetting} from "../../player/settings/service";
+import {updateHudSpeedUnitMenuItemIcons} from "./menu";
+
+export const HUD_SPEED_PRECISION = {
+  MIN: 0,
+  MAX: 3
+};
 
 export const SELECTABLE_HUD_SPEED_UNITS: Unit[] = [
   METERS_PER_SECOND,
@@ -19,7 +22,7 @@ export const SELECTABLE_HUD_SPEED_UNITS: Unit[] = [
   MILES_PER_HOUR
 ];
 
-function startUpdatingGui() {
+export function startUpdatingHud() {
   hudState.updateHud.start(() => {
     const speed = playerState.speed;
 
@@ -32,33 +35,30 @@ function startUpdatingGui() {
           value: unitConverter.convert(speed.value, speed.unit, hudState.unit)
         }
       };
-      sendNuiMessage({
-        id: NUI_MSG_IDS.HUD,
-        data
-      });
+      sendNuiMessage({ id: NUI_MSG_IDS.HUD, data });
     }
   });
 }
 
-function applyInitialSettings() {
+export function applyHudPlayerSettings() {
   // get unit
   const setting = getStringPlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, '');
   const unit = UNITS.find(u => u.identifier === setting) ?? MILES_PER_HOUR;
   if (undefined !== unit) {
     hudState.unit = unit;
-    menuService.setItemIcon(MENU_IDS.SETTINGS.HUD.SPEED_UNIT.MAIN, unit.identifier, ItemIconType.SELECTED);
-    logger.debug(`set initial hud speed unit to "${hudState.unit.symbol}"`);
+    updateHudSpeedUnitMenuItemIcons(unit.identifier);
+    logger.debug(`Set initial HUD speed unit to "${hudState.unit.label}"`);
   }
 
   // get precision
   const precision = getNumberPlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.PRECISION, -1);
   if (precision !== -1) {
     hudState.precision = precision;
-    logger.debug(`set initial hud speed precision to "${hudState.precision}"`);
+    logger.debug(`Set initial HUD speed precision to ${hudState.precision} decimals`);
   }
 }
 
-async function setSpeedUnit(unitRaw?: string) {
+export function setHudSpeedUnit(unitRaw?: string) {
   let unit: Unit | undefined;
 
   if (undefined !== unitRaw) {
@@ -71,24 +71,21 @@ async function setSpeedUnit(unitRaw?: string) {
 
   hudState.unit = unit;
   updatePlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.UNIT, unitRaw);
+  logger.info(`Set HUD speed unit to "${unit.label}"`);
 }
 
-async function setSpeedPrecision(precisionRaw?: string) {
+export function setHudSpeedPrecision(precisionRaw?: string) {
   const precision = Number(precisionRaw);
 
-  if (undefined === precisionRaw || Number.isNaN(precision) || precision < 0 || precision > 3) {
+  if (undefined === precisionRaw
+    || Number.isNaN(precision)
+    || precision < HUD_SPEED_PRECISION.MIN
+    || precision > HUD_SPEED_PRECISION.MAX
+  ) {
     throw new Error(`invalid precision "${precisionRaw}"`);
   }
 
   hudState.precision = precision;
   updatePlayerSetting(PLAYER_SETTING_NAMES.HUD.SPEED.PRECISION, precision);
+  logger.info(`Set HUD speed precision to ${precision} decimals`);
 }
-
-const hudService = {
-  applyInitialSettings,
-  startUpdatingGui,
-  setSpeedUnit,
-  setSpeedPrecision
-};
-
-export default hudService;

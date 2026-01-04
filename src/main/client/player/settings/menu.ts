@@ -1,4 +1,3 @@
-import menuService from "../../gui/menu/api/service";
 import MENU_IDS from "../../gui/menu/menu-ids";
 import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 import logger from "../../logging/logger";
@@ -10,17 +9,19 @@ import {initializeWeatherPlayerSettingsMenu} from "../../weather/menu";
 import {initializeHudPlayerSettingsMenu} from "../../gui/hud/menu";
 import {initializeVehiclePlayerSettingsMenu} from "../../vehicle/menu";
 import {savePlayerSettings} from "./service";
+import {addItemToMenu, addMenu, openMenu} from "../../gui/menu/api/service";
+import Item from "../../gui/menu/api/item";
 
 export function initializePlayerSettingsMenu() {
-  menuService.addItemToMenu(MENU_IDS.MAIN, {
+  addItemToMenu(MENU_IDS.MAIN, {
     id: 'settings',
     title: 'Settings',
     description: 'Customize your server experience by adjusting various settings.',
     icon: ItemIconType.SUB_MENU,
-    onPressed: () => menuService.openMenu(MENU_IDS.SETTINGS.MAIN)
+    onPressed: (item: Item) => pressSettingsSubMenuItem(item)
   }, { first: true });
 
-  menuService.addMenu({
+  addMenu({
     id: MENU_IDS.SETTINGS.MAIN,
     title: 'Settings',
     items: [
@@ -41,6 +42,18 @@ export function initializePlayerSettingsMenu() {
   initializeTimePlayerSettingsMenu();
   initializeWeatherPlayerSettingsMenu();
   initializeVehiclePlayerSettingsMenu();
+}
+
+function pressSettingsSubMenuItem(item: Item) {
+  const subMenuId = MENU_IDS.SETTINGS.MAIN;
+  try {
+    openMenu(subMenuId);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}": ${error.message}`);
+    toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
+    playSound.error();
+  }
 }
 
 async function pressSaveSettingsItem() {

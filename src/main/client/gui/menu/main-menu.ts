@@ -1,4 +1,3 @@
-import menuService from "./api/service";
 import MENU_IDS from "./menu-ids";
 import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 import {initializeVehicleMenu} from "../../vehicle/menu";
@@ -9,9 +8,10 @@ import {wait} from "../../../common/wait";
 import EVENT_NAMES from "../../../common/event-names";
 import {initializeAdministrationMenu} from "../../administration/menu";
 import {initializeModerationMenu} from "../../moderation/menu";
+import {addMenu, setMainMenu} from "./api/service";
 
 export async function initializeMainMenu() {
-  menuService.addMenu({
+  addMenu({
     id: MENU_IDS.MAIN,
     title: 'Main Menu',
     items: [
@@ -38,7 +38,7 @@ export async function initializeMainMenu() {
     ]
   });
 
-  menuService.setMainMenu(MENU_IDS.MAIN);
+  setMainMenu(MENU_IDS.MAIN);
 
   // all below menus will add their items at the top of the menu successively,
   // on top of the above default items.

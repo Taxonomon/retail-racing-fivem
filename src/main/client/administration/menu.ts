@@ -1,40 +1,52 @@
 import CALLBACK_NAMES from "../../common/callback/callback-names";
-import menuService from "../gui/menu/api/service";
 import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
 import callbackService from "../callback/outbound";
+import {addItemToMenu, addMenu, openMenu} from "../gui/menu/api/service";
+import playSound from "../sound";
+import toast from "../gui/toasts/service";
+import Item from "../gui/menu/api/item";
 
 export async function initializeAdministrationMenu() {
   const accessResult = await callbackService.triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.ADMINISTRATION);
 
   if (undefined !== accessResult.error) {
-    logger.warn(`error whilst checking access to administration menu: ${accessResult.error}`);
+    logger.warn(`Error whilst checking access to administration menu: ${accessResult.error}`);
     return;
   } else if (!accessResult.data) {
-    logger.debug(`client is not permitted access to administration menu`);
     return;
   }
 
-  menuService.addItemToMenu(
+  logger.debug(`Client is permitted access to administration menu`);
+
+  addItemToMenu(
     MENU_IDS.MAIN,
     {
       id: 'administration',
       title: 'Administration',
       description: 'Contains various tools for server administrators.',
-      onPressed: pressAdministrationItem,
+      onPressed: (item: Item) => pressAdministrationSubMenuItem(item),
       icon: ItemIconType.SUB_MENU
     },
     { first: true }
   );
 
-  menuService.addMenu({
+  addMenu({
     id: MENU_IDS.ADMINISTRATION.MAIN,
     title: 'Administration',
     items: []
   });
 }
 
-function pressAdministrationItem() {
-  menuService.openMenu(MENU_IDS.ADMINISTRATION.MAIN);
+function pressAdministrationSubMenuItem(item: Item) {
+  const subMenuId = MENU_IDS.ADMINISTRATION.MAIN;
+  try {
+    openMenu(subMenuId);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}"): ${error.message}`);
+    toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
+    playSound.error();
+  }
 }

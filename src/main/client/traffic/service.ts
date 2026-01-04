@@ -5,10 +5,7 @@ import {Vector3} from "../../common/vector";
 import playerState from "../player/state";
 import {getBooleanPlayerSetting, updatePlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
-import menuService from "../gui/menu/api/service";
-import MENU_IDS from "../gui/menu/menu-ids";
-import {DISABLE_TRAFFIC_ITEM_ID} from "./menu";
-import {ItemIconType} from "../../common/gui/menu/item-icon-type";
+import {updateDisableTrafficItemIcon} from "./menu";
 
 const DISABLE_RADIUS = 5000;
 const VEHICLE_SCENARIOS: string[] = [
@@ -62,18 +59,17 @@ const VEHICLE_SCENARIOS: string[] = [
   'WORLD_VEHICLE_DISTANT_EMPTY_GROUND'
 ];
 
-function applyInitialSettings() {
+export function applyTrafficPlayerSettings() {
   const disabled = getBooleanPlayerSetting(PLAYER_SETTING_NAMES.TRAFFIC.DISABLED, false);
   if (disabled) {
     disableTraffic();
-    menuService.setItemIcon(MENU_IDS.SETTINGS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_ON);
   } else {
     enableTraffic();
-    menuService.setItemIcon(MENU_IDS.SETTINGS.MAIN, DISABLE_TRAFFIC_ITEM_ID, ItemIconType.TOGGLE_OFF);
   }
+  updateDisableTrafficItemIcon(disabled);
 }
 
-function enableTraffic() {
+export function enableTraffic() {
   if (!trafficState.disabled) {
     return;
   }
@@ -90,7 +86,7 @@ function enableTraffic() {
   toast.showInfo('Enabled traffic');
 }
 
-function disableTraffic() {
+export function disableTraffic() {
   if (trafficState.disabled) {
     return;
   }
@@ -148,11 +144,3 @@ function disablePedestriansThisFrame(coords: Vector3, radius: number) {
   SetScenarioPedDensityMultiplierThisFrame(0, 0);
   ClearAreaOfPeds(x, y, z, radius, false);
 }
-
-const trafficService = {
-  enableTraffic,
-  disableTraffic,
-  applyInitialSettings
-};
-
-export default trafficService;

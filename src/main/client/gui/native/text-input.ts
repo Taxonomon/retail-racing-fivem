@@ -1,8 +1,8 @@
 import logger from "../../logging/logger";
 import guiState from "../state";
 import playSound from "../../sound";
-import menuInputService, {MENU_INPUT_BINDINGS} from "../menu/input";
 import {waitOneFrame} from "../../../common/wait";
+import {PRESS_ITEM, setMenuInputBindingsEnabled} from "../menu/api/input";
 
 export type NativeTextInputProps = {
   title: string;
@@ -32,7 +32,7 @@ async function showAndWait(props: NativeTextInputProps) {
   }
 
   guiState.isNativeTextInputShown = true;
-  menuInputService.disableMenuInputBindings(MENU_INPUT_BINDINGS.PRESS_ITEM);
+  setMenuInputBindingsEnabled(false, PRESS_ITEM);
 
   let length = props.maxLength ?? MAX_LENGTH;
   let result: NativeTextInputResult;
@@ -93,7 +93,7 @@ async function showAndWait(props: NativeTextInputProps) {
 
   guiState.isNativeTextInputShown = false;
   await waitOneFrame();
-  menuInputService.enableMenuInputBindings(MENU_INPUT_BINDINGS.PRESS_ITEM);
+  setMenuInputBindingsEnabled(true, PRESS_ITEM);
   return result;
 }
 

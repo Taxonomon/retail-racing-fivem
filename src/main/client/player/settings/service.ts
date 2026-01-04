@@ -3,19 +3,20 @@ import toast from "../../gui/toasts/service";
 import callbackService from "../../callback/outbound";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import playerState from "../state";
-import hudService from "../../gui/hud/service";
-import trafficService from "../../traffic/service";
+import {applyHudPlayerSettings} from "../../gui/hud/service";
+import {applyTrafficPlayerSettings} from "../../traffic/service";
 import {applyWeatherPlayerSettings} from "../../weather/service";
-import {applyInitialVehiclePlayerSettings} from "../../vehicle/service";
+import {applyVehiclePlayerSettings} from "../../vehicle/service";
 
 const ARRAY_SETTING_DELIMITER = ',';
 
 export async function fetchAndApplyPlayerSettings() {
   await fetchFromServer();
-  hudService.applyInitialSettings();
-  trafficService.applyInitialSettings();
+
   await applyWeatherPlayerSettings();
-  applyInitialVehiclePlayerSettings();
+  applyHudPlayerSettings();
+  applyVehiclePlayerSettings();
+  applyTrafficPlayerSettings();
 }
 
 async function fetchFromServer() {
@@ -49,7 +50,7 @@ export function getStringPlayerSetting(key: string, fallback: string): string {
 
 export function getStringArrayPlayerSetting(key: string, fallback: string[]): string[] {
   const value: any = playerState.settings.get(key);
-  return undefined !== value ? (value as string).split(ARRAY_SETTING_DELIMITER) : fallback;
+  return undefined !== value ? value : fallback;
 }
 
 export function getNumberPlayerSetting(key: string, fallback: number): number {

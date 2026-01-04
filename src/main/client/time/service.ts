@@ -11,7 +11,15 @@ export type TimeOfDay = {
   second: number;
 };
 
-function freezeTime() {
+export function setTimeFrozen(frozen: boolean) {
+  if (frozen) {
+    freezeTime();
+  } else {
+    unfreezeTime();
+  }
+}
+
+export function freezeTime() {
   if (!timeState.frozen) {
     timeState.frozenTimeOfDay = getTimeOfDay();
     timeState.freezeTime.start(() => {
@@ -25,7 +33,7 @@ function freezeTime() {
   }
 }
 
-function unfreezeTime() {
+export function unfreezeTime() {
   if (timeState.frozen) {
     timeState.freezeTime.stop();
     timeState.frozenTimeOfDay = undefined;
@@ -35,7 +43,7 @@ function unfreezeTime() {
   }
 }
 
-function getTimeOfDay(): TimeOfDay {
+export function getTimeOfDay(): TimeOfDay {
   return {
     hour: GetClockHours(),
     minute: GetClockMinutes(),
@@ -43,11 +51,11 @@ function getTimeOfDay(): TimeOfDay {
   };
 }
 
-function setTimeOfDay(timeOfDay: TimeOfDay) {
+export function setTimeOfDay(timeOfDay: TimeOfDay) {
   NetworkOverrideClockTime(timeOfDay.hour, timeOfDay.minute, timeOfDay.second);
 }
 
-function setHour(rawHour: string) {
+export function setTimeOfDayHour(rawHour: string) {
   const hour = Number(rawHour);
 
   if (rawHour.length === 0 || rawHour.length > 2 || Number.isNaN(hour) || hour < 0 || hour > 23) {
@@ -66,18 +74,9 @@ function setHour(rawHour: string) {
   toast.showInfo(`Set time of day to ${formattedString(timeOfDay)}`);
 }
 
-function formattedString(timeOfDay: TimeOfDay) {
+export function formattedString(timeOfDay: TimeOfDay) {
   const h = timeOfDay.hour.toString().padStart(2, '0');
   const m =  timeOfDay.minute.toString().padStart(2, '0');
   const s =  timeOfDay.second.toString().padStart(2, '0');
   return `${h}:${m}:${s}`;
 }
-
-const timeService = {
-  freezeTime,
-  unfreezeTime,
-  setTimeOfDay,
-  setHour
-};
-
-export default timeService;

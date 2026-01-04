@@ -2,16 +2,10 @@ import Menu, {MenuConstructorProps} from "./menu";
 import menuState from "./state";
 import sendNuiMessage from "../../send-nui-message";
 import {NUI_MSG_IDS} from "../../../../common/gui/nui-message";
-import playSound from "../../../sound";
 import logger from "../../../logging/logger";
 import Item, {ItemConstructorProps} from "./item";
-import toast from "../../toasts/service";
 import {ItemIconType} from "../../../../common/gui/menu/item-icon-type";
-import menuInputService from "../input";
-
-export type OpenMenuOptions = {
-  withSound?: boolean;
-};
+import {toggleMenuInputBindings} from "./input";
 
 export type AddItemToMenuProps = {
   before?: string;
@@ -19,86 +13,58 @@ export type AddItemToMenuProps = {
   first?: boolean;
 };
 
-function addMenu(props: MenuConstructorProps) {
-  if (menuState.hasMenu(props.id)) {
-    logger.warn(`cannot add menu "${props.id}": menu already exists`);
+export function addMenu(props: MenuConstructorProps) {
+  if (hasMenu(props.id)) {
+    throw new Error(`menu "${props.id}" already exists`);
   }
   menuState.register.push(new Menu(props));
-  logger.debug(`added menu "${props.id}"`);
+  logger.debug(`Added menu "${props.id}"`);
 }
 
-function setMainMenu(id: string) {
-  if (!menuState.hasMenu(id)) {
-    logger.warn(`cannot set main menu "${id}": no such menu found`);
+export function setMainMenu(menuId: string) {
+  if (!hasMenu(menuId)) {
+    throw noSuchMenuError(menuId);
   }
-  menuState.mainMenu = id;
-  logger.debug(`set main menu to "${id}"`);
+  menuState.mainMenu = menuId;
+  logger.debug(`Set main menu to "${menuId}"`);
 }
 
-function removeMenu(id: string) {
-  if (!menuState.hasMenu(id)) {
-    logger.warn(`cannot remove menu "${id}": no such menu found`);
-  } else if (menuState.isMenuRendered(id)) {
-    logger.warn(`cannot remove menu "${id}": menu is currently rendered`);
-  } else if (menuState.isMenuOpen(id)) {
-    logger.warn(
-      `cannot remove menu "${id}": menu is currently opened `
-      + `(another menu may currently be rendered`
-    );
+export function removeMenu(menuId: string) {
+  if (isMenuCurrentlyRendered(menuId)) {
+    throw new Error('menu is currently rendered');
+  } else if (isMenuOpen(menuId)) {
+    throw new Error('menu is currently opened (although another menu might currently be rendered)');
   }
 
-  const index = menuState.register.findIndex((menu) => menu.id === id);
+  const index = menuState.register.findIndex((menu) => menu.id === menuId);
 
   if (-1 === index) {
-    // shouldn't happen because we already checked this earlier, but whatever
-    logger.warn(`cannot remove menu "${id}": no such menu registered`);
+    throw noSuchMenuError(menuId);
   }
 
   menuState.register.splice(index, 1);
-  logger.debug(`removed menu "${id}"`);
+  logger.debug(`Removed menu "${menuId}"`);
 
-  if (menuState.mainMenu === id) {
+  if (menuState.mainMenu === menuId) {
     menuState.mainMenu = undefined;
-    logger.debug(`removed main menu "${id}"`);
+    logger.debug(`Removed main menu "${menuId}"`);
   }
 }
 
-function openMainMenu() {
+export function openMainMenu() {
   if (undefined === menuState.mainMenu) {
-    const msg = `cannot open main menu: no main menu found`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    playSound.error();
-  } else if (menuState.isAnyMenuOpen()) {
-    const msg = `cannot open main menu: menu is already open`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    playSound.error();
-  } else {
-    openMenu(menuState.mainMenu);
+    throw new Error('no main menu found');
+  } else if (isAnyMenuOpen()) {
+    throw new Error('another menu is already open');
   }
+  openMenu(menuState.mainMenu);
 }
 
-function openMenu(id: string, options?: OpenMenuOptions) {
-  const menu = menuState.getMenu(id);
-  const soundEnabled = undefined === options?.withSound || false !== options?.withSound;
+export function openMenu(menuId: string) {
+  const menu = getMenu(menuId);
 
-  if (undefined === menu) {
-    const msg = `cannot open menu "${id}": no such menu found`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    if (soundEnabled) {
-      playSound.error();
-    }
-    return;
-  } else if (!menu.hasItems()) {
-    const msg = `cannot open menu "${id}": menu has no items`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    if (soundEnabled) {
-      playSound.error();
-    }
-    return;
+  if (!menu.hasItems()) {
+    throw new Error(`menu "${menuId}" has no items`);
   }
 
   sendNuiMessage({
@@ -106,132 +72,72 @@ function openMenu(id: string, options?: OpenMenuOptions) {
     data: menu.renderProps()
   });
 
-  // if no menu has been opened so far, toggle certain menu inputs while any menu is opened
-  if (0 === menuState.stack.length) {
-    menuInputService.disableMenuInputsBlockedWhileMenuIsOpened();
-    menuInputService.enableMenuInputsNotBlockedWhileMenuIsOpened();
-  }
+  const isMainMenuOpened = 0 === menuState.stack.length;
 
   // if a child menu was closed, it was popped off the stack, leaving the parent menu on top of the stack.
   // now if this parent menu is trying to be opened, it shouldn't be added to the stack again if it's already
   // at the top of the stack.
-  if (id !== menuState.stack.at(-1)) {
-    menuState.stack.push(id);
+  if (menuId !== menuState.stack.at(-1)) {
+    menuState.stack.push(menuId);
   }
 
-  // play sound unless options specifically say not to
-  if (soundEnabled) {
-    playSound.select();
+  if (isMainMenuOpened) {
+    toggleMenuInputBindings();
   }
-  logger.debug(`opened menu "${id}"`);
+
+  logger.debug(`Opened menu "${menuId}"`);
 }
 
-function closeCurrentMenu() {
-  const currentMenuId = menuState.stack.at(-1);
-  const parentMenuId = menuState.stack.at(-2);
-
-  if (undefined === currentMenuId) {
-    const msg = `cannot close current menu: menu isn't opened`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    playSound.error();
-    return;
-  }
-
+export function closeCurrentMenu() {
+  const currentMenu = getCurrentlyRenderedMenu();
   sendNuiMessage({ id: NUI_MSG_IDS.MENU.CLEAR });
   menuState.stack.pop();
-  playSound.back();
-  logger.debug(`closed menu "${currentMenuId}"`);
+  logger.debug(`closed menu "${currentMenu.id}"`);
+
+  const parentMenuId = menuState.stack.at(-1);
 
   if (undefined !== parentMenuId) {
-    openMenu(parentMenuId, { withSound: false });
+    openMenu(parentMenuId);
   } else {
     menuState.mainMenuLastClosedAt = GetGameTimer();
-    menuInputService.enableMenuInputsNotBlockedWhileMenuIsClosed();
-    menuInputService.disableMenuInputsBlockedWhileMenuIsClosed();
+    toggleMenuInputBindings();
   }
 }
 
-function closeAllMenus() {
+export function closeAllMenus() {
   sendNuiMessage({ id: NUI_MSG_IDS.MENU.CLEAR });
   menuState.stack = [];
   menuState.mainMenuLastClosedAt = GetGameTimer();
-  menuInputService.enableMenuInputsNotBlockedWhileMenuIsClosed();
-  menuInputService.disableMenuInputsBlockedWhileMenuIsClosed();
-  playSound.back();
-  logger.debug(`closed all currently opened menus`);
+  toggleMenuInputBindings();
+  logger.debug(`Closed all currently opened menus (including currently rendered menu)`);
 }
 
-function navigateToNextItem() {
-  const menu = menuState.getRenderedMenu();
-
-  if (undefined === menu) {
-    const msg = `cannot navigate to next menu item: no menu is currently opened`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    return;
-  }
-
-  menu.navigateToNextItem();
+export function navigateToNextItem() {
+  getCurrentlyRenderedMenu().navigateToNextItem();
   refreshMenu();
-
-  playSound.navigate();
-  logger.debug(`navigated to next item in current menu`);
+  logger.debug(`Navigated to next item in currently rendered menu`);
 }
 
-function navigateToPreviousItem() {
-  const menu = menuState.getRenderedMenu();
-
-  if (undefined === menu) {
-    const msg = `cannot navigate to previous menu item: no menu is currently opened`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    return;
-  }
-
-  menu.navigateToPreviousItem();
+export function navigateToPreviousItem() {
+  getCurrentlyRenderedMenu().navigateToPreviousItem();
   refreshMenu();
-
-  playSound.navigate();
-  logger.debug(`navigated to previous item in current menu`);
+  logger.debug(`Navigated to previous item in currently rendered menu`);
 }
 
-async function pressFocusedItem() {
-  const menu = menuState.getRenderedMenu();
-
-  if (undefined === menu) {
-    const msg = `cannot press focused menu item: no menu is currently opened`;
-    logger.warn(msg);
-    toast.showWarning(msg);
-    return;
-  }
-
-  try {
-    await menu.pressFocusedItem();
-  } catch (error: any) {
-    const msg = `failed to press focused menu item: ${error.message}`;
-    logger.error(msg);
-    toast.showError(msg);
-    playSound.error();
-  }
+export async function pressCurrentlyFocusedMenuItem() {
+  await getCurrentlyRenderedMenu().pressFocusedItem();
+  logger.debug(`Pressed focused item in currently rendered menu`);
 }
 
-function addItemToMenu(menuId: string, item: ItemConstructorProps, options?: AddItemToMenuProps) {
-  const menu = menuState.getMenu(menuId);
-
-  if (undefined === menu) {
-    logger.warn(`cannot add item "${item.id}" to menu "${menuId}": no such menu found`);
-    return;
-  }
+export function addItemToMenu(menuId: string, item: ItemConstructorProps, options?: AddItemToMenuProps) {
+  const menu = getMenu(menuId);
 
   if (menu.hasItem(item.id)) {
-    logger.warn(`cannot add item "${item.id}" to menu "${menuId}": item of same id already exists`);
-    return;
+    throw new Error(`item "${item.id}" already exists in menu "${menuId}"`);
   }
 
   let indexToInsert = -1;
 
-  // if first is specified: insert item at the very beginning
   if (undefined !== options?.first && options.first) {
     indexToInsert = 0;
   } else if (undefined !== options?.before) {
@@ -242,7 +148,7 @@ function addItemToMenu(menuId: string, item: ItemConstructorProps, options?: Add
   }
 
   const newItem = new Item(item);
-  let insertedIndex = -1;
+  let insertedIndex;
 
   if (-1 === indexToInsert) {
     insertedIndex = menu.items.push(newItem);
@@ -251,100 +157,104 @@ function addItemToMenu(menuId: string, item: ItemConstructorProps, options?: Add
     insertedIndex = indexToInsert;
   }
 
-  logger.debug(
-    `inserted item "${item.id}" at index ${insertedIndex}/${menu.items.length - 1} `
-    + `of menu "${menuId}"`
-  );
+  logger.debug(`Inserted item "${item.id}" at index ${insertedIndex} of menu "${menuId}"`);
 }
 
-function removeItemFromMenu(menuId: string, itemId: string) {
-  const menu = menuState.getMenu(menuId);
-
-  if (undefined === menu) {
-    logger.warn(`cannot remove item "${itemId}" to menu "${menuId}": no such menu found`);
-    return;
-  }
-
+export function removeItemFromMenu(menuId: string, itemId: string) {
+  const menu = getMenu(menuId);
   const index = menu.indexOfItem(itemId);
 
   if (-1 === index) {
-    logger.warn(`cannot remove item "${itemId}" to menu "${menuId}": no such item found in menu`);
-    return;
+    throw noSuchItemInMenuError(menuId, itemId);
   }
 
   menu.items.splice(index, 1);
-  logger.debug(`removed item "${itemId}" from menu "${menuId}"`);
+  logger.debug(`Removed item "${itemId}" from menu "${menuId}"`);
 }
 
-function setItemIcon(menuId: string, itemId: string, icon: ItemIconType) {
-  const menu = menuState.getMenu(menuId);
-
-  if (undefined === menu) {
-    logger.warn(`cannot set icon of item "${itemId}": no such menu "${menuId}" found`);
-    return;
-  }
-
-  const item = menu.getItem(itemId);
-
-  if (undefined === item) {
-    logger.warn(`cannot set icon of item "${itemId}": no such item found in menu "${menuId}"`);
-    return;
-  }
-
-  item.icon = icon;
-  logger.debug(`set icon of item "${itemId}" of menu "${menuId}" to "${icon}"`);
+export function setMenuItemIcon(menuId: string, itemId: string, icon: ItemIconType) {
+  getMenuItem(menuId, itemId).icon = icon;
+  logger.debug(`Set icon of item "${itemId}" of menu "${menuId}" to "${icon}"`);
 }
 
-function setItemDisabled(menuId: string, itemId: string, disabled: boolean) {
-  const menu = menuState.getMenu(menuId);
-
-  if (undefined === menu) {
-    logger.warn(`cannot set disabled of item "${itemId}": no such menu "${menuId}" found`);
-    return;
-  }
-
-  const item = menu.getItem(itemId);
-
-  if (undefined === item) {
-    logger.warn(`cannot set disabled of item "${itemId}": no such item found in menu "${menuId}"`);
-    return;
-  }
-
-  item.disabled = disabled;
-  logger.debug(`set disabled of item "${itemId}" of menu "${menuId}" to ${disabled}`);
+function setMenuItemDisabled(menuId: string, itemId: string, disabled: boolean) {
+  getMenuItem(menuId, itemId).disabled = disabled;
+  logger.debug(`Set item "${itemId}" of menu "${menuId}" to disabled=${disabled}`);
 }
 
-function refreshMenu() {
-  const menu = menuState.getRenderedMenu();
-
-  if (undefined === menu) {
-    logger.warn(`cannot refresh menu: no menu is currently rendered`);
-    return;
-  }
-
+export function refreshMenu() {
   sendNuiMessage({
     id: NUI_MSG_IDS.MENU.RENDER,
-    data: menu.renderProps()
+    data: getCurrentlyRenderedMenu().renderProps()
   });
-  logger.debug(`refreshed currently rendered menu`);
+  logger.debug(`Refreshed currently rendered menu`);
 }
 
-const menuService = {
-  addMenu,
-  setMainMenu,
-  removeMenu,
-  openMainMenu,
-  openMenu,
-  closeCurrentMenu,
-  closeAllMenus,
-  navigateToNextItem,
-  navigateToPreviousItem,
-  pressFocusedItem,
-  addItemToMenu,
-  removeItemFromMenu,
-  setItemIcon,
-  setItemDisabled,
-  refreshMenu,
-};
+export function removeAllItemsFromMenu(menuId: string) {
+  if (isMenuCurrentlyRendered(menuId)) {
+    throw new Error('menu is currently being rendered');
+  }
 
-export default menuService;
+  getMenu(menuId).items = [];
+  logger.debug(`Removed all items from menu "${menuId}"`);
+}
+
+export function getMenu(menuId: string) {
+  const menu = menuState.register.find(menu => menu.id === menuId);
+
+  if (undefined === menu) {
+    throw noSuchMenuError(menuId);
+  }
+
+  return menu;
+}
+
+export function hasMenu(menuId: string) {
+  return menuState.register.find(menu => menu.id === menuId);
+}
+
+export function getMenuItem(menuId: string, itemId: string) {
+  const item = getMenu(menuId).items.find(item => item.id === itemId);
+
+  if (undefined === item) {
+    throw noSuchItemInMenuError(menuId, itemId);
+  }
+
+  return item;
+}
+
+export function isMenuOpen(menuId: string) {
+  return menuState.stack.includes(menuId);
+}
+
+export function isMenuCurrentlyRendered(menuId: string) {
+  return menuId === menuState.stack.at(-1);
+}
+
+export function getCurrentlyRenderedMenu() {
+  const renderedMenuId = menuState.stack.at(-1);
+
+  if (undefined === renderedMenuId) {
+    throw new Error('no menu is currently being rendered');
+  }
+
+  const menu = menuState.register.find(menu => menu.id === renderedMenuId);
+
+  if (undefined === menu) {
+    throw noSuchMenuError(renderedMenuId);
+  }
+
+  return menu;
+}
+
+export function isAnyMenuOpen() {
+  return menuState.stack.length > 0;
+}
+
+function noSuchMenuError(menuId: string) {
+  return new Error(`no such menu found for id "${menuId}"`);
+}
+
+function noSuchItemInMenuError(menuId: string, itemId: string) {
+  return new Error(`no such item found for id "${itemId}" in menu "${menuId}"`);
+}

@@ -1,4 +1,3 @@
-import menuService from "../gui/menu/api/service";
 import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import {SELECTABLE_WEATHER_TYPES} from "./weather-type";
@@ -7,17 +6,18 @@ import playSound from "../sound";
 import logger from "../logging/logger";
 import toast from "../gui/toasts/service";
 import {setPermanentWeatherByWeatherTypeId} from "./service";
+import {addItemToMenu, addMenu, openMenu, refreshMenu, setMenuItemIcon} from "../gui/menu/api/service";
 
 export function initializeWeatherPlayerSettingsMenu() {
-  menuService.addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
+  addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
     id: 'select-weather',
     title: 'Weather',
     description: 'Permanently change the current weather.',
     icon: ItemIconType.SUB_MENU,
-    onPressed: pressSelectWeatherSubMenuItem
+    onPressed: (item: Item) => pressSelectWeatherSubMenuItem(item)
   }, { first: true});
 
-  menuService.addMenu({
+  addMenu({
     id: MENU_IDS.SETTINGS.WEATHER.MAIN,
     title: 'Select Weather',
     items: SELECTABLE_WEATHER_TYPES.map(weatherType => {
@@ -32,8 +32,16 @@ export function initializeWeatherPlayerSettingsMenu() {
   });
 }
 
-function pressSelectWeatherSubMenuItem() {
-  menuService.openMenu(MENU_IDS.SETTINGS.WEATHER.MAIN);
+function pressSelectWeatherSubMenuItem(item: Item) {
+  const subMenuId = MENU_IDS.SETTINGS.WEATHER.MAIN;
+  try {
+    openMenu(subMenuId);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}"): ${error.message}`);
+    toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
+    playSound.error();
+  }
 }
 
 async function pressSetWeatherItem(item: Item) {
@@ -44,17 +52,17 @@ async function pressSetWeatherItem(item: Item) {
     await setPermanentWeatherByWeatherTypeId(weatherTypeId);
     toast.showInfo(`Changed weather to "${weatherName}"`);
     updateWeatherSelectionMenuItemIcons(weatherTypeId);
-    menuService.refreshMenu();
+    refreshMenu();
     playSound.select();
   } catch (error: any) {
-    logger.warn(`cannot set weather to "${weatherName}": ${error.message}`);
-    toast.showError(`Cannot set weather: ${error.message}`);
+    logger.warn(`Failed to set weather to "${weatherName}" (id="${weatherTypeId}"): ${error.message}`);
+    toast.showError(`Failed to set weather to "${weatherName}" (see logs for details)`);
   }
 }
 
 export function updateWeatherSelectionMenuItemIcons(selectedWeatherTypeId: string) {
   SELECTABLE_WEATHER_TYPES.forEach(weatherType => {
     const icon = selectedWeatherTypeId === weatherType.id ? ItemIconType.SELECTED : ItemIconType.NONE;
-    menuService.setItemIcon(MENU_IDS.SETTINGS.WEATHER.MAIN, weatherType.id, icon);
+    setMenuItemIcon(MENU_IDS.SETTINGS.WEATHER.MAIN, weatherType.id, icon);
   });
 }

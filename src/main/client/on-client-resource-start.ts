@@ -1,5 +1,4 @@
-import menuInputService from "./gui/menu/input";
-import {controlActionService} from "./input/control-action";
+import {startBlockingDisabledControlActions} from "./input/control-action";
 import inputBindingListener from "./input/binding/listener";
 import logger from "./logging/logger";
 import startUpdatingBreadcrumps from "./gui/breadcrumps/service";
@@ -10,9 +9,10 @@ import wantedLevelService from "./wanted-level/menu";
 import callbackService from "./callback/outbound";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 import startTrackingPlayerSpeed from "./player/speed";
-import hudService from "./gui/hud/service";
 import {initializeMainMenu} from "./gui/menu/main-menu";
 import {fetchAndApplyPlayerSettings} from "./player/settings/service";
+import {initializeMenuInputBindings} from "./gui/menu/api/input";
+import {startUpdatingHud} from "./gui/hud/service";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -28,16 +28,18 @@ async function handleOnClientResourceStart() {
   registerMessageFromServerEventListener();
 
   // inputs
-  menuInputService.setUp();
-  controlActionService.startBlockingDisabledControlActions();
+  startBlockingDisabledControlActions();
   inputBindingListener.start();
 
-  // do other stuff
+  // set up menu
   await initializeMainMenu();
+  initializeMenuInputBindings();
+
+  // do other stuff
   await fetchAndApplyPlayerSettings();
   startReceivingPingUpdates();
   startUpdatingBreadcrumps();
-  hudService.startUpdatingGui();
+  startUpdatingHud();
   startTrackingPlayerSpeed();
   startTrackingPlayerCoordinates();
   startHidingUnwantedNativeGuiHudElements();

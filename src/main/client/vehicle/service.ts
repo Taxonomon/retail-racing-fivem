@@ -354,7 +354,7 @@ export function cleanVehicleByRef(vehicleRef: number) {
   WashDecalsFromVehicle(vehicleRef, 1);
 }
 
-export function applyInitialVehiclePlayerSettings() {
+export function applyVehiclePlayerSettings() {
   // keep vehicle clean
   const keepCurrentVehicleCleanSetting = getBooleanPlayerSetting(
     PLAYER_SETTING_NAMES.VEHICLE.KEEP_CURRENT_VEHICLE_CLEAN,

@@ -1,9 +1,12 @@
 import CALLBACK_NAMES from "../../common/callback/callback-names";
-import menuService from "../gui/menu/api/service";
 import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
 import callbackService from "../callback/outbound";
+import {addItemToMenu, addMenu, openMenu} from "../gui/menu/api/service";
+import Item from "../gui/menu/api/item";
+import playSound from "../sound";
+import toast from "../gui/toasts/service";
 
 export async function initializeModerationMenu() {
   const accessResult = await callbackService.triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.MODERATION);
@@ -12,30 +15,39 @@ export async function initializeModerationMenu() {
     logger.warn(`error whilst checking access to moderation menu: ${accessResult.error}`);
     return;
   } else if (!accessResult.data) {
-    logger.debug(`client is not permitted access to moderation menu`);
     return;
   }
 
+  logger.debug(`Client is permitted access to moderation menu`);
+
   // if permitted: insert moderation item in front of about item
-  menuService.addItemToMenu(
+  addItemToMenu(
     MENU_IDS.MAIN,
     {
       id: 'moderation',
       title: 'Moderation',
       description: 'Contains various tools for server moderators.',
-      onPressed: pressModerationItem,
+      onPressed: (item: Item) => pressModerationSubMenuItem(item),
       icon: ItemIconType.SUB_MENU
     },
     { first: true }
   );
 
-  menuService.addMenu({
+  addMenu({
     id: MENU_IDS.MODERATION.MAIN,
     title: 'Moderation',
     items: []
   });
 }
 
-function pressModerationItem() {
-  menuService.openMenu(MENU_IDS.MODERATION.MAIN);
+function pressModerationSubMenuItem(item: Item) {
+  const subMenuId = MENU_IDS.MODERATION.MAIN;
+  try {
+    openMenu(subMenuId);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}"): ${error.message}`);
+    toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
+    playSound.error();
+  }
 }

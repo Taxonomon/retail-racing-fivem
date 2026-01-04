@@ -1,4 +1,5 @@
 import inputState from "./state";
+import logger from "../logging/logger";
 
 /**
  * Control actions represent bindings for pre-defined inputs by GTA. Unlike raw inputs, these are bound to inputs
@@ -85,27 +86,20 @@ export const CONTROL_ACTIONS = {
   } satisfies ControlAction,
 };
 
-function disableControlActions(...controlActions: ControlAction[]) {
-  controlActions.forEach(ca => inputState.disabledControlActions.add(ca));
-}
-
-function enableControlActions(...controlActions: ControlAction[]) {
+export function setControlActionsEnabled(enabled: boolean, ...controlActions: ControlAction[]) {
   controlActions.forEach(controlAction => {
-    inputState.disabledControlActions.delete(controlAction);
-    EnableControlAction(controlAction.type, controlAction.index, true);
+    if (enabled) {
+      EnableControlAction(controlAction.type, controlAction.index, true);
+    } else {
+      DisableControlAction(controlAction.type, controlAction.index, true)
+    }
   });
 }
 
-function startBlockingDisabledControlActions() {
+export function startBlockingDisabledControlActions() {
   inputState.blockDisabledControlActions.start(() =>
     inputState.disabledControlActions.forEach((controlAction) =>
       DisableControlAction(controlAction.type, controlAction.index, true)
     )
   );
-}
-
-export const controlActionService = {
-  disableControlActions,
-  enableControlActions,
-  startBlockingDisabledControlActions,
 }
