@@ -11,7 +11,7 @@ import logger from "../../../logging/logger";
 import playSound from "../../../sound";
 import toast from "../../toasts/service";
 
-const ENABLE_CINEMATIC_CAM_AFTER_MENU_CLOSED_FOR_MS = 250;
+const ENABLE_CINEMATIC_CAM_AFTER_MENU_CLOSED_FOR_MS = 500;
 
 export const OPEN_MAIN_MENU: InputBinding = new ControlActionInputBinding({
   name: 'MENU_OPEN_MAIN_MENU',
@@ -87,20 +87,16 @@ export function initializeMenuInputBindings() {
   inputState.bindings.push(...MENU_INPUT_BINDINGS.ALL);
 
   menuState.blockImpedingControlActions.start(() => {
-    const timeSinceMainMenuLastClosed = GetGameTimer() - menuState.mainMenuLastClosedAt;
-
-    // control actions need to be disabled every frame
+    // control actions need to be toggled every frame
     MENU_IMPEDING_CONTROL_ACTIONS.forEach(controlAction => {
       if (CONTROL_ACTIONS.INPUT_VEH_CIN_CAM.index === controlAction.index) {
         // cinematic vehicle cam can be disabled whenever, but should only be re-enabled again after a certain
         // amount of time has passed since the menu was completely closed. else the client activates the cinematic
         // cam the moment they close the menu because both underlying control actions are bound to the same button
         // on gamepad, and because that button activates on insta-hold as well as press.
-        if (isAnyMenuOpen()) {
-          setControlActionsEnabled(false, controlAction);
-        } else if (timeSinceMainMenuLastClosed >= ENABLE_CINEMATIC_CAM_AFTER_MENU_CLOSED_FOR_MS) {
-          setControlActionsEnabled(true, controlAction);
-        }
+        const disabled = isAnyMenuOpen()
+          || (GetGameTimer() - menuState.mainMenuLastClosedAt) < ENABLE_CINEMATIC_CAM_AFTER_MENU_CLOSED_FOR_MS;
+        setControlActionsEnabled(!disabled, controlAction);
       } else {
         // for all other control actions: disable while menu is opened
         setControlActionsEnabled(!isAnyMenuOpen(), controlAction);

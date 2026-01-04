@@ -104,5 +104,3 @@ export abstract class InputBinding {
 
   abstract isInputReleased(): boolean;
 }
-
-
