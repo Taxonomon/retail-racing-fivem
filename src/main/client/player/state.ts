@@ -9,6 +9,8 @@ class PlayerState {
   coords?: Vector3;
   speed?: UnitValue;
   pingMs?: number;
+  saveSettings: Tick = new Tick('submit player settings', logger);
+  lastSavedSettings: Map<string, any> = new Map();
   settings: Map<string, any> = new Map();
 }
 

@@ -10,7 +10,7 @@ import callbackService from "./callback/outbound";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 import startTrackingPlayerSpeed from "./player/speed";
 import {initializeMainMenu} from "./gui/menu/main-menu";
-import {fetchAndApplyPlayerSettings} from "./player/settings/service";
+import {fetchAndApplyPlayerSettings, startSavingPlayerSettingsPeriodically} from "./player/settings/service";
 import {initializeMenuInputBindings} from "./gui/menu/api/input";
 import {startUpdatingHud} from "./gui/hud/service";
 
@@ -35,8 +35,11 @@ async function handleOnClientResourceStart() {
   await initializeMainMenu();
   initializeMenuInputBindings();
 
-  // do other stuff
+  // player settings
   await fetchAndApplyPlayerSettings();
+  await startSavingPlayerSettingsPeriodically();
+
+  // do other stuff
   startReceivingPingUpdates();
   startUpdatingBreadcrumps();
   startUpdatingHud();

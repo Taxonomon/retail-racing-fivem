@@ -9,6 +9,7 @@ import {applyWeatherPlayerSettings} from "../../weather/service";
 import {applyVehiclePlayerSettings} from "../../vehicle/service";
 
 const ARRAY_SETTING_DELIMITER = ',';
+const SAVE_PLAYER_SETTINGS_INTERVAL_MS = 3000;
 
 export async function fetchAndApplyPlayerSettings() {
   await fetchFromServer();
@@ -63,9 +64,27 @@ export function getBooleanPlayerSetting(key: string, fallback: boolean): boolean
   return undefined !== value ? value as boolean : fallback;
 }
 
+export async function startSavingPlayerSettingsPeriodically() {
+  playerState.saveSettings.start(async () => {
+    const currentSettingsString = JSON.stringify(Object.fromEntries(playerState.settings));
+    const lastSubmittedSettingsString = JSON.stringify(Object.fromEntries(playerState.lastSavedSettings));
+
+    if (currentSettingsString !== lastSubmittedSettingsString) {
+      try {
+        logger.debug(`Detected changes in player settings; will try to save settings now`);
+        await savePlayerSettings();
+        playerState.lastSavedSettings = playerState.settings;
+        logger.debug(`Saved player settings`);
+      } catch (error: any) {
+        logger.error(`Failed to save player settings: ${error.message}`);
+      }
+    }
+  }, SAVE_PLAYER_SETTINGS_INTERVAL_MS);
+}
+
 export async function savePlayerSettings() {
   const rawSettings = Object.fromEntries(playerState.settings);
-  logger.debug(`will save player settings: ${JSON.stringify(rawSettings)}`);
+  logger.debug(`Will save the following raw player settings: ${JSON.stringify(rawSettings)}`);
 
   const result = await callbackService.triggerServerCallback(
     CALLBACK_NAMES.PLAYER.SETTINGS.SAVE,
@@ -75,6 +94,4 @@ export async function savePlayerSettings() {
   if (result.error) {
     throw new Error(result.error);
   }
-
-  logger.info(`saved player settings on server`);
 }

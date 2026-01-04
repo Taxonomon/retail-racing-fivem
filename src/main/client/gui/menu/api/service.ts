@@ -177,7 +177,7 @@ export function setMenuItemIcon(menuId: string, itemId: string, icon: ItemIconTy
   logger.debug(`Set icon of item "${itemId}" of menu "${menuId}" to "${icon}"`);
 }
 
-function setMenuItemDisabled(menuId: string, itemId: string, disabled: boolean) {
+export function setMenuItemDisabled(menuId: string, itemId: string, disabled: boolean) {
   getMenuItem(menuId, itemId).disabled = disabled;
   logger.debug(`Set item "${itemId}" of menu "${menuId}" to disabled=${disabled}`);
 }

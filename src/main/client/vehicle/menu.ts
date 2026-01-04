@@ -17,7 +17,14 @@ import {FRONT_DRIVER} from "../../common/rockstar-constants/vehicle/seats";
 import vehicleState from "./state";
 import {getStringArrayPlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
-import {addItemToMenu, addMenu, openMenu, refreshMenu, setMenuItemIcon} from "../gui/menu/api/service";
+import {
+  addItemToMenu,
+  addMenu,
+  openMenu,
+  refreshMenu, removeAllItemsFromMenu,
+  setMenuItemDisabled,
+  setMenuItemIcon
+} from "../gui/menu/api/service";
 
 const VEHICLE_MENU_ITEM_IDS = {
   MAIN: {
@@ -146,6 +153,12 @@ async function initializeVehicleSpawnMenu() {
       }))
     });
 
+    addMenu({
+      id: MENU_IDS.VEHICLE.SPAWN.RECENTLY_SPAWNED,
+      title: 'Recently spawned',
+      items: []
+    });
+
     const groupedByBeginningLetter = SpawnableVehicle.groupByBeginningLetter(sortedByLabel);
 
     addMenu({
@@ -155,7 +168,7 @@ async function initializeVehicleSpawnMenu() {
     });
 
     groupedByBeginningLetter.forEach((vehicles, beginningLetter) => {
-      const letterMenuId = MENU_IDS.VEHICLE.SPAWN.BY_BEGINNING_LETTER + beginningLetter.trim().toLowerCase();
+      const letterMenuId = MENU_IDS.VEHICLE.SPAWN.BY_BEGINNING_LETTER + '-' + beginningLetter.trim().toLowerCase();
 
       addItemToMenu(MENU_IDS.VEHICLE.SPAWN.BY_BEGINNING_LETTER, {
         id: beginningLetter.trim().toLowerCase(),
@@ -187,7 +200,7 @@ async function initializeVehicleSpawnMenu() {
     });
 
     groupedByBrand.forEach((vehicles, brand) => {
-      const brandMenuId = MENU_IDS.VEHICLE.SPAWN.BY_BRAND + brand.trim().toLowerCase();
+      const brandMenuId = MENU_IDS.VEHICLE.SPAWN.BY_BRAND + '-' + brand.trim().toLowerCase();
 
       addItemToMenu(MENU_IDS.VEHICLE.SPAWN.BY_BRAND, {
         id: brand.trim().toLowerCase(),
@@ -219,7 +232,7 @@ async function initializeVehicleSpawnMenu() {
     });
 
     groupedByClass.forEach((vehicles, clazz) => {
-      const classMenuId = MENU_IDS.VEHICLE.SPAWN.BY_CLASS + clazz.trim().toLowerCase();
+      const classMenuId = MENU_IDS.VEHICLE.SPAWN.BY_CLASS + '-' + clazz.trim().toLowerCase();
 
       addItemToMenu(MENU_IDS.VEHICLE.SPAWN.BY_CLASS, {
         id: clazz.trim().toLowerCase(),
@@ -261,8 +274,26 @@ export function initializeVehiclePlayerSettingsMenu() {
 export function updateRecentlySpawnedVehiclesMenu() {
   const modelIds = getStringArrayPlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED, []);
 
-  if (0 === modelIds.length) {
+  try {
+    removeAllItemsFromMenu(MENU_IDS.VEHICLE.SPAWN.RECENTLY_SPAWNED);
 
+    setMenuItemDisabled(
+      MENU_IDS.VEHICLE.SPAWN.MAIN,
+      VEHICLE_MENU_ITEM_IDS.SPAWN.RECENTLY_SPAWNED,
+      0 === modelIds.length
+    );
+
+    modelIds.map(modelId => SpawnableVehicle.fromModelId(modelId)).forEach(vehicle => {
+      addItemToMenu(MENU_IDS.VEHICLE.SPAWN.RECENTLY_SPAWNED, {
+        id: vehicle.model,
+        title: vehicle.label,
+        description: `${vehicle.brand} ${vehicle.label} (${vehicle.model})`,
+        icon: ItemIconType.NONE,
+        onPressed: async () => await pressSpawnRecentlySpawnedVehicleItem(vehicle)
+      })
+    });
+  } catch (error: any) {
+    logger.error(`Failed to update recently spawned vehicles menu: ${error.message}`);
   }
 }
 
@@ -356,4 +387,24 @@ export function updateKeepVehicleCleanItemIcon(toggled: boolean) {
     VEHICLE_MENU_ITEM_IDS.SETTINGS.KEEP_VEHICLE_CLEAN,
     toggled ? ItemIconType.TOGGLE_ON : ItemIconType.TOGGLE_OFF
   );
+}
+
+async function pressSpawnRecentlySpawnedVehicleItem(vehicle: SpawnableVehicle) {
+  playSound.select(); // to show that process was started
+
+  try {
+    await spawnVehicleByModelId(vehicle.model, {
+      engineTurnedOnInstantly: true,
+      placeClientInSeat: FRONT_DRIVER,
+      preserveSpeed: true
+    });
+    toast.showInfo(`Spawned "${vehicle.label}"`);
+    updateRecentlySpawnedVehiclesMenu();
+    refreshMenu();
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to spawn vehicle "${vehicle.model}": ${error.message}`);
+    toast.showError(`Failed to spawn vehicle "${vehicle.model}" (see logs for details)`);
+    playSound.error();
+  }
 }
