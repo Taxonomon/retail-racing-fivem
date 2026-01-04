@@ -1,6 +1,5 @@
-import databaseState from "../database/state";
-import {Generated, Insertable, Selectable, Updateable} from "kysely";
-import {ColumnType} from "kysely/dist/esm";
+import databaseState from "../../database/state";
+import {ColumnType, Generated, Insertable, Selectable, Updateable} from "kysely";
 
 export interface RockstarJobsTable {
   id: Generated<number>;

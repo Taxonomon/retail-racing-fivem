@@ -5,7 +5,7 @@ import {PrincipalsTable} from "../authorization/principal/schema";
 import {PrincipalPermissionsTable} from "../authorization/principal-permission/schema";
 import {PlayerPrincipalsTable} from "../authorization/player-principal/schema";
 import {PlayerSettingsTable} from "../player/settings/schema";
-import {RockstarJobsTable} from "../rockstar-job/database";
+import {RockstarJobsTable} from "../rockstar/job/database";
 
 export interface DatabaseSchema {
   players: PlayersTable;

@@ -53,5 +53,4 @@ Race components:
 - reject invalid/too short/long nicknames on player connect
 - put confirmation button abt player nickname on connection deferral (justl like 8g)
 - weather still isn't getting set properly when applying player settings on join
-- rewrite rockstar job importer
 - start refactoring server to adhere to exported functions

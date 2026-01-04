@@ -3,7 +3,6 @@ import databaseHealth from "./database/health";
 import logger from "./logging/logger";
 import registerAuthorizationCallbacks from "./authorization/callback";
 import startUpdatingPlayerPings from "./player/ping";
-import registerTrackImportCommand from "./track/service";
 import registerOnPlayerJoinListener from "./player/connection/join";
 import registerOnPlayerConnectingListener from "./player/connection/connect";
 import registerOnPlayerDroppedListener from "./player/connection/drop";
@@ -11,6 +10,7 @@ import registerPlayerSettingsCallbacks from "./player/settings/callback";
 import kickPlayerService from "./player/kick";
 import callbackService from "./callback/inbound";
 import blockedVehicleService from "./vehicle/blocked/service";
+import {registerImportJobCommand} from "./rockstar/job/import/service";
 
 export default function registerOnResourceStartListener() {
   on('onServerResourceStart', async (resource: string) => {
@@ -41,7 +41,7 @@ async function handleResourceStart() {
   blockedVehicleService.registerCallbacks();
 
   // register commands
-  registerTrackImportCommand();
+  registerImportJobCommand();
 
   // do other stuff
   startUpdatingPlayerPings();
