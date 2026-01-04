@@ -36,21 +36,45 @@ Race components:
 
 ## TODOs:
 
+### Foundation for hot lap mode
+
+- package `client/game-mode/hot-lap`
+  - 'Hot Lap' menu, which contains nothing more than all available tracks to hot lap
+  - on client resource start: fetch all available tracks from server via callback, and construct the menu
+  - when player selects a track from the hot lap menu:
+    - switch the player's server-side state to 'Hot Lap'
+    - add hot lap options to menu
+      - reset
+      - respawn
+      - choose reset cp
+      - weather
+      - time (hour, fixed time)
+      - traffic
+      - indestructible car
+
+### Lower Prio
+
 - vehicle menu
   - spawn
-    - give the player an option to not delete old vehicle when spawning a new one (so that someone can align multiple cars next to each other for screenshots etc.)
-    - keep track of all spawned vehicles and wipe them under the following conditions:
-      - client has disconnected
-      - client has changed game mode
-      - client has triggered the respective menu item to delete all their vehicles
-- y-menu/overview menu with players and their pings (using `INPUT_HUD_SPECIAL`)
-- hot lap mode
-  - load track
-  - client chooses car whenever, on change: reset hot lap
-  - during hot lap: let client pick a checkpoint to tp to (resets hot lap)
-  - respawn at cp, reset hot lap (resets hot lap)
-  - change time/weather/traffic (resets hot lap)
-- reject invalid/too short/long nicknames on player connect
-- put confirmation button abt player nickname on connection deferral (justl like 8g)
-- weather still isn't getting set properly when applying player settings on join
-- start refactoring server to adhere to exported functions
+    - option to keep old vehicle when spawning a new one
+    - option to wipe all spawned vehicles (requires client to keep track of them)
+      - wipe them anyway if client:
+        - disconnects
+        - changes game mode (free mode to hot lap/race)
+        - triggers the menu item to explicitly wipe them
+- y-menu/overview of players
+  - access via control action `INPUT_HUD_SPECIAL`
+  - properties:
+    - nickname
+    - ping
+    - game mode (race, hot lap, free mode)
+    - car
+    - track
+
+### Bugs
+
+- weather still isn't getting applied properly when applying player settings on join
+
+### Chores
+
+- refactor server to adhere more to exported functions (where possible)
