@@ -39,6 +39,8 @@ Race components:
 - re-order menu
   - move weather, traffic, time stuff into main menu
   - move 'keep vehicle clean' into vehicle menu
+- settings menu
+  - 'reload available tracks' item: reloads available rockstar jobs
 
 ### Foundation for hot lap mode
 
