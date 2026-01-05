@@ -37,6 +37,9 @@ const MENU_IDS = {
   },
   ADMINISTRATION: {
     MAIN: 'administration'
+  },
+  HOT_LAP: {
+    MAIN: 'hot-lap'
   }
 };
 
