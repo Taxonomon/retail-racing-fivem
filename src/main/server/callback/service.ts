@@ -4,7 +4,7 @@ import logger from "../logging/logger";
 import {CallbackResult} from "../../common/callback/result";
 import playerUtils from "../player/utils";
 
-function registerClientCallbackRequestListener() {
+export function registerClientCallbackRequestListener() {
   onNet(
     EVENT_NAMES.CALLBACK.CLIENT.REQUEST,
     async (requestId: string, identifier: string, data?: any) => {
@@ -71,7 +71,7 @@ function respondToClient(
   emitNet(EVENT_NAMES.CALLBACK.SERVER.RESPONSE, playerId, requestId, identifier, result);
 }
 
-export function register(identifier: string, handler: Function) {
+export function registerServerCallback(identifier: string, handler: Function) {
   if (callbackState.callbackRegister.has(identifier)) {
     logger.error(`Cannot register server callback "${identifier}": callback already registered`);
   } else {
@@ -80,7 +80,7 @@ export function register(identifier: string, handler: Function) {
   }
 }
 
-export function remove(identifier: string) {
+export function removeServerCallback(identifier: string) {
   const removed = callbackState.callbackRegister.delete(identifier);
   if (removed) {
     logger.debug(`Removed server callback "${identifier}"`);
@@ -88,11 +88,3 @@ export function remove(identifier: string) {
     logger.debug(`Did not remove server callback "${identifier}": no such callback registered`);
   }
 }
-
-const callbackService = {
-  register,
-  remove,
-  registerClientCallbackRequestListener
-};
-
-export default callbackService;

@@ -6,7 +6,7 @@ import registerOnPlayerConnectingListener from "./player/connection/connect";
 import registerOnPlayerDroppedListener from "./player/connection/drop";
 import registerPlayerSettingsCallbacks from "./player/settings/callback";
 import kickPlayerService from "./player/kick";
-import callbackService from "./callback/inbound";
+import {registerClientCallbackRequestListener} from "./callback/service";
 import blockedVehicleService from "./vehicle/blocked/service";
 import {registerImportJobCommand} from "./rockstar/job/import/service";
 import {configureDatabaseConnection, startMonitoringDatabaseConnectionHealth} from "./database/service";
@@ -31,8 +31,8 @@ async function handleResourceStart() {
   registerOnPlayerConnectingListener();
   registerOnPlayerJoinListener();
   registerOnPlayerDroppedListener();
+  registerClientCallbackRequestListener();
   kickPlayerService.registerPlayerSelfKickListener();
-  callbackService.registerClientCallbackRequestListener();
 
   // register server callbacks
   registerAuthorizationCallbacks();

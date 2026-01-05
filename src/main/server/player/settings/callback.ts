@@ -1,15 +1,22 @@
-import callbackService from "../../callback/inbound";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import playerState from "../state";
 import playerSettingsRepo from "./repo";
 import playerUtils from "../utils";
 import logger from "../../logging/logger";
+import {registerServerCallback} from "../../callback/service";
 
 const SAVE_PLAYER_SETTINGS_TIMEOUT_MS = 1000;
 
 export default function registerPlayerSettingsCallbacks() {
-  callbackService.register(CALLBACK_NAMES.PLAYER.SETTINGS.FETCH, fetchPlayerSettings);
-  callbackService.register(CALLBACK_NAMES.PLAYER.SETTINGS.SAVE, savePlayerSettings);
+  registerServerCallback(
+    CALLBACK_NAMES.PLAYER.SETTINGS.FETCH,
+    fetchPlayerSettings
+  );
+
+  registerServerCallback(
+    CALLBACK_NAMES.PLAYER.SETTINGS.SAVE,
+    savePlayerSettings
+  );
 }
 
 async function fetchPlayerSettings(netId: number) {

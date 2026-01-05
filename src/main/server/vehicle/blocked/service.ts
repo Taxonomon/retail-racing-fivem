@@ -1,13 +1,13 @@
-import callbackService from "../../callback/inbound";
+import {registerServerCallback} from "../../callback/service";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import BLOCKED_MODEL_IDS from "./blocked-model-ids";
 
 function registerCallbacks() {
-  callbackService.register(
+  registerServerCallback(
     CALLBACK_NAMES.VEHICLE.SPAWN.IS_BLOCKED_MODEL_ID,
     isBlockedModelId
   );
-  callbackService.register(
+  registerServerCallback(
     CALLBACK_NAMES.VEHICLE.SPAWN.FILTER_BLOCKED_MODEL_IDS,
     filterBlockedModelIds
   );
