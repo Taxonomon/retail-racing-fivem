@@ -54,3 +54,7 @@ function setHotLapMenu() {}
 function setRaceMenu() {
   removeMenu(MENU_IDS.HOT_LAP.MAIN);
 }
+
+export function refreshHotLapMenuTracks() {
+
+}

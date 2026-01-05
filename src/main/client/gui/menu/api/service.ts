@@ -63,7 +63,9 @@ export function openMainMenu() {
 export function openMenu(menuId: string) {
   const menu = getMenu(menuId);
 
-  if (menu.hidden) {
+  if (menu.disabled) {
+    throw new Error(`menu "${menuId}" is disabled`);
+  } else if (menu.hidden) {
     throw new Error(`menu "${menuId}" is hidden`);
   } else if (!menu.hasItems()) {
     throw new Error(`menu "${menuId}" has no items`);
@@ -256,6 +258,10 @@ export function isAnyMenuOpen() {
 export function setMenuHidden(menuId: string, hidden: boolean) {
   getMenu(menuId).hidden = hidden;
   logger.debug(`Set menu "${menuId}" to hidden=${hidden}`);
+}
+
+export function setMenuDisabled(menuId: string, disabled: boolean) {
+  getMenu(menuId).disabled = disabled;
 }
 
 function noSuchMenuError(menuId: string) {

@@ -5,4 +5,5 @@ export type AvailableJob = {
   data: string;
   hash: string;
   categories: string[];
+  enabled: boolean;
 };

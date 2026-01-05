@@ -3,7 +3,7 @@ import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
 import callbackService from "../callback/outbound";
-import {addItemToMenu, addMenu, openMenu} from "../gui/menu/api/service";
+import {addItemToMenu, addMenu, hasMenu, openMenu} from "../gui/menu/api/service";
 import playSound from "../sound";
 import toast from "../gui/toasts/service";
 import Item from "../gui/menu/api/item";
@@ -48,5 +48,11 @@ function pressAdministrationSubMenuItem(item: Item) {
     logger.error(`Failed to open menu "${item.title}" (id="${subMenuId}"): ${error.message}`);
     toast.showError(`Failed to open menu "${item.title}" (see logs for details)`);
     playSound.error();
+  }
+}
+
+export function refreshAdministrationMenuTracks() {
+  if (!hasMenu(MENU_IDS.ADMINISTRATION.MAIN)) {
+    return;
   }
 }

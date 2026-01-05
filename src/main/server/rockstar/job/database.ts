@@ -21,7 +21,9 @@ export type RockstarJob = Selectable<RockstarJobsTable>;
 export type NewRockstarJob = Insertable<RockstarJobsTable>;
 export type RockstarJobUpdate = Updateable<RockstarJobsTable>;
 
-export async function insertRockstarJob(rockstarJob: NewRockstarJob): Promise<RockstarJob> {
+export async function insertRockstarJob(
+  rockstarJob: NewRockstarJob
+): Promise<RockstarJob> {
   const result: RockstarJob | undefined = await databaseState.db
     .withSchema('txn')
     .insertInto('rockstar_jobs')
@@ -36,7 +38,17 @@ export async function insertRockstarJob(rockstarJob: NewRockstarJob): Promise<Ro
   return result;
 }
 
-export async function findRockstarJobByJobId(jobId: string): Promise<RockstarJob | undefined> {
+export async function findAllRockstarJobs() {
+  return databaseState.db
+    .withSchema('txn')
+    .selectFrom('rockstar_jobs')
+    .selectAll()
+    .execute();
+}
+
+export async function findRockstarJobByJobId(
+  jobId: string
+): Promise<RockstarJob | undefined> {
   return databaseState.db
     .withSchema('txn')
     .selectFrom('rockstar_jobs')
@@ -45,11 +57,24 @@ export async function findRockstarJobByJobId(jobId: string): Promise<RockstarJob
     .executeTakeFirst();
 }
 
-export async function findRockstarJobByHashMd5(hashMd5: string): Promise<RockstarJob | undefined> {
+export async function findRockstarJobByHashMd5(
+  hashMd5: string
+): Promise<RockstarJob | undefined> {
   return databaseState.db
     .withSchema('txn')
     .selectFrom('rockstar_jobs')
     .selectAll()
     .where('hash_md5', '=', hashMd5)
     .executeTakeFirst();
+}
+
+export async function findRockstarJobsByEnabled(
+  enabled: boolean
+): Promise<RockstarJob[]> {
+  return databaseState.db
+    .withSchema('txn')
+    .selectFrom('rockstar_jobs')
+    .selectAll()
+    .where('enabled', '=', enabled)
+    .execute();
 }

@@ -13,6 +13,7 @@ import {initializeMainMenu} from "./gui/menu/main-menu";
 import {fetchAndApplyPlayerSettings, startSavingPlayerSettingsPeriodically} from "./player/settings/service";
 import {initializeMenuInputBindings} from "./gui/menu/api/input";
 import {startUpdatingHud} from "./gui/hud/service";
+import {fetchAllRockstarJobs} from "./rockstar/job/service";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -47,6 +48,7 @@ async function handleOnClientResourceStart() {
   startTrackingPlayerCoordinates();
   startHidingUnwantedNativeGuiHudElements();
   wantedLevelService.disable();
+  await fetchAllRockstarJobs();
 
   // all done
   logger.info(`txn client script started`);
