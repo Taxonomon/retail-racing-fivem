@@ -9,6 +9,8 @@ export default function registerMessageFromServerEventListener() {
 
     logger.logMessage(logLevel, message);
 
+    // TODO provide an option to show a toast message different to the log message
+
     switch (logLevel) {
       case LOG_LEVELS.INFO: {
         toast.showInfo(message);

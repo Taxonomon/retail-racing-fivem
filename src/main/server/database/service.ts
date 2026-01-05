@@ -2,15 +2,16 @@ import databaseState from "./state";
 import logger from "../logging/logger";
 import CONVARS from "../convars";
 import {Pool} from "pg";
-import {PlayersTable} from "../player/schema";
-import {PastNicknamesTable} from "../player/past-nicknames/schema";
-import {PrincipalsTable} from "../authorization/principal/schema";
-import {PermissionsTable} from "../authorization/permission/schema";
-import {PrincipalPermissionsTable} from "../authorization/principal-permission/schema";
-import {PlayerPrincipalsTable} from "../authorization/player-principal/schema";
 import {RockstarJobsTable} from "../rockstar/job/database";
-import {PlayerSettingsTable} from "../player/settings/schema";
 import {Kysely, LogEvent, PostgresDialect, sql} from "kysely";
+import {
+  PermissionsTable,
+  PlayerPrincipalsTable,
+  PrincipalPermissionsTable,
+  PrincipalsTable
+} from "../player/authorization/database";
+import {PastNicknamesTable, PlayersTable} from "../player/database";
+import {PlayerSettingsTable} from "../player/settings/database";
 
 const CONNECTION_HEALTH_CHECK_FALLBACK_INTERVAL_MS = 60000;
 
@@ -86,19 +87,17 @@ async function performDatabaseConnectionHealthCheck() {
       + 'Check if database is online and reachable '
       + `(disconnected since ${databaseState.connectionUnhealthySince.toISOString()})`
     );
-  } else {
-    if (isFirstCheck) {
-      logger.info(
-        'Initial database connection health check succeeded! '
-        + 'Database is online and reachable'
-      );
-    } else if (undefined !== databaseState.connectionUnhealthySince) {
-      logger.info(
-        'Database connection health check succeeded! '
-        + `(previously disconnected since ${databaseState.connectionUnhealthySince?.toISOString()})`
-      );
-      databaseState.connectionUnhealthySince = undefined;
-    }
+  } else if (isFirstCheck) {
+    logger.info(
+      'Initial database connection health check succeeded! '
+      + 'Database is online and reachable'
+    );
+  } else if (undefined !== databaseState.connectionUnhealthySince) {
+    logger.info(
+      'Database connection health check succeeded! '
+      + `(previously disconnected since ${databaseState.connectionUnhealthySince?.toISOString()})`
+    );
+    databaseState.connectionUnhealthySince = undefined;
   }
 }
 

@@ -1,3 +1,6 @@
+import {registerServerCallback} from "../callback/service";
+import CALLBACK_NAMES from "../../common/callback/callback-names";
+
 const BLOCKED_MODEL_IDS: Set<string> = new Set([
   // freight train
   'freightcar2',
@@ -41,4 +44,13 @@ const BLOCKED_MODEL_IDS: Set<string> = new Set([
   'trailersmall2'
 ]);
 
-export default BLOCKED_MODEL_IDS;
+export function registerBlockedVehicleCallbacks() {
+  registerServerCallback(
+    CALLBACK_NAMES.VEHICLE.SPAWN.IS_BLOCKED_MODEL_ID,
+    (netId: number, modelId: string) => BLOCKED_MODEL_IDS.has(modelId)
+  );
+  registerServerCallback(
+    CALLBACK_NAMES.VEHICLE.SPAWN.FILTER_BLOCKED_MODEL_IDS,
+    (netId: number, modelIds: string[]) => modelIds.filter(id => !BLOCKED_MODEL_IDS.has(id))
+  );
+}

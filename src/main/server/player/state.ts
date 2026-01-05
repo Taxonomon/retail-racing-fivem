@@ -1,6 +1,6 @@
 import {Tick} from "../../common/tick";
 import logger from "../logging/logger";
-import {ConnectedPlayer} from "./connection/connected-player";
+import {ConnectedPlayer} from "./connection/service";
 
 class PlayerState {
   connectedPlayers: ConnectedPlayer[] = [];
@@ -9,7 +9,7 @@ class PlayerState {
   playerSettingsLastSavedAt: Date = new Date();
 
   getConnectedPlayer(netId: number): ConnectedPlayer {
-    const result = this.connectedPlayers.find(connectedPlayer => netId === connectedPlayer.netId);
+    const result = this.connectedPlayers.find(player => netId === player.netId);
     if (undefined === result) {
       throw new Error(`no connected player found for net id ${netId}`);
     }

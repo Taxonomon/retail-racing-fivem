@@ -2,14 +2,14 @@ import EVENT_NAMES from "../../common/event-names";
 import callbackState from "./state";
 import logger from "../logging/logger";
 import {CallbackResult} from "../../common/callback/result";
-import playerUtils from "../player/utils";
+import {getPlayerNameFromNetId} from "../player/service";
 
 export function registerClientCallbackRequestListener() {
   onNet(
     EVENT_NAMES.CALLBACK.CLIENT.REQUEST,
     async (requestId: string, identifier: string, data?: any) => {
       const netId = globalThis.source;
-      const playerName = playerUtils.getPlayerNameFromNetId(netId);
+      const playerName = getPlayerNameFromNetId(netId);
       logger.trace(
         `received net event "${EVENT_NAMES.CALLBACK.CLIENT.REQUEST}" `
         + `(triggered by "${playerName}" (net id ${netId}))`

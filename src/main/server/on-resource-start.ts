@@ -1,15 +1,12 @@
 import logger from "./logging/logger";
-import registerAuthorizationCallbacks from "./authorization/callback";
-import startUpdatingPlayerPings from "./player/ping";
-import registerOnPlayerJoinListener from "./player/connection/join";
-import registerOnPlayerConnectingListener from "./player/connection/connect";
-import registerOnPlayerDroppedListener from "./player/connection/drop";
-import registerPlayerSettingsCallbacks from "./player/settings/callback";
-import kickPlayerService from "./player/kick";
 import {registerClientCallbackRequestListener} from "./callback/service";
-import blockedVehicleService from "./vehicle/blocked/service";
 import {registerImportJobCommand} from "./rockstar/job/import/service";
 import {configureDatabaseConnection, startMonitoringDatabaseConnectionHealth} from "./database/service";
+import {registerPlayerSettingsCallbacks} from "./player/settings/service";
+import {kickAllPlayers, registerPlayerConnectionEventListeners} from "./player/connection/service";
+import registerPlayerAuthorizationCallbacks from "./player/authorization/service";
+import {startUpdatingPlayerPings} from "./player/service";
+import {registerBlockedVehicleCallbacks} from "./vehicle/service";
 
 export default function registerOnResourceStartListener() {
   on('onServerResourceStart', async (resource: string) => {
@@ -21,23 +18,20 @@ export default function registerOnResourceStartListener() {
 
 async function handleResourceStart() {
   // prevent illegal states by kicking all players on (re)start
-  kickPlayerService.kickAllPlayers('main server script restarting');
+  kickAllPlayers('Restarted main server script');
 
   // set up db
   configureDatabaseConnection();
   startMonitoringDatabaseConnectionHealth();
 
-  // register server listeners
-  registerOnPlayerConnectingListener();
-  registerOnPlayerJoinListener();
-  registerOnPlayerDroppedListener();
+  // register event listeners
+  registerPlayerConnectionEventListeners();
   registerClientCallbackRequestListener();
-  kickPlayerService.registerPlayerSelfKickListener();
 
-  // register server callbacks
-  registerAuthorizationCallbacks();
+  // register callbacks
+  registerPlayerAuthorizationCallbacks();
   registerPlayerSettingsCallbacks();
-  blockedVehicleService.registerCallbacks();
+  registerBlockedVehicleCallbacks();
 
   // register commands
   registerImportJobCommand();
