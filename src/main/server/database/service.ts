@@ -13,6 +13,7 @@ import {
 import {PastNicknamesTable, PlayersTable} from "../player/database";
 import {PlayerSettingsTable} from "../player/settings/database";
 
+const QUERY_LOG_PARAMS_LENGTH_MAX = 1028;
 const CONNECTION_HEALTH_CHECK_FALLBACK_INTERVAL_MS = 60000;
 
 export interface DatabaseSchema {
@@ -44,20 +45,26 @@ export function configureDatabaseConnection() {
 
 function logDatabaseEvent(event: LogEvent) {
   const sql = event.query.sql;
-  const params = event.query.parameters;
-  const paramsString = typeof params === 'object' ? JSON.stringify(params) : params;
   const executionDurationMs = event.queryDurationMillis;
+  const params = event.query.parameters;
+
+  let fullParamsString = typeof params === 'object' ? JSON.stringify(params) : params;
+  let paramsLogString = fullParamsString;
+
+  if (fullParamsString.length >= QUERY_LOG_PARAMS_LENGTH_MAX) {
+    paramsLogString = `${fullParamsString.substring(0, QUERY_LOG_PARAMS_LENGTH_MAX)}... (truncated)`;
+  }
 
   if ('query' === event.level) {
     logger.trace(
       `Executed database query "${sql}" `
-      + `with params ${paramsString} `
+      + `with params ${paramsLogString} `
       + `in ${executionDurationMs.toFixed(0)} ms`
     );
   } else if ('error' === event.level) {
     logger.error(
       `Failed to execute database query "${sql}" `
-      + `with params ${paramsString}: ${event.error}`
+      + `with params ${paramsLogString}: ${event.error}`
     );
   }
 }

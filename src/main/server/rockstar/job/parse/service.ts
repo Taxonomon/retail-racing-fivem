@@ -9,7 +9,7 @@ export function parseJobName(json: any): string | undefined {
 }
 
 export function parseJobAuthor(json: any): string | undefined {
-  return json?.mission?.gen?.ownerId?.toString();
+  return json?.mission?.gen?.ownerid?.toString();
 }
 
 export function parseJobDescription(json: any): string | undefined {

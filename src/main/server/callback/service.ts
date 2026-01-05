@@ -4,6 +4,8 @@ import logger from "../logging/logger";
 import {CallbackResult} from "../../common/callback/result";
 import {getPlayerNameFromNetId} from "../player/service";
 
+const CALLBACK_RESPONSE_LOG_LENGTH_MAX = 1028;
+
 export function registerClientCallbackRequestListener() {
   onNet(
     EVENT_NAMES.CALLBACK.CLIENT.REQUEST,
@@ -48,10 +50,7 @@ async function handleClientCallbackRequest(
 
   try {
     const result = await callback(playerId, data);
-    logger.trace(
-      `client callback request "${identifier}" (request id ${requestId}): `
-      + `callback result: ${JSON.stringify(result)}`
-    );
+    logCallbackResult(identifier, requestId, JSON.stringify(result));
     respondToClient(playerId, requestId, identifier, { data: result });
   } catch (error: any) {
     logger.error(
@@ -60,6 +59,16 @@ async function handleClientCallbackRequest(
     );
     respondToClient(playerId, requestId, identifier, { error: error.message });
   }
+}
+
+function logCallbackResult(identifier: string, requestId: string, result: string) {
+  const resultLogString = result.length < CALLBACK_RESPONSE_LOG_LENGTH_MAX
+    ? result
+    : `${result.substring(0, CALLBACK_RESPONSE_LOG_LENGTH_MAX)}... (truncated)`;
+  logger.trace(
+    `client callback request "${identifier}" (request id ${requestId}): `
+    + `callback result: ${resultLogString}`
+  );
 }
 
 function respondToClient(

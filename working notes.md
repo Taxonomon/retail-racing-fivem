@@ -39,8 +39,11 @@ Race components:
 - re-order menu
   - move weather, traffic, time stuff into main menu
   - move 'keep vehicle clean' into vehicle menu
-- settings menu
-  - 'reload available tracks' item: reloads available rockstar jobs
+- administration menu
+  - 'reload available tracks' item
+    - reloads available rockstar jobs for all connected clients
+    - needs permission `job:available:refresh`
+- disable falling off bikes/motorcycles
 
 ### Foundation for hot lap mode
 

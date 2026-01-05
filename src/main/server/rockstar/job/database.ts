@@ -12,7 +12,8 @@ export interface RockstarJobsTable {
   enabled: boolean;
   // jsonb in database
   // TODO change type of RockstarJobsTable.data to appropriate jsonb type
-  data: string;
+  original_data: ColumnType<string, string, never>;
+  current_data: string;
   hash_md5: ColumnType<string, string, never>;
 }
 

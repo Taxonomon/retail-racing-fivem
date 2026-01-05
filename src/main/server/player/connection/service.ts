@@ -235,9 +235,8 @@ export function kickAllPlayers(reason: string) {
 }
 
 export function kickPlayerByNetId(netId: string, reason: string) {
+  // fetch name before kick, else name is null
+  const playerName = getPlayerNameFromNetId(Number(netId));
   DropPlayer(netId, reason);
-  logger.info(
-    `Kicked player "${getPlayerNameFromNetId(Number(netId))}" `
-    + `(net id ${netId}): ${reason}`
-  );
+  logger.info(`Kicked player "${playerName}" (net id ${netId}): ${reason}`);
 }

@@ -43,12 +43,15 @@ html, body {
   --font-family-geist: 'Geist', sans-serif;
 
   /* font sizes */
-  --font-size-xs: 1.000vh;
-  --font-size-s: 1.250vh;
-  --font-size-r: 1.500vh;
-  --font-size-l: 2.000vh;
-  --font-size-xl: 2.500vh;
-  --font-size-2xl: 3.000vh;
+  --font-size-1-vh: 1.000vh;
+  --font-size-1c25-vh: 1.250vh;
+  --font-size-1c5-vh: 1.500vh;
+  --font-size-1c75-vh: 1.750vh;
+  --font-size-2-vh: 2.000vh;
+  --font-size-2c5-vh: 2.500vh;
+  --font-size-3-vh: 3.000vh;
+  --font-size-3c5-vh: 3.500vh;
+  --font-size-4-vh: 4.000vh;
 
   /* font weights */
   --font-weight-regular: 400;
@@ -56,10 +59,32 @@ html, body {
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
+  /* drop shadows */
+  --drop-shadow-1-px-vh:
+    0 var(--1-px-vh) black,
+    var(--1-px-vh) 0 black,
+    var(--1-px-vh) var(--1-px-vh) black;
+  --drop-shadow-1c5-px-vh:
+    0 var(--1c5-px-vh) black,
+    var(--1c5-px-vh) 0 black,
+    var(--1c5-px-vh) var(--1c5-px-vh) black;
+  --drop-shadow-2-px-vh:
+    0 var(--2-px-vh) black,
+    var(--2-px-vh) 0 black,
+    var(--2-px-vh) var(--2-px-vh) black;
+  --drop-shadow-3-px-vh:
+    0 var(--3-px-vh) black,
+    var(--3-px-vh) 0 black,
+    var(--3-px-vh) var(--3-px-vh) black;
+  --drop-shadow-4-px-vh:
+    0 var(--4-px-vh) black,
+    var(--4-px-vh) 0 black,
+    var(--4-px-vh) var(--4-px-vh) black;
+
   /* global settings */
   font-family: var(--font-family-geist), sans-serif;
   font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-r);
+  font-size: var(--font-size-1c5-vh);
   line-height: 1.4em;
   color: var(--color-mono-900);
 }
@@ -138,33 +163,34 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: var(--20-px-vh);
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-1c25-vh);
   color: var(--color-mono-900);
+  text-shadow: var(--drop-shadow-1c5-px-vh);
 }
 
-.drop-shadow-1px {
-  text-shadow:
-    0 var(--1-px-vh) black,
-    var(--1-px-vh) 0 black,
-    var(--1-px-vh) var(--1-px-vh) black;
-}
+/*.drop-shadow-1px {*/
+/*  text-shadow:*/
+/*    0 var(--1-px-vh) black,*/
+/*    var(--1-px-vh) 0 black,*/
+/*    var(--1-px-vh) var(--1-px-vh) black;*/
+/*}*/
 
-.drop-shadow-1c5px {
-  text-shadow:
-    0 var(--1c5-px-vh) black,
-    var(--1c5-px-vh) 0 black,
-    var(--1c5-px-vh) var(--1c5-px-vh) black;
-}
+/*.drop-shadow-1c5px {*/
+/*  text-shadow:*/
+/*    0 var(--1c5-px-vh) black,*/
+/*    var(--1c5-px-vh) 0 black,*/
+/*    var(--1c5-px-vh) var(--1c5-px-vh) black;*/
+/*}*/
 
-.drop-shadow-2px {
-  text-shadow:
-    0 var(--1-px-vh) black,
-    var(--1-px-vh) 0 black,
-    var(--1-px-vh) var(--1-px-vh) black,
-    0 var(--2-px-vh) black,
-    var(--2-px-vh) 0 black,
-    var(--2-px-vh) var(--2-px-vh) black;
-}
+/*.drop-shadow-2px {*/
+/*  text-shadow:*/
+/*    0 var(--1-px-vh) black,*/
+/*    var(--1-px-vh) 0 black,*/
+/*    var(--1-px-vh) var(--1-px-vh) black,*/
+/*    0 var(--2-px-vh) black,*/
+/*    var(--2-px-vh) 0 black,*/
+/*    var(--2-px-vh) var(--2-px-vh) black;*/
+/*}*/
 
 .toasts {
   position: fixed;
@@ -212,7 +238,7 @@ html, body {
 }
 
 .toasts .label {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-1-vh);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--2-px-vh);
 }
@@ -229,11 +255,12 @@ html, body {
   gap: var(--10-px-vh);
   justify-content: flex-end;
   align-items: flex-end;
+  font-weight: var(--font-weight-semibold);
 }
 
 .hud .speed .value {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-4-vh);
+  text-shadow: var(--drop-shadow-3-px-vh);
 }
 
 .hud .speed .wrapper {
@@ -241,5 +268,6 @@ html, body {
 }
 
 .hud .speed .unit {
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-1c75-vh);
+  text-shadow: var(--drop-shadow-2-px-vh);
 }

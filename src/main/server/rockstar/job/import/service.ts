@@ -33,9 +33,17 @@ const SUPPORTED_RACE_TYPES: Set<RaceType> = new Set([ LAND, STUNT ]);
 export function registerImportJobCommand() {
   registerAuthorizedCommand({
     name: 'importjob',
-    handler: async (netId: number, args: string[]) => await importJob(netId, args),
+    handler: handleImportJobCommand,
     permissions: [PERMISSIONS.JOB.IMPORT]
   });
+}
+
+async function handleImportJobCommand(netId: number, args: string[]) {
+  try {
+    await importJob(netId, args);
+  } catch (error: any) {
+    throw new Error(`Error whilst trying to import job: ${error.message}`);
+  }
 }
 
 async function importJob(netId: number, args: string[]) {
@@ -77,7 +85,7 @@ async function importJob(netId: number, args: string[]) {
     throw new Error('job is not a lap race');
   }
 
-  // TODO consider checking whether a track of the same hash was already imported
+  // TODO consider checking whether a job of the same hash was already imported
 
   const rockstarJob: RockstarJob = await insertRockstarJob({
     name: jobName,
@@ -86,23 +94,24 @@ async function importJob(netId: number, args: string[]) {
     added_at: new Date(),
     added_by: player.id,
     enabled: false,
-    data: jobJson,
+    original_data: jobJson,
+    current_data: jobJson,
     job_id: jobId,
     hash_md5: jobHash
   });
 
   logger.info(
-    `Imported new track from job id ${jobId}: "${jobName}" by "${jobAuthor}" `
+    `Imported new job from job id ${jobId}: "${jobName}" by "${jobAuthor}" `
     + `(imported by "${player.nickname}")`
   );
 
   logger.logClientMessage(
     netId,
     LOG_LEVELS.INFO,
-    `Imported new track from job id ${jobId}: "${jobName}" by "${jobAuthor}"`
+    `Imported new job from job id ${jobId}: "${jobName}" by "${jobAuthor}"`
   );
 
-  // TODO refresh list of all available tracks for all connected clients
+  // TODO refresh list of all available jobs for all connected clients
 }
 
 async function fetchRockstarJobJson(jobId: string) {
@@ -112,7 +121,7 @@ async function fetchRockstarJobJson(jobId: string) {
         try {
           const response = await fetch(toRockstarJobLink(jobId, x, y, language), {
             method: 'GET',
-            headers: {'User=Agent': USER_AGENT}
+            headers: {'User-Agent': USER_AGENT}
           });
           if (200 === response.status) {
             return response.json();

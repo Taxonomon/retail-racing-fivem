@@ -231,7 +231,17 @@ async function initializeVehicleSpawnMenu() {
       });
     });
 
-    const groupedByClass = SpawnableVehicle.groupByClass(sortedByLabel);
+    // class sorting requires a little bit more work
+    const classes: string[] = [];
+    spawnableVehicles.forEach(sv => {
+      sv.classes.forEach(c => {
+        if (!classes.includes(c)) {
+          classes.push(c);
+        }
+      });
+    });
+    classes.sort((a, b) => a.localeCompare(b));
+    const groupedByClass = SpawnableVehicle.groupByClass(spawnableVehicles);
 
     addMenu({
       id: MENU_IDS.VEHICLE.SPAWN.BY_CLASS,
@@ -239,7 +249,7 @@ async function initializeVehicleSpawnMenu() {
       items: []
     });
 
-    groupedByClass.forEach((vehicles, clazz) => {
+    classes.forEach(clazz => {
       const classMenuId = MENU_IDS.VEHICLE.SPAWN.BY_CLASS + '-' + clazz.trim().toLowerCase();
 
       addItemToMenu(MENU_IDS.VEHICLE.SPAWN.BY_CLASS, {
@@ -253,7 +263,7 @@ async function initializeVehicleSpawnMenu() {
       addMenu({
         id: classMenuId,
         title: clazz,
-        items: SpawnableVehicle.sortByLabel(vehicles).map(vehicle => ({
+        items: SpawnableVehicle.sortByLabel(groupedByClass.get(clazz) ?? []).map(vehicle => ({
           id: vehicle.model,
           title: vehicle.label,
           description: `${vehicle.brand} ${vehicle.label} (${vehicle.model})`,

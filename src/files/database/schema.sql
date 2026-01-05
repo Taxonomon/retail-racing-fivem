@@ -106,7 +106,8 @@ CREATE TABLE txn.rockstar_jobs (
   added_at timestamptz NOT NULL,
   added_by bigint,
   enabled bool NOT NULL,
-  data jsonb NOT NULL,
+  original_data jsonb NOT NULL,
+  current_data jsonb NOT NULL,
   hash_md5 text NOT NULL,
   CONSTRAINT rockstar_jobs_pk_id
     PRIMARY KEY (id),
