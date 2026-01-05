@@ -1,7 +1,6 @@
 import playerState from "../player/state";
 import logger from "../logging/logger";
-
-export type GameMode = 'FREE_MODE' | 'HOT_LAP' | 'RACE';
+import {GameMode} from "../../common/game-mode/game-mode";
 
 export function setPlayerGameMode(netId: number, gameMode: GameMode) {
   const player = playerState.getConnectedPlayer(netId);

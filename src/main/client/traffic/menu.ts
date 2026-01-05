@@ -7,8 +7,8 @@ import {disableTraffic, enableTraffic} from "./service";
 
 export const DISABLE_TRAFFIC_ITEM_ID = 'disable-traffic'
 
-export function initializeTrafficPlayerSettingsMenu() {
-  addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
+export function initializeTrafficMenu() {
+  addItemToMenu(MENU_IDS.MAIN, {
     id: DISABLE_TRAFFIC_ITEM_ID,
     title: 'Disable Traffic',
     description: 'Disables all traffic and pedestrians.',
@@ -19,7 +19,7 @@ export function initializeTrafficPlayerSettingsMenu() {
 
 export function updateDisableTrafficItemIcon(toggled: boolean) {
   setMenuItemIcon(
-    MENU_IDS.SETTINGS.MAIN,
+    MENU_IDS.MAIN,
     DISABLE_TRAFFIC_ITEM_ID,
     toggled ? ItemIconType.TOGGLE_ON : ItemIconType.TOGGLE_OFF
   );

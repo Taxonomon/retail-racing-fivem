@@ -16,21 +16,12 @@ const MENU_IDS = {
   },
   SETTINGS: {
     MAIN: 'settings',
-    TIME: {
-      MAIN: 'settings-time',
-      SELECT_TIME: {
-        MAIN: 'settings-time-select-time'
-      }
-    },
     HUD: {
       MAIN: 'settings-hud',
       SPEED_UNIT: {
         MAIN: 'settings-speed-unit'
       }
     },
-    WEATHER: {
-      MAIN: 'settings-weather'
-    }
   },
   MODERATION: {
     MAIN: 'moderation'
@@ -40,6 +31,15 @@ const MENU_IDS = {
   },
   HOT_LAP: {
     MAIN: 'hot-lap'
+  },
+  TIME: {
+    MAIN: 'time',
+    SELECT_TIME: {
+      MAIN: 'time-select-time'
+    }
+  },
+  WEATHER: {
+    MAIN: 'weather'
   }
 };
 

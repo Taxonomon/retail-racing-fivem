@@ -26,8 +26,8 @@ const SELECTABLE_HOURS: SelectableHour[] = [
   { label: 'Evening', hour: 18 }
 ];
 
-export function initializeTimePlayerSettingsMenu() {
-  addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
+export function initializeTimeMenu() {
+  addItemToMenu(MENU_IDS.MAIN, {
     id: 'time',
     title: 'Time',
     icon: ItemIconType.SUB_MENU,
@@ -35,7 +35,7 @@ export function initializeTimePlayerSettingsMenu() {
   }, { first: true});
 
   addMenu({
-    id: MENU_IDS.SETTINGS.TIME.MAIN,
+    id: MENU_IDS.TIME.MAIN,
     title: 'Time',
     items: [
       {
@@ -63,7 +63,7 @@ export function initializeTimePlayerSettingsMenu() {
   });
 
   addMenu({
-    id: MENU_IDS.SETTINGS.TIME.SELECT_TIME.MAIN,
+    id: MENU_IDS.TIME.SELECT_TIME.MAIN,
     title: 'Select Time of Day',
     items: SELECTABLE_HOURS.map(selectableHour => ({
       id: selectableHour.hour.toString(),
@@ -76,7 +76,7 @@ export function initializeTimePlayerSettingsMenu() {
 }
 
 function pressTimeSubMenuItem(item: Item) {
-  const subMenuId = MENU_IDS.SETTINGS.TIME.MAIN;
+  const subMenuId = MENU_IDS.TIME.MAIN;
   try {
     openMenu(subMenuId);
     playSound.select();
@@ -88,7 +88,7 @@ function pressTimeSubMenuItem(item: Item) {
 }
 
 function pressSelectTimeSubMenuItem(item: Item) {
-  const subMenuId = MENU_IDS.SETTINGS.TIME.SELECT_TIME.MAIN;
+  const subMenuId = MENU_IDS.TIME.SELECT_TIME.MAIN;
   try {
     openMenu(subMenuId);
     playSound.select();
@@ -103,7 +103,7 @@ function pressFreezeTimeOfDayItem() {
   const freeze = !timeState.frozen;
   setTimeFrozen(freeze);
   setMenuItemIcon(
-    MENU_IDS.SETTINGS.TIME.MAIN,
+    MENU_IDS.TIME.MAIN,
     ITEM_IDS.FREEZE_TIME_OF_DAY,
     freeze ? ItemIconType.TOGGLE_ON : ItemIconType.TOGGLE_OFF
   );

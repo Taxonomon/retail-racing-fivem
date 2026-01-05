@@ -1,6 +1,6 @@
-import {GameMode} from "../../server/game-mode/service";
 import {Tick} from "../../common/tick";
 import logger from "../logging/logger";
+import {GameMode} from "../../common/game-mode/game-mode";
 
 class GameModeState {
   updateMenusBasedOnGameMode: Tick = new Tick('update game mode menus based on game mode', logger);

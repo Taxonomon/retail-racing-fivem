@@ -3,11 +3,7 @@ import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 import logger from "../../logging/logger";
 import toast from "../../gui/toasts/service";
 import playSound from "../../sound";
-import {initializeTimePlayerSettingsMenu} from "../../time/menu";
-import {initializeTrafficPlayerSettingsMenu} from "../../traffic/menu";
-import {initializeWeatherPlayerSettingsMenu} from "../../weather/menu";
 import {initializeHudPlayerSettingsMenu} from "../../gui/hud/menu";
-import {initializeVehiclePlayerSettingsMenu} from "../../vehicle/menu";
 import {SAVE_PLAYER_SETTINGS_INTERVAL_MS, savePlayerSettings} from "./service";
 import {addItemToMenu, addMenu, openMenu} from "../../gui/menu/api/service";
 import Item from "../../gui/menu/api/item";
@@ -41,10 +37,6 @@ export function initializePlayerSettingsMenu() {
   // all below menus will add their items at the top of the menu successively,
   // on top of the above default items.
   initializeHudPlayerSettingsMenu();
-  initializeTrafficPlayerSettingsMenu();
-  initializeTimePlayerSettingsMenu();
-  initializeWeatherPlayerSettingsMenu();
-  initializeVehiclePlayerSettingsMenu();
 }
 
 function pressSettingsSubMenuItem(item: Item) {

@@ -8,8 +8,8 @@ import toast from "../gui/toasts/service";
 import {setPermanentWeatherByWeatherTypeId} from "./service";
 import {addItemToMenu, addMenu, openMenu, refreshMenu, setMenuItemIcon} from "../gui/menu/api/service";
 
-export function initializeWeatherPlayerSettingsMenu() {
-  addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
+export function initializeWeatherMenu() {
+  addItemToMenu(MENU_IDS.MAIN, {
     id: 'select-weather',
     title: 'Weather',
     description: 'Permanently change the current weather.',
@@ -18,7 +18,7 @@ export function initializeWeatherPlayerSettingsMenu() {
   }, { first: true});
 
   addMenu({
-    id: MENU_IDS.SETTINGS.WEATHER.MAIN,
+    id: MENU_IDS.WEATHER.MAIN,
     title: 'Select Weather',
     items: SELECTABLE_WEATHER_TYPES.map(weatherType => {
       return {
@@ -33,7 +33,7 @@ export function initializeWeatherPlayerSettingsMenu() {
 }
 
 function pressSelectWeatherSubMenuItem(item: Item) {
-  const subMenuId = MENU_IDS.SETTINGS.WEATHER.MAIN;
+  const subMenuId = MENU_IDS.WEATHER.MAIN;
   try {
     openMenu(subMenuId);
     playSound.select();
@@ -63,6 +63,6 @@ async function pressSetWeatherItem(item: Item) {
 export function updateWeatherSelectionMenuItemIcons(selectedWeatherTypeId: string) {
   SELECTABLE_WEATHER_TYPES.forEach(weatherType => {
     const icon = selectedWeatherTypeId === weatherType.id ? ItemIconType.SELECTED : ItemIconType.NONE;
-    setMenuItemIcon(MENU_IDS.SETTINGS.WEATHER.MAIN, weatherType.id, icon);
+    setMenuItemIcon(MENU_IDS.WEATHER.MAIN, weatherType.id, icon);
   });
 }

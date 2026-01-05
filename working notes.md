@@ -36,6 +36,10 @@ Race components:
 
 ## TODOs:
 
+- re-order menu
+  - move weather, traffic, time stuff into main menu
+  - move 'keep vehicle clean' into vehicle menu
+
 ### Foundation for hot lap mode
 
 - package `client/game-mode/hot-lap`

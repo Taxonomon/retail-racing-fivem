@@ -2,7 +2,6 @@ import {waitOneFrame} from "../../../common/wait";
 import playerState from "../state";
 import logger from "../../logging/logger";
 import {findPlayerByLicense2, insertPastNickname, insertPlayer, Player, updatePlayerById} from "../database";
-import {GameMode} from "../../game-mode/game-mode";
 import {
   findPlayerPrincipalsByPlayerId,
   findPrincipalPermissionsByPrincipalIds,
@@ -12,6 +11,7 @@ import {getOrCreatePlayerSettingsByPlayerId} from "../settings/service";
 import {LOG_LEVELS} from "../../../common/logging/level";
 import {getPlayerLicense2ByNetId, getPlayerNameFromNetId} from "../service";
 import EVENT_NAMES from "../../../common/event-names";
+import {GameMode} from "../../../common/game-mode/game-mode";
 
 /**
  * <a href="https://docs.fivem.net/docs/scripting-reference/events/list/playerConnecting/">
@@ -155,12 +155,12 @@ async function handleConnectingPlayer(
   }
 }
 
-async function toConnectedPlayer (player: Player, netId: number) {
+async function toConnectedPlayer (player: Player, netId: number): Promise<ConnectedPlayer> {
   const principalIdentifiers: Set<string> = new Set();
   const permissionIdentifiers: Set<string> = new Set();
   const playerPrincipals = await findPlayerPrincipalsByPlayerId(player.id);
 
-  if (undefined !== playerPrincipals) {
+  if (undefined !== playerPrincipals && playerPrincipals.length > 0) {
     const principalIds = playerPrincipals.map(pp => pp.principal);
     const principals = await findPrincipalsByIds(principalIds);
     const permissions = await findPrincipalPermissionsByPrincipalIds(principalIds);
@@ -171,7 +171,7 @@ async function toConnectedPlayer (player: Player, netId: number) {
   return {
     ...player,
     netId,
-    gameMode: GameMode.FREEMODE,
+    gameMode: 'FREE_MODE',
     principals: Array.from(principalIdentifiers),
     permissions: Array.from(permissionIdentifiers),
   };

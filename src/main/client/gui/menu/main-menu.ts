@@ -9,8 +9,10 @@ import EVENT_NAMES from "../../../common/event-names";
 import {initializeAdministrationMenu} from "../../administration/menu";
 import {initializeModerationMenu} from "../../moderation/menu";
 import {addMenu, setMainMenu} from "./api/service";
-import {initializeHotLapMenu} from "../../game-mode/hot-lap/menu";
-import {startUpdatingGameModeMenusBasedOnGameMode} from "../../game-mode/menu";
+import {updateGameModeMenus} from "../../game-mode/menu";
+import {initializeWeatherMenu} from "../../weather/menu";
+import {initializeTimeMenu} from "../../time/menu";
+import {initializeTrafficMenu} from "../../traffic/menu";
 
 export async function initializeMainMenu() {
   addMenu({
@@ -47,10 +49,13 @@ export async function initializeMainMenu() {
   await initializeAdministrationMenu();
   await initializeModerationMenu();
   initializePlayerSettingsMenu();
+  initializeTrafficMenu();
+  initializeTimeMenu();
+  initializeWeatherMenu();
   await initializeVehicleMenu();
 
   // game mode menus will be set dynamically, based on the client's current game mode
-  startUpdatingGameModeMenusBasedOnGameMode();
+  updateGameModeMenus();
 }
 
 function pressKillYourselfItem() {

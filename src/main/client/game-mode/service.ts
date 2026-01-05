@@ -1,7 +1,7 @@
-import {GameMode} from "../../server/game-mode/service";
 import gameModeState from "./state";
 import {updateGameModeMenus} from "./menu";
 import logger from "../logging/logger";
+import {GameMode} from "../../common/game-mode/game-mode";
 
 export function switchGameModeTo(gameMode: GameMode) {
   gameModeState.gameMode = gameMode;

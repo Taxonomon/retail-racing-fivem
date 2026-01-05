@@ -31,6 +31,7 @@ const VEHICLE_MENU_ITEM_IDS = {
   MAIN: {
     SPAWN: 'spawn',
     REPAIR: 'repair',
+    KEEP_VEHICLE_CLEAN: 'keep-vehicle-clean',
     DELETE: 'delete'
   },
   SPAWN: {
@@ -42,9 +43,6 @@ const VEHICLE_MENU_ITEM_IDS = {
     RECENTLY_SPAWNED: 'recently-spawned',
     NO_RECENTLY_SPAWNED_VEHICLES: 'no-recently-spawned-vehicles'
   },
-  SETTINGS: {
-    KEEP_VEHICLE_CLEAN: 'keep-vehicle-clean'
-  }
 };
 
 export async function initializeVehicleMenu() {
@@ -73,6 +71,15 @@ export async function initializeVehicleMenu() {
         description: 'Repair your current vehicle.',
         icon: ItemIconType.NONE,
         onPressed: pressRepairVehicleItem
+      },
+      {
+        id: VEHICLE_MENU_ITEM_IDS.MAIN.KEEP_VEHICLE_CLEAN,
+        title: 'Keep Vehicle Clean',
+        description:
+          'Prevents the vehicle from becoming dirty while driving.<br><br>'
+          + '(This setting will persist across all game modes.)',
+        icon: ItemIconType.NONE,
+        onPressed: pressKeepVehicleCleanItem
       },
       {
         id: VEHICLE_MENU_ITEM_IDS.MAIN.DELETE,
@@ -260,18 +267,6 @@ async function initializeVehicleSpawnMenu() {
   }
 }
 
-export function initializeVehiclePlayerSettingsMenu() {
-  addItemToMenu(MENU_IDS.SETTINGS.MAIN, {
-    id: VEHICLE_MENU_ITEM_IDS.SETTINGS.KEEP_VEHICLE_CLEAN,
-    title: 'Keep Vehicle Clean',
-    description:
-      'Prevents the vehicle from becoming dirty while driving.<br><br>'
-      + '(This setting will persist across all game modes.)',
-    icon: ItemIconType.NONE,
-    onPressed: pressKeepVehicleCleanItem
-  }, { first: true });
-}
-
 export function updateRecentlySpawnedVehiclesMenu() {
   const modelIds = getStringArrayPlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED, []);
 
@@ -384,8 +379,8 @@ function pressKeepVehicleCleanItem() {
 
 export function updateKeepVehicleCleanItemIcon(toggled: boolean) {
   setMenuItemIcon(
-    MENU_IDS.SETTINGS.MAIN,
-    VEHICLE_MENU_ITEM_IDS.SETTINGS.KEEP_VEHICLE_CLEAN,
+    MENU_IDS.VEHICLE.MAIN,
+    VEHICLE_MENU_ITEM_IDS.MAIN.KEEP_VEHICLE_CLEAN,
     toggled ? ItemIconType.TOGGLE_ON : ItemIconType.TOGGLE_OFF
   );
 }

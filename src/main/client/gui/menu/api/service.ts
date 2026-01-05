@@ -63,7 +63,9 @@ export function openMainMenu() {
 export function openMenu(menuId: string) {
   const menu = getMenu(menuId);
 
-  if (!menu.hasItems()) {
+  if (menu.hidden) {
+    throw new Error(`menu "${menuId}" is hidden`);
+  } else if (!menu.hasItems()) {
     throw new Error(`menu "${menuId}" has no items`);
   }
 
@@ -90,7 +92,6 @@ export function openMenu(menuId: string) {
 
 export function closeCurrentMenu() {
   const currentMenu = getCurrentlyRenderedMenu();
-  sendNuiMessage({ id: NUI_MSG_IDS.MENU.CLEAR });
   menuState.stack.pop();
   logger.debug(`closed menu "${currentMenu.id}"`);
 
@@ -99,6 +100,7 @@ export function closeCurrentMenu() {
   if (undefined !== parentMenuId) {
     openMenu(parentMenuId);
   } else {
+    sendNuiMessage({ id: NUI_MSG_IDS.MENU.CLEAR });
     menuState.mainMenuLastClosedAt = GetGameTimer();
     toggleMenuInputBindings();
   }
@@ -249,6 +251,11 @@ export function getCurrentlyRenderedMenu() {
 
 export function isAnyMenuOpen() {
   return menuState.stack.length > 0;
+}
+
+export function setMenuHidden(menuId: string, hidden: boolean) {
+  getMenu(menuId).hidden = hidden;
+  logger.debug(`Set menu "${menuId}" to hidden=${hidden}`);
 }
 
 function noSuchMenuError(menuId: string) {

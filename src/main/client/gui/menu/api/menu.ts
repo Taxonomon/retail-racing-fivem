@@ -7,11 +7,13 @@ export default class Menu {
   id: string;
   title: string;
   items: Item[];
+  hidden: boolean;
 
   constructor(props: MenuConstructorProps) {
     this.id = props.id;
     this.title = props.title;
     this.items = props.items.map((itemProps) => new Item(itemProps));
+    this.hidden = props.hidden ?? false;
   }
 
   renderProps(): MenuRenderProps {
@@ -129,4 +131,5 @@ export type MenuConstructorProps = {
   id: string;
   title: string;
   items: ItemConstructorProps[];
+  hidden?: boolean;
 };
