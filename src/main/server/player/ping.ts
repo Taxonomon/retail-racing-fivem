@@ -1,6 +1,8 @@
 import playerState from "./state";
 import EVENT_NAMES from "../../common/event-names";
 
+const UPDATE_PLAYER_PINGS_INTERVAL_MS = 10000;
+
 export default function startUpdatingPlayerPings() {
   playerState.updatePings.start(() => {
     const connectedNetIds = getPlayers();
@@ -24,5 +26,5 @@ export default function startUpdatingPlayerPings() {
     netIdsNoLongerConnected.forEach((netId) => {
       playerState.pings.delete(netId);
     });
-  });
+  }, UPDATE_PLAYER_PINGS_INTERVAL_MS);
 }

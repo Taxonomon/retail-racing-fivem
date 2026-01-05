@@ -73,19 +73,19 @@ function respondToClient(
 
 export function register(identifier: string, handler: Function) {
   if (callbackState.callbackRegister.has(identifier)) {
-    logger.error(`cannot register server callback "${identifier}": callback already registered`);
+    logger.error(`Cannot register server callback "${identifier}": callback already registered`);
   } else {
     callbackState.callbackRegister.set(identifier, handler);
-    logger.debug(`registered server callback "${identifier}"`);
+    logger.debug(`Registered server callback "${identifier}"`);
   }
 }
 
 export function remove(identifier: string) {
   const removed = callbackState.callbackRegister.delete(identifier);
   if (removed) {
-    logger.debug(`removed server callback "${identifier}"`);
+    logger.debug(`Removed server callback "${identifier}"`);
   } else {
-    logger.debug(`did not remove server callback "${identifier}": no such callback registered`);
+    logger.debug(`Did not remove server callback "${identifier}": no such callback registered`);
   }
 }
 

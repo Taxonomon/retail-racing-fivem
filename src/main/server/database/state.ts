@@ -1,18 +1,18 @@
 import {Kysely} from "kysely";
-import {DatabaseSchema} from "./schema";
 import {Tick} from "../../common/tick";
-import {DatabaseHealthState} from "./health";
 import logger from "../logging/logger";
+import {DatabaseSchema} from "./service";
 
 class DatabaseState {
   private _db?: Kysely<DatabaseSchema>;
-  readonly health: DatabaseHealthState = new DatabaseHealthState(
-    new Tick('monitor database health', logger)
-  );
+
+  readonly monitorConnectionHealth: Tick = new Tick('monitor database connection health', logger);
+  connectionIsHealthy?: boolean;
+  connectionUnhealthySince?: Date;
 
   get db() {
     if (undefined === this._db) {
-      throw new Error('cannot get db: db undefined');
+      throw new Error('database connection config undefined');
     }
     return this._db;
   }

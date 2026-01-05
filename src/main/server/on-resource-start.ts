@@ -1,5 +1,3 @@
-import databaseConnection from "./database/connection";
-import databaseHealth from "./database/health";
 import logger from "./logging/logger";
 import registerAuthorizationCallbacks from "./authorization/callback";
 import startUpdatingPlayerPings from "./player/ping";
@@ -11,6 +9,7 @@ import kickPlayerService from "./player/kick";
 import callbackService from "./callback/inbound";
 import blockedVehicleService from "./vehicle/blocked/service";
 import {registerImportJobCommand} from "./rockstar/job/import/service";
+import {configureDatabaseConnection, startMonitoringDatabaseConnectionHealth} from "./database/service";
 
 export default function registerOnResourceStartListener() {
   on('onServerResourceStart', async (resource: string) => {
@@ -25,8 +24,8 @@ async function handleResourceStart() {
   kickPlayerService.kickAllPlayers('main server script restarting');
 
   // set up db
-  databaseConnection.init();
-  databaseHealth.startMonitor();
+  configureDatabaseConnection();
+  startMonitoringDatabaseConnectionHealth();
 
   // register server listeners
   registerOnPlayerConnectingListener();
