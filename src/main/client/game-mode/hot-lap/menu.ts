@@ -1,15 +1,14 @@
 import {addItemToMenu, addMenu, openMenu, removeAllItemsFromMenu, setMenuDisabled} from "../../gui/menu/api/service";
 import MENU_IDS from "../../gui/menu/menu-ids";
-import gameModeState from "../state";
 import rockstarJobState from "../../rockstar/job/state";
 import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
 import {GameMode} from "../../../common/game-mode/game-mode";
 import logger from "../../logging/logger";
-import {AvailableJob} from "../../../common/rockstar/available-job";
 import playSound from "../../sound";
 import toast from "../../gui/toasts/service";
 import Item from "../../gui/menu/api/item";
 import {startHotLap} from "./service";
+import {AvailableJob} from "../../../common/rockstar/job/available-job";
 
 const HOT_LAP_MENU_ITEM_IDS = {
   HOT_LAP: 'hot-lap'

@@ -5,18 +5,14 @@ import logger from "../../logging/logger";
 import {AvailableJob} from "../../../common/rockstar/job/available-job";
 import toast from "../../gui/toasts/service";
 import {updateGameModeMenus} from "../../game-mode/menu";
+import {Prop} from "../../../common/rockstar/job/prop";
+import {FixtureRemoval} from "../../../common/rockstar/job/fixture-removal";
+import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
 
 export type LoadedJob = AvailableJob & {
   props: Prop[];
   fixtureRemovals: FixtureRemoval[];
-};
-
-export type Prop = {
-  ref?: number;
-};
-
-export type FixtureRemoval = {
-  ref?: number;
+  checkpoints: Checkpoint[];
 };
 
 export async function fetchAllRockstarJobs() {
@@ -31,8 +27,17 @@ export async function fetchAllRockstarJobs() {
   }
 }
 
+export function loadJob(jobHash: string) {
+  const job = rockstarJobState.availableJobs.find(job => job.hash === jobHash);
+
+  if (undefined === job) {
+    throw new Error('job not available');
+  }
+
+  // load props, fixture removals and checkpoints
+}
+
 export function startUpdatingNearbyJobPropsAndFixtures() {
-  // TODO parse job's props and fixtures (and persist in state), and use those to place props/fixture removals
   if (!rockstarJobState.updateNearbyPropsAndFixtures.isRunning()) {
     rockstarJobState.updateNearbyPropsAndFixtures.start(updateNearbyJobPropsAndFixtures);
   }
@@ -45,11 +50,15 @@ export function stopUpdatingNearbyJobPropsAndFixtures() {
 }
 
 function updateNearbyJobPropsAndFixtures() {
-  const job = rockstarJobState.loadedJob;
-
-  if (undefined === job) {
+  if (undefined === rockstarJobState.loadedJob) {
     return;
   }
+
+  const { props, fixtureRemovals } = rockstarJobState.loadedJob;
+
+  // check distance of prop/fixture coords to current player
+  // if in distance: place
+  // else: remove
 }
 
 export function tearDownPlacedJob() {
