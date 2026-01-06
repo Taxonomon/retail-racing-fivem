@@ -2,7 +2,7 @@ import Menu from "./menu";
 import {Tick} from "../../../../common/tick";
 import logger from "../../../logging/logger";
 
-class MenuState {
+class MenuApiState {
   register: Menu[] = [];
   stack: string[] = [];
   mainMenu?: string;
@@ -10,6 +10,6 @@ class MenuState {
   mainMenuLastClosedAt: number = -1;
 }
 
-const menuState = new MenuState();
+const menuApiState = new MenuApiState();
 
-export default menuState;
+export default menuApiState;

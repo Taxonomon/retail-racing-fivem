@@ -75,7 +75,7 @@ function generateRequestId() {
 }
 
 const callbackService = {
-  registerServerCallbackResponseListener,
+  registerServerCallbackResponseEventListener: registerServerCallbackResponseListener,
   triggerServerCallback
 };
 

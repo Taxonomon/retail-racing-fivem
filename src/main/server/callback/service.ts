@@ -6,7 +6,7 @@ import {getPlayerNameFromNetId} from "../player/service";
 
 const CALLBACK_RESPONSE_LOG_LENGTH_MAX = 1028;
 
-export function registerClientCallbackRequestListener() {
+export function registerClientCallbackRequestEventListener() {
   onNet(
     EVENT_NAMES.CALLBACK.CLIENT.REQUEST,
     async (requestId: string, identifier: string, data?: any) => {
@@ -62,13 +62,21 @@ async function handleClientCallbackRequest(
 }
 
 function logCallbackResult(identifier: string, requestId: string, result: string) {
-  const resultLogString = result.length < CALLBACK_RESPONSE_LOG_LENGTH_MAX
-    ? result
-    : `${result.substring(0, CALLBACK_RESPONSE_LOG_LENGTH_MAX)}... (truncated)`;
-  logger.trace(
-    `client callback request "${identifier}" (request id ${requestId}): `
-    + `callback result: ${resultLogString}`
-  );
+  if (undefined === result) {
+    logger.trace(
+      `Handled client callback request "${identifier}" (request id ${requestId}) `
+      + '- callback did not return any result'
+    );
+  } else {
+    const resultLogString = result.length >= CALLBACK_RESPONSE_LOG_LENGTH_MAX
+      ? `${result.substring(0, CALLBACK_RESPONSE_LOG_LENGTH_MAX)}... (truncated)`
+      : result;
+
+    logger.trace(
+      `Handled client callback request "${identifier}" (request id ${requestId}) `
+      + `- callback result: ${resultLogString}`
+    );
+  }
 }
 
 function respondToClient(

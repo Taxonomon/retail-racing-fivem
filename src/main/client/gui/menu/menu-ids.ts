@@ -30,7 +30,10 @@ const MENU_IDS = {
     MAIN: 'administration'
   },
   HOT_LAP: {
-    MAIN: 'hot-lap'
+    MAIN: 'hot-lap',
+    TRACKS: {
+      MAIN: 'hot-lap-tracks'
+    }
   },
   TIME: {
     MAIN: 'time',

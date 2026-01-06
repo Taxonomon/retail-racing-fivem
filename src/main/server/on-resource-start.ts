@@ -1,5 +1,5 @@
 import logger from "./logging/logger";
-import {registerClientCallbackRequestListener} from "./callback/service";
+import {registerClientCallbackRequestEventListener} from "./callback/service";
 import {registerImportJobCommand} from "./rockstar/job/import/service";
 import {configureDatabaseConnection, startMonitoringDatabaseConnectionHealth} from "./database/service";
 import {registerPlayerSettingsCallbacks} from "./player/settings/service";
@@ -18,29 +18,37 @@ export default function registerOnResourceStartListener() {
 }
 
 async function handleResourceStart() {
-  // prevent illegal states by kicking all players on (re)start
+  const startedAt = Date.now();
+
+  // prevent illegal script state by kicking everyone
   kickAllPlayers('Restarted main server script');
-
-  // set up db
   configureDatabaseConnection();
-  startMonitoringDatabaseConnectionHealth();
 
-  // register event listeners
+  registerEventListeners();
+  registerCallbacks();
+  registerCommands();
+  startSubProcesses();
+
+  logger.info(`txn client script started in ${(Date.now() - startedAt).toFixed(0)} ms`);
+}
+
+function registerEventListeners() {
   registerPlayerConnectionEventListeners();
-  registerClientCallbackRequestListener();
+  registerClientCallbackRequestEventListener();
+}
 
-  // register callbacks
+function registerCallbacks() {
   registerPlayerAuthorizationCallbacks();
   registerPlayerSettingsCallbacks();
   registerBlockedVehicleCallbacks();
   registerRockstarJobCallbacks();
+}
 
-  // register commands
+function registerCommands() {
   registerImportJobCommand();
+}
 
-  // do other stuff
+function startSubProcesses() {
+  startMonitoringDatabaseConnectionHealth();
   startUpdatingPlayerPings();
-
-  // all done
-  logger.info(`txn server script started`);
 }

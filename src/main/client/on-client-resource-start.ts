@@ -14,6 +14,7 @@ import {fetchAndApplyPlayerSettings, startSavingPlayerSettingsPeriodically} from
 import {initializeMenuInputBindings} from "./gui/menu/api/input";
 import {startUpdatingHud} from "./gui/hud/service";
 import {fetchAllRockstarJobs} from "./rockstar/job/service";
+import {switchGameModeTo} from "./game-mode/service";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -24,32 +25,39 @@ export default function registerOnClientResourceStartListener() {
 }
 
 async function handleOnClientResourceStart() {
-  // register event listeners
-  callbackService.registerServerCallbackResponseListener();
-  registerMessageFromServerEventListener();
+  const startedAt = GetGameTimer();
 
-  // inputs
+  initializeEventListeners();
+  initializeInputs();
+  await initializeSubProcesses();
+
+  // other one-time process calls
+  await initializeMainMenu();
+  await fetchAndApplyPlayerSettings();
+  await fetchAllRockstarJobs();
+  wantedLevelService.disable();
+  switchGameModeTo('FREE_MODE');
+
+  logger.info(`txn client script started in ${GetGameTimer() - startedAt} ms`);
+}
+
+function initializeEventListeners() {
+  callbackService.registerServerCallbackResponseEventListener();
+  registerMessageFromServerEventListener();
+}
+
+function initializeInputs() {
+  initializeMenuInputBindings();
   startBlockingDisabledControlActions();
   inputBindingListener.start();
+}
 
-  // set up menu
-  await initializeMainMenu();
-  initializeMenuInputBindings();
-
-  // player settings
-  await fetchAndApplyPlayerSettings();
+async function initializeSubProcesses() {
   await startSavingPlayerSettingsPeriodically();
-
-  // do other stuff
   startReceivingPingUpdates();
   startUpdatingBreadcrumps();
   startUpdatingHud();
   startTrackingPlayerSpeed();
   startTrackingPlayerCoordinates();
   startHidingUnwantedNativeGuiHudElements();
-  wantedLevelService.disable();
-  await fetchAllRockstarJobs();
-
-  // all done
-  logger.info(`txn client script started`);
 }

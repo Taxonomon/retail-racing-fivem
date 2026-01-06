@@ -50,7 +50,10 @@ async function savePlayerSettings(netId: number, settingsRaw: string) {
   if (undefined !== updatedSettings) {
     playerState.playerSettingsLastSavedAt = new Date();
     logger.info(`Updated player settings of "${playerName}" (net id ${netId})`);
-    logger.debug(`Set player settings of "${playerName}" (net id ${netId}) to ${updatedSettings.settings}`);
+    logger.debug(
+      `Set player settings of "${playerName}" (net id ${netId}) to: `
+      + `${JSON.stringify(updatedSettings.settings)}`
+    );
   }
 }
 

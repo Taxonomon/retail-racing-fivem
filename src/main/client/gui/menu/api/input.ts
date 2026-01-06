@@ -2,7 +2,7 @@ import {ControlActionInputBinding} from "../../../input/binding/control-action";
 import {CONTROL_ACTIONS, ControlAction, setControlActionsEnabled} from "../../../input/control-action";
 import {InputBinding} from "../../../input/binding/abstract";
 import inputState from "../../../input/state";
-import menuState from "./state";
+import menuApiState from "./state";
 import {
   closeCurrentMenu, isAnyMenuOpen, navigateToNextItem, navigateToPreviousItem, openMainMenu,
   pressCurrentlyFocusedMenuItem
@@ -86,7 +86,7 @@ export const MENU_IMPEDING_CONTROL_ACTIONS: ControlAction[] = [
 export function initializeMenuInputBindings() {
   inputState.bindings.push(...MENU_INPUT_BINDINGS.ALL);
 
-  menuState.blockImpedingControlActions.start(() => {
+  menuApiState.blockImpedingControlActions.start(() => {
     // control actions need to be toggled every frame
     MENU_IMPEDING_CONTROL_ACTIONS.forEach(controlAction => {
       if (CONTROL_ACTIONS.INPUT_VEH_CIN_CAM.index === controlAction.index) {
@@ -95,7 +95,7 @@ export function initializeMenuInputBindings() {
         // cam the moment they close the menu because both underlying control actions are bound to the same button
         // on gamepad, and because that button activates on insta-hold as well as press.
         const disabled = isAnyMenuOpen()
-          || (GetGameTimer() - menuState.mainMenuLastClosedAt) < ENABLE_CINEMATIC_CAM_AFTER_MENU_CLOSED_FOR_MS;
+          || (GetGameTimer() - menuApiState.mainMenuLastClosedAt) < ENABLE_CINEMATIC_CAM_AFTER_MENU_CLOSED_FOR_MS;
         setControlActionsEnabled(!disabled, controlAction);
       } else {
         // for all other control actions: disable while menu is opened

@@ -8,16 +8,20 @@ import {wait} from "../../../common/wait";
 import EVENT_NAMES from "../../../common/event-names";
 import {initializeAdministrationMenu} from "../../administration/menu";
 import {initializeModerationMenu} from "../../moderation/menu";
-import {addMenu, setMainMenu} from "./api/service";
-import {updateGameModeMenus} from "../../game-mode/menu";
+import {addMenu, setMainMenu, setMenuDisabled} from "./api/service";
 import {initializeWeatherMenu} from "../../weather/menu";
 import {initializeTimeMenu} from "../../time/menu";
 import {initializeTrafficMenu} from "../../traffic/menu";
+import {initializeHotLapMenu} from "../../game-mode/hot-lap/menu";
+import {updateGameModeMenus} from "../../game-mode/menu";
+import logger from "../../logging/logger";
+import menuState from "./state";
 
 export async function initializeMainMenu() {
   addMenu({
     id: MENU_IDS.MAIN,
     title: 'Main Menu',
+    disabled: true,
     items: [
       {
         id: 'about',
@@ -53,9 +57,14 @@ export async function initializeMainMenu() {
   initializeTimeMenu();
   initializeWeatherMenu();
   await initializeVehicleMenu();
+  initializeHotLapMenu();
 
   // game mode menus will be set dynamically, based on the client's current game mode
   updateGameModeMenus();
+
+  setMenuDisabled(MENU_IDS.MAIN, false);
+  menuState.initialized = true;
+  logger.info(`Initialized main menu`);
 }
 
 function pressKillYourselfItem() {

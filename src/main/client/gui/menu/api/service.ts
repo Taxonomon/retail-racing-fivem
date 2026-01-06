@@ -1,5 +1,5 @@
 import Menu, {MenuConstructorProps} from "./menu";
-import menuState from "./state";
+import menuApiState from "./state";
 import sendNuiMessage from "../../send-nui-message";
 import {NUI_MSG_IDS} from "../../../../common/gui/nui-message";
 import logger from "../../../logging/logger";
@@ -17,7 +17,7 @@ export function addMenu(props: MenuConstructorProps) {
   if (hasMenu(props.id)) {
     throw new Error(`menu "${props.id}" already exists`);
   }
-  menuState.register.push(new Menu(props));
+  menuApiState.register.push(new Menu(props));
   logger.debug(`Added menu "${props.id}"`);
 }
 
@@ -25,7 +25,7 @@ export function setMainMenu(menuId: string) {
   if (!hasMenu(menuId)) {
     throw noSuchMenuError(menuId);
   }
-  menuState.mainMenu = menuId;
+  menuApiState.mainMenu = menuId;
   logger.debug(`Set main menu to "${menuId}"`);
 }
 
@@ -36,28 +36,28 @@ export function removeMenu(menuId: string) {
     throw new Error('menu is currently opened (although another menu might currently be rendered)');
   }
 
-  const index = menuState.register.findIndex((menu) => menu.id === menuId);
+  const index = menuApiState.register.findIndex((menu) => menu.id === menuId);
 
   if (-1 === index) {
     throw noSuchMenuError(menuId);
   }
 
-  menuState.register.splice(index, 1);
+  menuApiState.register.splice(index, 1);
   logger.debug(`Removed menu "${menuId}"`);
 
-  if (menuState.mainMenu === menuId) {
-    menuState.mainMenu = undefined;
+  if (menuApiState.mainMenu === menuId) {
+    menuApiState.mainMenu = undefined;
     logger.debug(`Removed main menu "${menuId}"`);
   }
 }
 
 export function openMainMenu() {
-  if (undefined === menuState.mainMenu) {
+  if (undefined === menuApiState.mainMenu) {
     throw new Error('no main menu found');
   } else if (isAnyMenuOpen()) {
     throw new Error('another menu is already open');
   }
-  openMenu(menuState.mainMenu);
+  openMenu(menuApiState.mainMenu);
 }
 
 export function openMenu(menuId: string) {
@@ -76,13 +76,13 @@ export function openMenu(menuId: string) {
     data: menu.renderProps()
   });
 
-  const isMainMenuOpened = 0 === menuState.stack.length;
+  const isMainMenuOpened = 0 === menuApiState.stack.length;
 
   // if a child menu was closed, it was popped off the stack, leaving the parent menu on top of the stack.
   // now if this parent menu is trying to be opened, it shouldn't be added to the stack again if it's already
   // at the top of the stack.
-  if (menuId !== menuState.stack.at(-1)) {
-    menuState.stack.push(menuId);
+  if (menuId !== menuApiState.stack.at(-1)) {
+    menuApiState.stack.push(menuId);
   }
 
   if (isMainMenuOpened) {
@@ -94,24 +94,24 @@ export function openMenu(menuId: string) {
 
 export function closeCurrentMenu() {
   const currentMenu = getCurrentlyRenderedMenu();
-  menuState.stack.pop();
+  menuApiState.stack.pop();
   logger.debug(`closed menu "${currentMenu.id}"`);
 
-  const parentMenuId = menuState.stack.at(-1);
+  const parentMenuId = menuApiState.stack.at(-1);
 
   if (undefined !== parentMenuId) {
     openMenu(parentMenuId);
   } else {
     sendNuiMessage({ id: NUI_MSG_IDS.MENU.CLEAR });
-    menuState.mainMenuLastClosedAt = GetGameTimer();
+    menuApiState.mainMenuLastClosedAt = GetGameTimer();
     toggleMenuInputBindings();
   }
 }
 
 export function closeAllMenus() {
   sendNuiMessage({ id: NUI_MSG_IDS.MENU.CLEAR });
-  menuState.stack = [];
-  menuState.mainMenuLastClosedAt = GetGameTimer();
+  menuApiState.stack = [];
+  menuApiState.mainMenuLastClosedAt = GetGameTimer();
   toggleMenuInputBindings();
   logger.debug(`Closed all currently opened menus (including currently rendered menu)`);
 }
@@ -204,7 +204,7 @@ export function removeAllItemsFromMenu(menuId: string) {
 }
 
 export function getMenu(menuId: string) {
-  const menu = menuState.register.find(menu => menu.id === menuId);
+  const menu = menuApiState.register.find(menu => menu.id === menuId);
 
   if (undefined === menu) {
     throw noSuchMenuError(menuId);
@@ -214,7 +214,7 @@ export function getMenu(menuId: string) {
 }
 
 export function hasMenu(menuId: string) {
-  return menuState.register.find(menu => menu.id === menuId);
+  return menuApiState.register.find(menu => menu.id === menuId);
 }
 
 export function getMenuItem(menuId: string, itemId: string) {
@@ -228,21 +228,21 @@ export function getMenuItem(menuId: string, itemId: string) {
 }
 
 export function isMenuOpen(menuId: string) {
-  return menuState.stack.includes(menuId);
+  return menuApiState.stack.includes(menuId);
 }
 
 export function isMenuCurrentlyRendered(menuId: string) {
-  return menuId === menuState.stack.at(-1);
+  return menuId === menuApiState.stack.at(-1);
 }
 
 export function getCurrentlyRenderedMenu() {
-  const renderedMenuId = menuState.stack.at(-1);
+  const renderedMenuId = menuApiState.stack.at(-1);
 
   if (undefined === renderedMenuId) {
     throw new Error('no menu is currently being rendered');
   }
 
-  const menu = menuState.register.find(menu => menu.id === renderedMenuId);
+  const menu = menuApiState.register.find(menu => menu.id === renderedMenuId);
 
   if (undefined === menu) {
     throw noSuchMenuError(renderedMenuId);
@@ -252,7 +252,7 @@ export function getCurrentlyRenderedMenu() {
 }
 
 export function isAnyMenuOpen() {
-  return menuState.stack.length > 0;
+  return menuApiState.stack.length > 0;
 }
 
 export function setMenuHidden(menuId: string, hidden: boolean) {
