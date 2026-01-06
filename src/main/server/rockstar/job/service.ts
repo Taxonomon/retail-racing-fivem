@@ -1,6 +1,6 @@
 import {registerServerCallback} from "../../callback/service";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
-import {AvailableJob} from "../../../common/rockstar/available-job";
+import {AvailableJob} from "../../../common/rockstar/job/available-job";
 import {findAllRockstarJobs, findRockstarJobsByEnabled, RockstarJob} from "./database";
 import {isPlayerAdministrator} from "../../player/authorization/service";
 

@@ -2,7 +2,7 @@ import rockstarJobState from "./state";
 import callbackService from "../../callback/outbound";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
 import logger from "../../logging/logger";
-import {AvailableJob} from "../../../common/rockstar/available-job";
+import {AvailableJob} from "../../../common/rockstar/job/available-job";
 import toast from "../../gui/toasts/service";
 import {updateGameModeMenus} from "../../game-mode/menu";
 
