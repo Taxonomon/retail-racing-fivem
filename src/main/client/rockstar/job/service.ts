@@ -8,7 +8,7 @@ import {updateGameModeMenus} from "../../game-mode/menu";
 import {Prop} from "../../../common/rockstar/job/prop";
 import {FixtureRemoval} from "../../../common/rockstar/job/fixture-removal";
 import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
-import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
+import parseJobCheckpoints, {parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
 
 export type LoadedJob = AvailableJob & {
   props: Prop[];

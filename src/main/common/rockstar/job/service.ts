@@ -6,8 +6,10 @@ import {METER} from "../../unit/unit";
 import {Prop} from "./prop";
 import {FixtureRemoval} from "./fixture-removal";
 import {Checkpoint} from "./checkpoint";
+import {CHECKPOINT_EFFECTS, CheckpointEffect} from "./checkpoint-effect";
 
 const DEFAULT_FIXTURE_REMOVAL_RADIUS = 3;
+const MINIMUM_CHECKPOINT_SIZE = 50;
 
 type PropProps = {
   hasLODDistances: boolean;
@@ -164,13 +166,66 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
   return result;
 }
 
-export function parseJobCheckpoints(json: any) {
+function parseJobCheckpoints(json: any) {
   const result: Checkpoint[] = [];
   const count = json?.mission?.race?.chp?.length ?? 0;
 
   for (let i = 0; i < count; i++) {
-
+    try {
+      result.push({
+        coordinates: {
+          x: json.mission.race.chl[i].x,
+          y: json.mission.race.chl[i].y,
+          z: json.mission.race.chl[i].z
+        },
+        heading: json.mission.race.chh[i],
+        size: Math.max(json?.mission?.race?.chs ?? 0, MINIMUM_CHECKPOINT_SIZE),
+        effects: parseJobCheckpointEffects(json, i),
+        secondaryCheckpoint: {
+          coordinates: {
+            x: json.mission.race.sndchk[i].x,
+            y: json.mission.race.sndchk[i].y,
+            z: json.mission.race.sndchk[i].z,
+          },
+          heading: json.mission.race.sndrsp[i],
+          size: Math.max(json?.mission?.race?.chs2 ?? 0, MINIMUM_CHECKPOINT_SIZE)
+        }
+      });
+    } catch (error: any) {
+      // swallow and do nothing
+    }
   }
 
+  // In an R* race, the start/finish checkpoint gets placed at the end of the checkpoints array.
+  // For convenience, if possible, we'll pull it in front to the first index, and append the remaining
+  // checkpoints after it.
+  try {
+    return [
+      result.at(-1)!,
+      ...result.slice(0, -2)
+    ];
+  } catch (error: any) {
+    return result;
+  }
+}
+
+function parseJobCheckpointEffects(json: any, index: number) {
+  const result: CheckpointEffect[] = [];
+  const cpbs1Value: number = json?.mission?.cpbs1[index] ?? -1;
+  const cpbs2Value: number = json?.mission?.cpbs2[index] ?? -1;
+
+  CHECKPOINT_EFFECTS.forEach(effect => {
+    if (
+      (1 === effect.nativeCpbsType && isBitSet(cpbs1Value, effect.index))
+      || (2 === effect.nativeCpbsType && isBitSet(cpbs2Value, effect.index))
+    ) {
+      result.push(effect);
+    }
+  });
+
   return result;
+}
+
+function isBitSet(x: number, n: number): boolean {
+  return (x & (1 << n)) !== 0;
 }
