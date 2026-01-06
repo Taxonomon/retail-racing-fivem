@@ -17,6 +17,7 @@ import {loadModelByHash} from "../../../common/model";
 const PLAYER_DETECTION_RADIUS = 500;
 const PROP_LOD_DISTANCE = 16960;
 
+// TODO rename to "PlayableJob", turn into class, and put all functions to place/remove objects (all, dynamic, etc.) into it
 export type LoadedJob = AvailableJob & {
   props: Prop[];
   fixtureRemovals: FixtureRemoval[];
@@ -60,8 +61,8 @@ export async function loadJob(jobHash: string) {
 
   rockstarJobState.loadedJob = {
     ...job,
-    spawnPointCoordinates: checkpoints[-2].coordinates,
-    spawnPointHeading: checkpoints[-2].heading,
+    spawnPointCoordinates: checkpoints.at(-2)!.coordinates,
+    spawnPointHeading: checkpoints.at(-2)!.heading,
     props,
     fixtureRemovals,
     checkpoints
@@ -105,7 +106,7 @@ async function updateNearbyJobPropsAndFixtures() {
           + `${error.message}`
         );
       }
-    } else if (undefined !== prop.ref) {
+    } else if (!withinPlayerDistance && undefined !== prop.ref) {
       DeleteObject(prop.ref);
       prop.ref = undefined;
     }
@@ -127,14 +128,10 @@ async function updateNearbyJobPropsAndFixtures() {
           + `${error.message}`
         );
       }
-    } else if (fixtureRemoval.enabled) {
+    } else if (!withinPlayerDistance && fixtureRemoval.enabled) {
       disableFixtureRemoval(fixtureRemoval);
     }
   }
-
-  // check distance of prop/fixture coords to current player
-  // if in distance: place
-  // else: remove
 }
 
 export function tearDownPlacedJob() {

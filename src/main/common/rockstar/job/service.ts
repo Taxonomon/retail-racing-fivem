@@ -5,9 +5,9 @@ import {RaceDistance} from "./race-distance";
 import {METER} from "../../unit/unit";
 import {Prop} from "./prop";
 import {FixtureRemoval} from "./fixture-removal";
-import {Checkpoint} from "./checkpoint";
+import {Checkpoint, CheckpointProps} from "./checkpoint";
 import {CHECKPOINT_EFFECTS, CheckpointEffect} from "./checkpoint-effect";
-import logger from "../../../gui/logging/logger";
+import logger from "../../../client/logging/logger";
 
 const DEFAULT_FIXTURE_REMOVAL_RADIUS = 3;
 const MINIMUM_CHECKPOINT_SIZE = 50;
@@ -81,6 +81,7 @@ function parseJobStaticProps(json: any, propProps: PropProps): Prop[] {
   }
 
   for (let i = 0; i < count; i++) {
+    logger.trace(`Parsing static prop ${i}/${count - 1}`);
     try {
       result.push({
         hash: json.mission.prop.model[i],
@@ -115,6 +116,7 @@ function parseDynamicProps(json: any, propProps: PropProps): Prop[] {
   }
 
   for (let i = 0; i < count; i++) {
+    logger.trace(`Parsing dynamic prop ${i}/${count - 1}`);
     try {
       result.push({
         hash: json.mission.dprop.model[i],
@@ -149,6 +151,7 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
   }
 
   for (let i = 0; i < count; i++) {
+    logger.trace(`Parsing fixture removal ${i}/${count - 1}`);
     try {
       result.push({
         enabled: false,
@@ -170,16 +173,13 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
 
 export function parseJobCheckpoints(json: any) {
   const result: Checkpoint[] = [];
-  const count = json?.mission?.race?.chp?.length ?? 0;
+  const count = json?.mission?.race?.chp ?? 0;
 
   for (let i = 0; i < count; i++) {
+    logger.trace(`Parsing checkpoint ${i}/${count - 1}`);
     try {
       result.push({
-        coordinates: {
-          x: json.mission.race.chl[i].x,
-          y: json.mission.race.chl[i].y,
-          z: json.mission.race.chl[i].z
-        },
+        coordinates: json.mission.race.chl[i],
         heading: json.mission.race.chh[i],
         size: Math.max(json?.mission?.race?.chs ?? 0, MINIMUM_CHECKPOINT_SIZE),
         effects: parseJobCheckpointEffects(json, i),
@@ -221,13 +221,13 @@ export function parseJobSecondaryCheckpoint(json: any, index: number) {
 
 function parseJobCheckpointEffects(json: any, index: number) {
   const result: CheckpointEffect[] = [];
-  const cpbs1Value: number = json?.mission?.cpbs1[index] ?? -1;
-  const cpbs2Value: number = json?.mission?.cpbs2[index] ?? -1;
+  const cpbs1Value: number = json?.mission?.race?.cpbs1[index] ?? -1;
+  const cpbs2Value: number = json?.mission?.race?.cpbs2[index] ?? -1;
 
   CHECKPOINT_EFFECTS.forEach(effect => {
     if (
-      (1 === effect.nativeCpbsType && isBitSet(cpbs1Value, effect.index))
-      || (2 === effect.nativeCpbsType && isBitSet(cpbs2Value, effect.index))
+      (1 === effect.nativeCpbsType && -1 !== cpbs1Value && isBitSet(cpbs1Value, effect.index))
+      || (2 === effect.nativeCpbsType && -1 !== cpbs2Value && isBitSet(cpbs2Value, effect.index))
     ) {
       result.push(effect);
     }

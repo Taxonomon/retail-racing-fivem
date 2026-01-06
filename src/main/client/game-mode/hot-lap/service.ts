@@ -8,6 +8,7 @@ import {
 import {switchGameModeTo} from "../service";
 import {teleportPlayerToCoordinates} from "../../player/service";
 import rockstarJobState from "../../rockstar/job/state";
+import logger from "../../logging/logger";
 
 export async function startHotLap(jobHash: string) {
   if ('RACE' === gameModeState.gameMode) {
@@ -30,15 +31,19 @@ export async function startHotLap(jobHash: string) {
   const loadedJob = rockstarJobState.loadedJob;
 
   if (undefined !== loadedJob) {
-    await teleportPlayerToCoordinates(
-      loadedJob.spawnPointCoordinates,
-      loadedJob.spawnPointHeading,
-      {
-        freezeAfterTeleportForMs: 500,
-        teleportWithVehicle: true,
-        findCollisionLand: true
-      }
-    );
+    try {
+      await teleportPlayerToCoordinates(
+        loadedJob.spawnPointCoordinates,
+        loadedJob.spawnPointHeading,
+        {
+          freezeAfterTeleportForMs: 500,
+          teleportWithVehicle: true,
+          findCollisionLand: true
+        }
+      );
+    } catch (error: any) {
+      logger.error(`Failed to teleport player to loaded job's spawn coordinates: ${error.message}`);
+    }
   }
   // - start drawing checkpoints (target and follow-up)
   //   - if player passes checkpoint: draw next pair
