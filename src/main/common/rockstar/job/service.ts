@@ -5,6 +5,7 @@ import {RaceDistance} from "./race-distance";
 import {METER} from "../../unit/unit";
 import {Prop} from "./prop";
 import {FixtureRemoval} from "./fixture-removal";
+import {Checkpoint} from "./checkpoint";
 
 const DEFAULT_FIXTURE_REMOVAL_RADIUS = 3;
 
@@ -70,13 +71,13 @@ export function parseJobProps(json: any): Prop[] {
 
 function parseJobStaticProps(json: any, propProps: PropProps): Prop[] {
   const result: Prop[] = [];
-  const propCount: number = json?.mission?.prop?.no ?? 0;
+  const count: number = json?.mission?.prop?.no ?? 0;
 
-  if (undefined === json?.mission?.prop || 0 === propCount) {
+  if (undefined === json?.mission?.prop) {
     return result;
   }
 
-  for (let i = 0; i < propCount; i++) {
+  for (let i = 0; i < count; i++) {
     try {
       result.push({
         hash: json.mission.prop.model[i],
@@ -104,13 +105,13 @@ function parseJobStaticProps(json: any, propProps: PropProps): Prop[] {
 
 function parseDynamicProps(json: any, propProps: PropProps): Prop[] {
   const result: Prop[] = [];
-  const propCount: number = json?.mission?.dprop?.no ?? 0;
+  const count: number = json?.mission?.dprop?.no ?? 0;
 
-  if (undefined === json?.mission?.dprop || 0 === propCount) {
+  if (undefined === json?.mission?.dprop) {
     return result;
   }
 
-  for (let i = 0; i < propCount; i++) {
+  for (let i = 0; i < count; i++) {
     try {
       result.push({
         hash: json.mission.dprop.model[i],
@@ -136,16 +137,15 @@ function parseDynamicProps(json: any, propProps: PropProps): Prop[] {
   return result;
 }
 
-export function parseFixtureRemovals(json: any): FixtureRemoval[] {
+export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
   const result: FixtureRemoval[] = [];
+  const count: number = json?.mission?.dhprop?.no ?? 0;
 
-  const fixtureRemovalCount: number = json?.mission?.dhprop?.no ?? 0;
-
-  if (undefined === json?.mission?.dhprop || 0 === fixtureRemovalCount) {
+  if (undefined === json?.mission?.dhprop) {
     return result;
   }
 
-  for (let i = 0; i < fixtureRemovalCount; i++) {
+  for (let i = 0; i < count; i++) {
     try {
       result.push({
         hash: json.mission.dhprop.mn[i],
@@ -159,6 +159,17 @@ export function parseFixtureRemovals(json: any): FixtureRemoval[] {
     } catch (error: any) {
       // swallow and do nothing
     }
+  }
+
+  return result;
+}
+
+export function parseJobCheckpoints(json: any) {
+  const result: Checkpoint[] = [];
+  const count = json?.mission?.race?.chp?.length ?? 0;
+
+  for (let i = 0; i < count; i++) {
+
   }
 
   return result;
