@@ -1,5 +1,3 @@
-import {JobType, RACE} from "../../../../common/rockstar/job-type";
-import {LAND, RaceType, STUNT} from "../../../../common/rockstar/race-type";
 import {registerAuthorizedCommand} from "../../../command/service";
 import playerState from "../../../player/state";
 import {
@@ -9,13 +7,15 @@ import {
   parseJobName,
   parseJobType,
   parseRaceType
-} from "../parse/service";
+} from "../../../../common/rockstar/job/service";
 import {hashWithMd5} from "../../../../common/hash";
 import logger from "../../../logging/logger";
 import {LOG_LEVELS} from "../../../../common/logging/level";
 import {wait} from "../../../../common/wait";
 import {findRockstarJobByJobId, insertRockstarJob, RockstarJob} from "../database";
 import {PERMISSIONS} from "../../../player/authorization/service";
+import {JobType, RACE} from "../../../../common/rockstar/job/job-type";
+import {LAND, RaceType, STUNT} from "../../../../common/rockstar/job/race-type";
 
 const EXPECTED_JOB_ID_LENGTH = 22;
 const REGEX_ROCKSTAR_JOB_ID = /[a-zA-Z0-9-_)]+$/;
@@ -23,9 +23,11 @@ const URL_RANGE_X = 3;
 const URL_RANGE_Y = 500;
 const JSON_LANGUAGES = ["en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"];
 const TIMEOUT_BETWEEN_FETCHES_MS = 100;
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-  + ' AppleWebKit/537.36 (KHTML, like Gecko)'
-  + ' Chrome/91.0.4472.124 Safari/537.36';
+const USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+  'AppleWebKit/537.36 (KHTML, like Gecko)',
+  'Chrome/91.0.4472.124 Safari/537.36'
+];
 
 const SUPPORTED_JOB_TYPES: Set<JobType> = new Set([ RACE ]);
 const SUPPORTED_RACE_TYPES: Set<RaceType> = new Set([ LAND, STUNT ]);
@@ -121,7 +123,7 @@ async function fetchRockstarJobJson(jobId: string) {
         try {
           const response = await fetch(toRockstarJobLink(jobId, x, y, language), {
             method: 'GET',
-            headers: {'User-Agent': USER_AGENT}
+            headers: {'User-Agent': USER_AGENTS.join(' ')}
           });
           if (200 === response.status) {
             return response.json();

@@ -25,7 +25,7 @@ import {
   setMenuItemIcon
 } from "../gui/menu/api/service";
 import Item from "../gui/menu/api/item";
-import {FRONT_DRIVER} from "../../common/rockstar/vehicle-seat";
+import {FRONT_DRIVER} from "../../common/rockstar/vehicle/vehicle-seat";
 
 const VEHICLE_MENU_ITEM_IDS = {
   MAIN: {

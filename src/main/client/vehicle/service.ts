@@ -8,9 +8,12 @@ import {loadModelByHash} from "../../common/model";
 import {getBooleanPlayerSetting, getStringArrayPlayerSetting, updatePlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
 import {updateKeepVehicleCleanItemIcon, updateRecentlySpawnedVehiclesMenu} from "./menu";
-import {FRONT_DRIVER, VEHICLE_SEATS, VehicleSeat} from "../../common/rockstar/vehicle-seat";
-import {LeaveVehicleFlag, TELEPORT_OUTSIDE_KEEP_DOOR_CLOSED} from "../../common/rockstar/leave-vehicle-flag";
-import {VEHICLE_CLASSES} from "../../common/rockstar/vehicle-class";
+import {FRONT_DRIVER, VEHICLE_SEATS, VehicleSeat} from "../../common/rockstar/vehicle/vehicle-seat";
+import {
+  LeaveVehicleFlag,
+  TELEPORT_OUTSIDE_KEEP_DOOR_CLOSED
+} from "../../common/rockstar/vehicle/leave-vehicle-flag";
+import {VEHICLE_CLASSES} from "../../common/rockstar/vehicle/vehicle-class";
 
 const CAR_NOT_FOUND = 'CARNOTFOUND';
 const REGEX_STARTS_WITH_NUMBER = /^\d/;

@@ -1,8 +1,8 @@
-import {getRaceTypeById, RaceType} from "../../../../common/rockstar/race-type";
-import {getJobTypeById, JobType} from "../../../../common/rockstar/job-type";
-import {RaceDistance} from "../../../../common/rockstar/race-distance";
-import {METER} from "../../../../common/unit/unit";
-import {JOB_AREAS, JobArea} from "../../../../common/rockstar/job-area";
+import {getJobTypeById, JobType} from "./job-type";
+import {JOB_AREAS, JobArea} from "./job-area";
+import {getRaceTypeById, RaceType} from "./race-type";
+import {RaceDistance} from "./race-distance";
+import {METER} from "../../unit/unit";
 
 export function parseJobName(json: any): string | undefined {
   return json?.mission?.gen?.nm?.toString();
