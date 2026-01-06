@@ -9,5 +9,5 @@ export type CheckpointProps = {
 
 export type Checkpoint = CheckpointProps & {
   effects: CheckpointEffect[];
-  secondaryCheckpoint: CheckpointProps;
+  secondaryCheckpoint?: CheckpointProps;
 };

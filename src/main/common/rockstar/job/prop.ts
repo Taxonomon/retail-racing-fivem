@@ -9,3 +9,7 @@ export type Prop = {
   hasCollision: boolean;
   color?: number;
 };
+
+export const PROP_ROTATION_ORDER = {
+  Z_Y_X: 2
+};

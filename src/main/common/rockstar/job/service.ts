@@ -7,6 +7,7 @@ import {Prop} from "./prop";
 import {FixtureRemoval} from "./fixture-removal";
 import {Checkpoint} from "./checkpoint";
 import {CHECKPOINT_EFFECTS, CheckpointEffect} from "./checkpoint-effect";
+import logger from "../../../gui/logging/logger";
 
 const DEFAULT_FIXTURE_REMOVAL_RADIUS = 3;
 const MINIMUM_CHECKPOINT_SIZE = 50;
@@ -98,7 +99,7 @@ function parseJobStaticProps(json: any, propProps: PropProps): Prop[] {
         color: json?.mission?.prop?.prpclr[i] ?? 0
       });
     } catch (error: any) {
-      // swallow & do nothing
+      logger.warn(`Failed to parse static prop ${i}: ${error.message}`);
     }
   }
 
@@ -132,7 +133,7 @@ function parseDynamicProps(json: any, propProps: PropProps): Prop[] {
         color: json?.mission?.dprop?.prpdclr[i] ?? 0
       });
     } catch (error: any) {
-      // swallow & do nothing
+      logger.warn(`Failed to parse dynamic prop ${i}: ${error.message}`);
     }
   }
 
@@ -150,6 +151,7 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
   for (let i = 0; i < count; i++) {
     try {
       result.push({
+        enabled: false,
         hash: json.mission.dhprop.mn[i],
         coordinates: {
           x: json.mission.dhprop.pos[i].x,
@@ -159,7 +161,7 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
         radius: json?.mission?.dhprop?.wprad[i] ?? DEFAULT_FIXTURE_REMOVAL_RADIUS
       });
     } catch (error: any) {
-      // swallow and do nothing
+      logger.warn(`Failed to parse fixture removal ${i}: ${error.message}`);
     }
   }
 
@@ -181,18 +183,10 @@ export function parseJobCheckpoints(json: any) {
         heading: json.mission.race.chh[i],
         size: Math.max(json?.mission?.race?.chs ?? 0, MINIMUM_CHECKPOINT_SIZE),
         effects: parseJobCheckpointEffects(json, i),
-        secondaryCheckpoint: {
-          coordinates: {
-            x: json.mission.race.sndchk[i].x,
-            y: json.mission.race.sndchk[i].y,
-            z: json.mission.race.sndchk[i].z,
-          },
-          heading: json.mission.race.sndrsp[i],
-          size: Math.max(json?.mission?.race?.chs2 ?? 0, MINIMUM_CHECKPOINT_SIZE)
-        }
+        secondaryCheckpoint: parseJobSecondaryCheckpoint(json, i)
       });
     } catch (error: any) {
-      // swallow and do nothing
+      logger.warn(`Failed to parse checkpoint ${i}: ${error.message}`);
     }
   }
 
@@ -206,6 +200,22 @@ export function parseJobCheckpoints(json: any) {
     ];
   } catch (error: any) {
     return result;
+  }
+}
+
+export function parseJobSecondaryCheckpoint(json: any, index: number) {
+  try {
+    return {
+      coordinates: {
+        x: json.mission.race.sndchk[index].x,
+          y: json.mission.race.sndchk[index].y,
+          z: json.mission.race.sndchk[index].z,
+      },
+      heading: json.mission.race.sndrsp[index],
+        size: Math.max(json?.mission?.race?.chs2 ?? 0, MINIMUM_CHECKPOINT_SIZE)
+    }
+  } catch (error: any) {
+    return undefined;
   }
 }
 

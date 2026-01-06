@@ -5,15 +5,24 @@ import logger from "../../logging/logger";
 import {AvailableJob} from "../../../common/rockstar/job/available-job";
 import toast from "../../gui/toasts/service";
 import {updateGameModeMenus} from "../../game-mode/menu";
-import {Prop} from "../../../common/rockstar/job/prop";
+import {Prop, PROP_ROTATION_ORDER} from "../../../common/rockstar/job/prop";
 import {FixtureRemoval} from "../../../common/rockstar/job/fixture-removal";
 import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
 import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
+import playerState from "../../player/state";
+import playerUtilService from "../../player/util/service";
+import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
+import {loadModelByHash} from "../../../common/model";
+
+const PLAYER_DETECTION_RADIUS = 500;
+const PROP_LOD_DISTANCE = 16960;
 
 export type LoadedJob = AvailableJob & {
   props: Prop[];
   fixtureRemovals: FixtureRemoval[];
   checkpoints: Checkpoint[];
+  spawnPointCoordinates: Vector3;
+  spawnPointHeading: number;
 };
 
 export async function fetchAllRockstarJobs() {
@@ -28,21 +37,35 @@ export async function fetchAllRockstarJobs() {
   }
 }
 
-export function loadJob(jobHash: string) {
+export async function loadJob(jobHash: string) {
   const job = rockstarJobState.availableJobs.find(job => job.hash === jobHash);
 
   if (undefined === job) {
     throw new Error('job not available');
   }
 
+  const props: Prop[] = parseJobProps(job.data);
+  logger.debug(`Parsed ${props.length} prop(s) of job ${job.hash}`);
+
+  const fixtureRemovals: FixtureRemoval[] = parseJobFixtureRemovals(job.data);
+  logger.debug(`Parsed ${fixtureRemovals.length} fixture removal(s) of job ${job.hash}`);
+
+  const checkpoints: Checkpoint[] = parseJobCheckpoints(job.data);
+  logger.debug(`Parsed ${checkpoints.length} checkpoint(s) of job ${job.hash}`);
+
+  for (const prop of props) {
+    await loadModelByHash(prop.hash);
+  }
+  logger.debug(`Loaded ${props.length} prop models of job ${job.hash}`);
+
   rockstarJobState.loadedJob = {
     ...job,
-    props: parseJobProps(job.data),
-    fixtureRemovals: parseJobFixtureRemovals(job.data),
-    checkpoints: parseJobCheckpoints(job.data)
+    spawnPointCoordinates: checkpoints[-2].coordinates,
+    spawnPointHeading: checkpoints[-2].heading,
+    props,
+    fixtureRemovals,
+    checkpoints
   };
-
-  // TODO load models for all props of loaded job
 
   logger.debug(`Loaded job ${jobHash} (parsed props, fixture removals and checkpoints)`);
 }
@@ -59,12 +82,55 @@ export function stopUpdatingNearbyJobPropsAndFixtures() {
   }
 }
 
-function updateNearbyJobPropsAndFixtures() {
+async function updateNearbyJobPropsAndFixtures() {
   if (undefined === rockstarJobState.loadedJob) {
     return;
   }
 
   const { props, fixtureRemovals } = rockstarJobState.loadedJob;
+  const playerCoords = playerState.coords ?? playerUtilService.getCoords();
+
+  for (const prop of props) {
+    const withinPlayerDistance = distanceBetweenVector3s(
+      playerCoords,
+      prop.coordinates
+    ) <= PLAYER_DETECTION_RADIUS;
+
+    if (withinPlayerDistance && undefined === prop.ref) {
+      try {
+        prop.ref = await placeProp(prop);
+      } catch (error: any) {
+        logger.warn(
+          `Failed to place prop ${prop.hash} at ${JSON.stringify(prop.coordinates)}: `
+          + `${error.message}`
+        );
+      }
+    } else if (undefined !== prop.ref) {
+      DeleteObject(prop.ref);
+      prop.ref = undefined;
+    }
+  }
+
+  for (const fixtureRemoval of fixtureRemovals) {
+    const withinPlayerDistance = distanceBetweenVector3s(
+      playerCoords,
+      fixtureRemoval.coordinates
+    ) <= PLAYER_DETECTION_RADIUS;
+
+    if (withinPlayerDistance && !fixtureRemoval.enabled) {
+      try {
+        enableFixtureRemoval(fixtureRemoval);
+      } catch (error: any) {
+        logger.warn(
+          `Failed to enable fixture removal ${fixtureRemoval.hash} `
+          + `at ${JSON.stringify(fixtureRemoval.coordinates)}: `
+          + `${error.message}`
+        );
+      }
+    } else if (fixtureRemoval.enabled) {
+      disableFixtureRemoval(fixtureRemoval);
+    }
+  }
 
   // check distance of prop/fixture coords to current player
   // if in distance: place
@@ -74,4 +140,69 @@ function updateNearbyJobPropsAndFixtures() {
 export function tearDownPlacedJob() {
   // remove all placed props
   // replace all removed fixtures
+}
+
+async function placeProp(prop: Prop) {
+  if (!IsModelInCdimage(prop.hash)) {
+    throw new Error('not in cdimage');
+  } else if (!IsModelValid(prop.hash)) {
+    throw new Error('invalid model');
+  }
+
+  if (!HasModelLoaded(prop.hash)) {
+    await loadModelByHash(prop.hash);
+  }
+
+  const propRef = CreateObjectNoOffset(
+    prop.hash,
+    prop.coordinates.x,
+    prop.coordinates.y,
+    prop.coordinates.z,
+    false,
+    true,
+    false
+  );
+
+  SetEntityRotation(
+    propRef,
+    prop.rotation.x,
+    prop.rotation.y,
+    prop.rotation.z,
+    PROP_ROTATION_ORDER.Z_Y_X,
+    false
+  );
+
+  if (undefined !== prop.color) {
+    SetObjectTextureVariant(propRef, prop.color);
+  }
+
+  SetEntityLodDist(propRef, PROP_LOD_DISTANCE);
+  SetEntityCollision(propRef, !prop.hasCollision, !prop.hasCollision);
+  FreezeEntityPosition(propRef, true); // to freeze dynamic props
+
+  return propRef;
+}
+
+function enableFixtureRemoval(fixtureRemoval: FixtureRemoval) {
+  CreateModelHideExcludingScriptObjects(
+    fixtureRemoval.coordinates.x,
+    fixtureRemoval.coordinates.y,
+    fixtureRemoval.coordinates.z,
+    fixtureRemoval.radius,
+    fixtureRemoval.hash,
+    true
+  );
+  fixtureRemoval.enabled = true;
+}
+
+function disableFixtureRemoval(fixtureRemoval: FixtureRemoval) {
+  RemoveModelHide(
+    fixtureRemoval.coordinates.x,
+    fixtureRemoval.coordinates.y,
+    fixtureRemoval.coordinates.z,
+    fixtureRemoval.radius,
+    fixtureRemoval.hash,
+    false
+  );
+  fixtureRemoval.enabled = false;
 }

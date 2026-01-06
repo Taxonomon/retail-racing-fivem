@@ -1,7 +1,7 @@
 import {Vector3} from "../../vector";
 
 export type FixtureRemoval = {
-  ref?: number;
+  enabled: boolean;
   hash: number;
   coordinates: Vector3;
   radius: number;
