@@ -8,7 +8,7 @@ import {updateGameModeMenus} from "../../game-mode/menu";
 import {Prop} from "../../../common/rockstar/job/prop";
 import {FixtureRemoval} from "../../../common/rockstar/job/fixture-removal";
 import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
-import parseJobCheckpoints, {parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
+import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
 
 export type LoadedJob = AvailableJob & {
   props: Prop[];
@@ -41,6 +41,10 @@ export function loadJob(jobHash: string) {
     fixtureRemovals: parseJobFixtureRemovals(job.data),
     checkpoints: parseJobCheckpoints(job.data)
   };
+
+  // TODO load models for all props of loaded job
+
+  logger.debug(`Loaded job ${jobHash} (parsed props, fixture removals and checkpoints)`);
 }
 
 export function startUpdatingNearbyJobPropsAndFixtures() {

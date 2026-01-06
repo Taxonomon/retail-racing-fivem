@@ -166,7 +166,7 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
   return result;
 }
 
-function parseJobCheckpoints(json: any) {
+export function parseJobCheckpoints(json: any) {
   const result: Checkpoint[] = [];
   const count = json?.mission?.race?.chp?.length ?? 0;
 
