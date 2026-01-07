@@ -11,7 +11,7 @@ import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
 import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
 import playerState from "../../player/state";
 import playerUtilService from "../../player/util/service";
-import {distanceBetweenVector3s} from "../../../common/vector";
+import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
 import {loadModelByHash} from "../../../common/model";
 
 const PLAYER_DETECTION_RADIUS = 500;
@@ -54,7 +54,12 @@ export async function getPreLoadedJobObjectsFromAvailableJob(job: AvailableJob) 
 
 export function startUpdatingNearbyJobPropsAndFixtures() {
   if (!rockstarJobState.updateNearbyPropsAndFixtures.isRunning()) {
-    rockstarJobState.updateNearbyPropsAndFixtures.start(updateNearbyJobPropsAndFixtures);
+    rockstarJobState.updateNearbyPropsAndFixtures.start(async () => {
+      const { props, fixtureRemovals } = rockstarJobState.loadedJob;
+      const playerCoordinates = playerState.coords ?? playerUtilService.getCoords();
+      await updateNearbyProps(playerCoordinates, props, PLAYER_DETECTION_RADIUS);
+      await updateNearbyFixtureRemovals(playerCoordinates, fixtureRemovals, PLAYER_DETECTION_RADIUS);
+    });
   }
 }
 
@@ -64,19 +69,16 @@ export function stopUpdatingNearbyJobPropsAndFixtures() {
   }
 }
 
-async function updateNearbyJobPropsAndFixtures() {
-  if (undefined === rockstarJobState.loadedJob) {
-    return;
-  }
-
-  const { props, fixtureRemovals } = rockstarJobState.loadedJob;
-  const playerCoords = playerState.coords ?? playerUtilService.getCoords();
-
+async function updateNearbyProps(
+  playerCoordinates: Vector3,
+  props: Prop[],
+  detectionRadius: number
+) {
   for (const prop of props) {
     const withinPlayerDistance = distanceBetweenVector3s(
-      playerCoords,
+      playerCoordinates,
       prop.coordinates
-    ) <= PLAYER_DETECTION_RADIUS;
+    ) <= detectionRadius;
 
     if (withinPlayerDistance && undefined === prop.ref) {
       try {
@@ -88,16 +90,21 @@ async function updateNearbyJobPropsAndFixtures() {
         );
       }
     } else if (!withinPlayerDistance && undefined !== prop.ref) {
-      DeleteObject(prop.ref);
-      prop.ref = undefined;
+      removeProp(prop);
     }
   }
+}
 
+async function updateNearbyFixtureRemovals(
+  playerCoordinates: Vector3,
+  fixtureRemovals: FixtureRemoval[],
+  detectionRadius: number
+) {
   for (const fixtureRemoval of fixtureRemovals) {
     const withinPlayerDistance = distanceBetweenVector3s(
-      playerCoords,
+      playerCoordinates,
       fixtureRemoval.coordinates
-    ) <= PLAYER_DETECTION_RADIUS;
+    ) <= detectionRadius;
 
     if (withinPlayerDistance && !fixtureRemoval.enabled) {
       try {
@@ -116,8 +123,22 @@ async function updateNearbyJobPropsAndFixtures() {
 }
 
 export function tearDownPlacedJob() {
-  // remove all placed props
-  // replace all removed fixtures
+  const { props, fixtureRemovals } = rockstarJobState.loadedJob;
+
+  // remove placed props
+  props.forEach(prop => {
+    if (undefined !== prop.ref) {
+      SetModelAsNoLongerNeeded(prop.ref);
+      removeProp(prop);
+    }
+  });
+
+  // disable fixture removals
+  fixtureRemovals.forEach(fixtureRemoval => {
+    if (fixtureRemoval.enabled) {
+      disableFixtureRemoval(fixtureRemoval);
+    }
+  });
 }
 
 async function placeProp(prop: Prop) {
@@ -161,6 +182,13 @@ async function placeProp(prop: Prop) {
   return propRef;
 }
 
+function removeProp(prop: Prop) {
+  if (undefined !== prop.ref) {
+    DeleteObject(prop.ref);
+    prop.ref = undefined;
+  }
+}
+
 function enableFixtureRemoval(fixtureRemoval: FixtureRemoval) {
   CreateModelHideExcludingScriptObjects(
     fixtureRemoval.coordinates.x,
@@ -183,4 +211,62 @@ function disableFixtureRemoval(fixtureRemoval: FixtureRemoval) {
     false
   );
   fixtureRemoval.enabled = false;
+}
+
+export function placeJobCheckpoint(checkpoint: Checkpoint, followUpCheckpointCoordinates: Vector3) {
+  checkpoint.ref ??= CreateCheckpoint(
+    1, // simple checkpoint
+    checkpoint.coordinates.x,
+    checkpoint.coordinates.y,
+    checkpoint.coordinates.z,
+    followUpCheckpointCoordinates.x,
+    followUpCheckpointCoordinates.y,
+    followUpCheckpointCoordinates.z,
+    checkpoint.size,
+    255,
+    255,
+    255,
+    100,
+    0
+  );
+  logger.debug(`Placed checkpoint at ${JSON.stringify(checkpoint.coordinates)}`);
+
+  if (undefined !== checkpoint.secondaryCheckpoint) {
+    checkpoint.secondaryCheckpoint.ref ??= CreateCheckpoint(
+      0, // simple checkpoint
+      checkpoint.coordinates.x,
+      checkpoint.coordinates.y,
+      checkpoint.coordinates.z,
+      followUpCheckpointCoordinates.x,
+      followUpCheckpointCoordinates.y,
+      followUpCheckpointCoordinates.z,
+      checkpoint.size,
+      255,
+      255,
+      255,
+      1,
+      0
+    );
+    logger.debug(
+      `Placed secondary checkpoint at `
+      + `${JSON.stringify(checkpoint.secondaryCheckpoint.coordinates)}`
+    );
+  }
+}
+
+export function removeJobCheckpoint(checkpoint: Checkpoint) {
+  if (undefined !== checkpoint.ref) {
+    DeleteCheckpoint(checkpoint.ref);
+    checkpoint.ref = undefined;
+    logger.debug(`Removed checkpoint at ${JSON.stringify(checkpoint.coordinates)}`);
+  }
+
+  if (undefined !== checkpoint.secondaryCheckpoint?.ref) {
+    DeleteCheckpoint(checkpoint.secondaryCheckpoint.ref);
+    checkpoint.secondaryCheckpoint.ref = undefined;
+    logger.debug(
+      `Removed secondary checkpoint at `
+      + `${JSON.stringify(checkpoint.secondaryCheckpoint.coordinates)}`
+    );
+  }
 }

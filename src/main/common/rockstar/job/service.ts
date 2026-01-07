@@ -5,12 +5,12 @@ import {RaceDistance} from "./race-distance";
 import {METER} from "../../unit/unit";
 import {Prop} from "./prop";
 import {FixtureRemoval} from "./fixture-removal";
-import {Checkpoint, CheckpointProps} from "./checkpoint";
+import {Checkpoint} from "./checkpoint";
 import {CHECKPOINT_EFFECTS, CheckpointEffect} from "./checkpoint-effect";
 import logger from "../../../client/logging/logger";
 
 const DEFAULT_FIXTURE_REMOVAL_RADIUS = 3;
-const MINIMUM_CHECKPOINT_SIZE = 50;
+const MINIMUM_CHECKPOINT_SIZE = 5;
 
 type PropProps = {
   hasLODDistances: boolean;
@@ -181,7 +181,7 @@ export function parseJobCheckpoints(json: any) {
       result.push({
         coordinates: json.mission.race.chl[i],
         heading: json.mission.race.chh[i],
-        size: Math.max(json?.mission?.race?.chs ?? 0, MINIMUM_CHECKPOINT_SIZE),
+        size: Math.max(json?.mission?.race?.chs[i] ?? 0, MINIMUM_CHECKPOINT_SIZE),
         effects: parseJobCheckpointEffects(json, i),
         secondaryCheckpoint: parseJobSecondaryCheckpoint(json, i)
       });
@@ -212,7 +212,7 @@ export function parseJobSecondaryCheckpoint(json: any, index: number) {
           z: json.mission.race.sndchk[index].z,
       },
       heading: json.mission.race.sndrsp[index],
-        size: Math.max(json?.mission?.race?.chs2 ?? 0, MINIMUM_CHECKPOINT_SIZE)
+      size: Math.max(json?.mission?.race?.chs2[index] ?? 0, MINIMUM_CHECKPOINT_SIZE),
     }
   } catch (error: any) {
     return undefined;

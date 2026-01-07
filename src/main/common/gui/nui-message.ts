@@ -12,5 +12,6 @@ export const NUI_MSG_IDS = {
   TOASTS: {
     ADD: 'txn:gui:toasts:add'
   },
-  HUD: 'txn:gui:hud'
+  HUD: 'txn:gui:hud',
+  LAP_TIMER: 'txn:gui:lap-timer'
 };

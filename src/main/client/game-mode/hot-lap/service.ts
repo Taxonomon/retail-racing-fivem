@@ -1,6 +1,6 @@
 import gameModeState from "../state";
 import {
-  getPreLoadedJobObjectsFromAvailableJob, JobObjects,
+  getPreLoadedJobObjectsFromAvailableJob, JobObjects, placeJobCheckpoint, removeJobCheckpoint,
   startUpdatingNearbyJobPropsAndFixtures,
   stopUpdatingNearbyJobPropsAndFixtures,
   tearDownPlacedJob
@@ -13,6 +13,8 @@ import {AvailableJob} from "../../../common/rockstar/job/available-job";
 import hotLapState from "./state";
 import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
 import {waitOneFrame} from "../../../common/wait";
+import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
+import playerState from "../../player/state";
 
 const FREEZE_CLIENT_ON_SPAWN_POINT_FOR_MS = 1000;
 
@@ -30,20 +32,28 @@ export async function startHotLap(jobHash: string) {
   }
 
   rockstarJobState.loadedJob = { ...job, ...await getPreLoadedJobObjectsFromAvailableJob(job) };
+
+  const spawnCheckpoint = getHotLapSpawnCheckPoint();
+  hotLapState.currentCheckpoint = spawnCheckpoint.index;
+
   startUpdatingNearbyJobPropsAndFixtures();
-  await teleportClientToHotLapSpawnPoint();
+  startUpdatingHotLapCheckpoints();
+
+  await teleportClientToHotLapSpawnPoint(
+    spawnCheckpoint.checkpoint.coordinates,
+    spawnCheckpoint.checkpoint.heading
+  );
+
   switchGameModeTo('HOT_LAP');
 }
 
-async function teleportClientToHotLapSpawnPoint() {
-  const spawnCheckPoint: Checkpoint = getHotLapSpawnCheckPoint();
-
+async function teleportClientToHotLapSpawnPoint(coordinates: Vector3, heading: number) {
   // The client's hot lap spawn point may be on top of a prop.
   // In that case: freeze the client's position for a guesstimated amount of time
   // until the prop below them is placed.
   FreezeEntityPosition(PlayerId(), true);
-  setClientCoordinates(spawnCheckPoint.coordinates);
-  setClientHeading(spawnCheckPoint.heading);
+  setClientCoordinates(coordinates);
+  setClientHeading(heading);
 
   const teleportFinishedAt = GetGameTimer();
   while (GetGameTimer() - teleportFinishedAt < FREEZE_CLIENT_ON_SPAWN_POINT_FOR_MS) {
@@ -54,9 +64,9 @@ async function teleportClientToHotLapSpawnPoint() {
   logger.debug(`Teleported client to hot lap spawn point`);
 }
 
-function getHotLapSpawnCheckPoint() {
+function getHotLapSpawnCheckPoint(): { checkpoint: Checkpoint; index: number } {
   const checkpoints: Checkpoint[] = rockstarJobState.loadedJob.checkpoints;
-  let result: Checkpoint | undefined;
+  let index: number | undefined;
 
   switch (checkpoints.length) {
     case 0: {
@@ -66,31 +76,78 @@ function getHotLapSpawnCheckPoint() {
       throw new Error('loaded job only has a single checkpoint');
     }
     case 2: {
-      result = checkpoints.at(0);
+      index = 0;
       break;
     }
     case 3: {
-      result = checkpoints.at(-1);
+      index = -1;
       break;
     }
     case 4: {
-      result = checkpoints.at(-2);
+      index = -2;
       break;
     }
     default: {
-      result = checkpoints.at(-3);
+      index = -3;
       break;
     }
   }
 
-  if (undefined === result) {
+  const checkpoint: Checkpoint | undefined = checkpoints.at(index);
+
+  if (undefined === checkpoint) {
     throw new Error('no viable spawn check point found');
   }
 
-  return result;
+  return { checkpoint, index };
 }
 
 function tearDownCurrentHotLap() {
   stopUpdatingNearbyJobPropsAndFixtures();
   tearDownPlacedJob();
+}
+
+function startUpdatingHotLapCheckpoints() {
+  hotLapState.updateCheckpoints.start(() => {
+    const { checkpoints } = rockstarJobState.loadedJob;
+
+    const targetIndex = hotLapState.currentCheckpoint;
+    const followUpIndex = targetIndex === checkpoints.length - 1 ? 0 : targetIndex + 1;
+
+    const target = checkpoints.at(targetIndex);
+    const followUp = checkpoints.at(followUpIndex);
+
+    if (undefined === target) {
+      logger.trace(`target checkpoint undefined`);
+      return;
+    } else if (undefined === followUp) {
+      logger.trace(`follow up checkpoint undefined`);
+      return;
+    }
+
+    if (undefined === target.ref) {
+      placeJobCheckpoint(target, followUp.coordinates);
+    }
+
+    const distanceToTarget = distanceBetweenVector3s(playerState.coords, target.coordinates);
+
+    if (distanceToTarget <= target.size) {
+      logger.trace(`Client is touching target checkpoint (distance: ${distanceToTarget}, target.size: ${target.size})`);
+      hotLapState.currentCheckpoint = followUpIndex;
+      removeJobCheckpoint(target);
+    } else {
+      logger.trace(`Client isn't touching target checkpoint (distance: ${distanceToTarget}, target.size: ${target.size})`);
+    }
+  }, 100);
+}
+
+async function stopUpdatingHotLapCheckpoints() {
+  hotLapState.updateCheckpoints.stop();
+}
+
+function placeInitialCheckpoints(targetCheckpoint: Checkpoint) {
+  const { checkpoints } = rockstarJobState.loadedJob;
+  const targetIndex = checkpoints.findIndex(checkpoint => checkpoint.coordinates === targetCheckpoint.coordinates);
+  const followUpIndex = targetIndex === checkpoints.length - 1 ? 0 : targetIndex + 1;
+  const followUpCheckpoint = checkpoints[followUpIndex];
 }

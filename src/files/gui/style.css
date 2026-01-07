@@ -271,3 +271,13 @@ html, body {
   font-size: var(--font-size-1c75-vh);
   text-shadow: var(--drop-shadow-2-px-vh);
 }
+
+.lap-timer {
+  position: fixed;
+  bottom: 1.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--font-size-4-vh);
+  font-weight: var(--font-weight-semibold);
+  text-shadow: var(--drop-shadow-3-px-vh);
+}
