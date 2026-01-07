@@ -79,7 +79,7 @@ function loadHotLapMenuForFreeMode() {
       title: job.name,
       description: `${job.name}<br><br>Author: ${job.author}`,
       icon: ItemIconType.NONE,
-      onPressed: () => pressHotLapJobItemInFreeMode(job)
+      onPressed: async () => await pressHotLapJobItemInFreeMode(job)
     });
   });
   setMenuDisabled(MENU_IDS.HOT_LAP.MAIN, false);
@@ -98,9 +98,9 @@ function pressHotLapSubMenuItem(item: Item) {
   openSubMenuFromItem(item, MENU_IDS.HOT_LAP.MAIN);
 }
 
-function pressHotLapJobItemInFreeMode(job: AvailableJob) {
+async function pressHotLapJobItemInFreeMode(job: AvailableJob) {
   try {
-    startHotLap(job.hash);
+    await startHotLap(job.hash);
     playSound.select();
   } catch (error: any) {
     logger.error(`Failed to start hot lap for track "${job.name}" (hash=${job.hash}): ${error.message}`);

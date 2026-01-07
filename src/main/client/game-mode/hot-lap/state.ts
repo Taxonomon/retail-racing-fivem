@@ -1,4 +1,4 @@
-import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
+import {LoadedJob} from "./service";
 
 class HotLapState {
 }

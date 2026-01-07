@@ -11,19 +11,18 @@ import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
 import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
 import playerState from "../../player/state";
 import playerUtilService from "../../player/util/service";
-import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
+import {distanceBetweenVector3s} from "../../../common/vector";
 import {loadModelByHash} from "../../../common/model";
 
 const PLAYER_DETECTION_RADIUS = 500;
 const PROP_LOD_DISTANCE = 16960;
 
-// TODO rename to "PlayableJob", turn into class, and put all functions to place/remove objects (all, dynamic, etc.) into it
-export type LoadedJob = AvailableJob & {
+export type LoadedJob = AvailableJob & JobObjects;
+
+export type JobObjects = {
   props: Prop[];
   fixtureRemovals: FixtureRemoval[];
   checkpoints: Checkpoint[];
-  spawnPointCoordinates: Vector3;
-  spawnPointHeading: number;
 };
 
 export async function fetchAllRockstarJobs() {
@@ -38,37 +37,19 @@ export async function fetchAllRockstarJobs() {
   }
 }
 
-export async function loadJob(jobHash: string) {
-  const job = rockstarJobState.availableJobs.find(job => job.hash === jobHash);
-
-  if (undefined === job) {
-    throw new Error('job not available');
-  }
-
-  const props: Prop[] = parseJobProps(job.data);
-  logger.debug(`Parsed ${props.length} prop(s) of job ${job.hash}`);
-
-  const fixtureRemovals: FixtureRemoval[] = parseJobFixtureRemovals(job.data);
-  logger.debug(`Parsed ${fixtureRemovals.length} fixture removal(s) of job ${job.hash}`);
-
-  const checkpoints: Checkpoint[] = parseJobCheckpoints(job.data);
-  logger.debug(`Parsed ${checkpoints.length} checkpoint(s) of job ${job.hash}`);
-
-  for (const prop of props) {
-    await loadModelByHash(prop.hash);
-  }
-  logger.debug(`Loaded ${props.length} prop models of job ${job.hash}`);
-
-  rockstarJobState.loadedJob = {
-    ...job,
-    spawnPointCoordinates: checkpoints.at(-2)!.coordinates,
-    spawnPointHeading: checkpoints.at(-2)!.heading,
-    props,
-    fixtureRemovals,
-    checkpoints
+export async function getPreLoadedJobObjectsFromAvailableJob(job: AvailableJob) {
+  const jobObjects: JobObjects = {
+    props: parseJobProps(job.data),
+    fixtureRemovals: parseJobFixtureRemovals(job.data),
+    checkpoints: parseJobCheckpoints(job.data)
   };
 
-  logger.debug(`Loaded job ${jobHash} (parsed props, fixture removals and checkpoints)`);
+  // pre-load prop models of all unique prop hashes
+  for (const hash of new Set(jobObjects.props.map(prop => prop.hash))) {
+    await loadModelByHash(hash);
+  }
+
+  return jobObjects;
 }
 
 export function startUpdatingNearbyJobPropsAndFixtures() {
