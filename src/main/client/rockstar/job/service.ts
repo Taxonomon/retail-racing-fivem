@@ -7,15 +7,36 @@ import toast from "../../gui/toasts/service";
 import {updateGameModeMenus} from "../../game-mode/menu";
 import {Prop, PROP_ROTATION_ORDER} from "../../../common/rockstar/job/prop";
 import {FixtureRemoval} from "../../../common/rockstar/job/fixture-removal";
-import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
+import {Checkpoint, CheckpointProps} from "../../../common/rockstar/job/checkpoint";
 import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
 import playerState from "../../player/state";
 import playerUtilService from "../../player/util/service";
 import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
 import {loadModelByHash} from "../../../common/model";
+import {RGBColor} from "../../../common/color";
+import {CheckpointEffect, ROUND, ROUND_SECONDARY} from "../../../common/rockstar/job/checkpoint-effect";
 
 const PLAYER_DETECTION_RADIUS = 500;
 const PROP_LOD_DISTANCE = 16960;
+const ROUND_CHECKPOINT_SIZE_MULTIPLIER = 2.25;
+
+const DEFAULT_CHECKPOINT_CYLINDER_COLOR: RGBColor = { r: 237,  g: 234,  b: 194,  a: 75 };
+const DEFAULT_CHECKPOINT_ICON_COLOR: RGBColor = { r: 18,  g: 122,  b: 219,  a: 100 };
+const DEFAULT_BLIP_COLOR = 5;
+
+const CHECKPOINT_ICON = {
+  SINGLE_ARROW: 1,
+  NO_ICON: 49,
+  FINISH: 4
+};
+
+const BLIP_SPRITES = {
+  RADAR_LEVEL: 1
+};
+
+const BLIP_DISPLAY_MODE = {
+  MAIN_MAP_AND_MINIMAP_SELECTABLE_ON_MAP: 6
+};
 
 export type LoadedJob = AvailableJob & JobObjects;
 
@@ -23,6 +44,20 @@ export type JobObjects = {
   props: Prop[];
   fixtureRemovals: FixtureRemoval[];
   checkpoints: Checkpoint[];
+};
+
+export type PlaceCheckpointProps = CheckpointProps & {
+  isSecondary: boolean;
+  effects?: CheckpointEffect[];
+  followUpCheckpointCoordinates?: Vector3;
+  cylinderColor?: RGBColor;
+  iconColor?: RGBColor;
+};
+
+export type DrawBlipProps = {
+  coordinates: Vector3;
+  scale: number;
+  alpha: number;
 };
 
 export async function fetchAllRockstarJobs() {
@@ -214,44 +249,69 @@ function disableFixtureRemoval(fixtureRemoval: FixtureRemoval) {
 }
 
 export function placeJobCheckpoint(checkpoint: Checkpoint, followUpCheckpointCoordinates: Vector3) {
-  checkpoint.ref ??= CreateCheckpoint(
-    1, // simple checkpoint
-    checkpoint.coordinates.x,
-    checkpoint.coordinates.y,
-    checkpoint.coordinates.z,
-    followUpCheckpointCoordinates.x,
-    followUpCheckpointCoordinates.y,
-    followUpCheckpointCoordinates.z,
-    checkpoint.size,
-    255,
-    255,
-    255,
-    100,
-    0
-  );
-  logger.debug(`Placed checkpoint at ${JSON.stringify(checkpoint.coordinates)}`);
+  checkpoint.ref ??= placeCheckpoint({
+    ...checkpoint,
+    followUpCheckpointCoordinates,
+    isSecondary: false
+  });
 
   if (undefined !== checkpoint.secondaryCheckpoint) {
-    checkpoint.secondaryCheckpoint.ref ??= CreateCheckpoint(
-      0, // simple checkpoint
-      checkpoint.coordinates.x,
-      checkpoint.coordinates.y,
-      checkpoint.coordinates.z,
-      followUpCheckpointCoordinates.x,
-      followUpCheckpointCoordinates.y,
-      followUpCheckpointCoordinates.z,
-      checkpoint.size,
-      255,
-      255,
-      255,
-      1,
-      0
-    );
-    logger.debug(
-      `Placed secondary checkpoint at `
-      + `${JSON.stringify(checkpoint.secondaryCheckpoint.coordinates)}`
+    checkpoint.secondaryCheckpoint.ref ??= placeCheckpoint({
+      ...checkpoint.secondaryCheckpoint,
+      followUpCheckpointCoordinates,
+      isSecondary: true
+    });
+  }
+}
+
+function placeCheckpoint(props: PlaceCheckpointProps): number {
+  const withArrowIcon = undefined !== props.followUpCheckpointCoordinates;
+  const finalProps = undefined === props.effects ? props : applyCheckpointEffects(props);
+
+  const ref = CreateCheckpoint(
+    withArrowIcon ? CHECKPOINT_ICON.SINGLE_ARROW : CHECKPOINT_ICON.NO_ICON,
+    finalProps.coordinates.x,
+    finalProps.coordinates.y,
+    finalProps.coordinates.z,
+    finalProps.followUpCheckpointCoordinates?.x ?? finalProps.coordinates.x,
+    finalProps.followUpCheckpointCoordinates?.y ?? finalProps.coordinates.y,
+    finalProps.followUpCheckpointCoordinates?.z ?? finalProps.coordinates.z,
+    finalProps.size,
+    DEFAULT_CHECKPOINT_CYLINDER_COLOR.r,
+    DEFAULT_CHECKPOINT_CYLINDER_COLOR.g,
+    DEFAULT_CHECKPOINT_CYLINDER_COLOR.b,
+    DEFAULT_CHECKPOINT_CYLINDER_COLOR.a ?? 100,
+    0
+  );
+
+  if (withArrowIcon) {
+    SetCheckpointRgba2(
+      ref,
+      DEFAULT_CHECKPOINT_ICON_COLOR.r,
+      DEFAULT_CHECKPOINT_ICON_COLOR.g,
+      DEFAULT_CHECKPOINT_ICON_COLOR.b,
+      DEFAULT_CHECKPOINT_ICON_COLOR.a ?? 100,
     );
   }
+
+  logger.debug(`Placed checkpoint at ${JSON.stringify(props.coordinates)}`);
+  return ref;
+}
+
+function applyCheckpointEffects(props: PlaceCheckpointProps) {
+  const result: PlaceCheckpointProps = { ...props };
+
+  // this can be done better, but for now this suffices
+  if (undefined === props.effects) {
+    return result;
+  } else if (
+    (props.effects.includes(ROUND) && !props.isSecondary)
+    || (props.effects.includes(ROUND_SECONDARY) && props.isSecondary)
+  ) {
+    result.size *= ROUND_CHECKPOINT_SIZE_MULTIPLIER;
+  }
+
+  return result;
 }
 
 export function removeJobCheckpoint(checkpoint: Checkpoint) {
@@ -268,5 +328,21 @@ export function removeJobCheckpoint(checkpoint: Checkpoint) {
       `Removed secondary checkpoint at `
       + `${JSON.stringify(checkpoint.secondaryCheckpoint.coordinates)}`
     );
+  }
+}
+
+export function drawBlip(props: DrawBlipProps): number {
+  const ref = AddBlipForCoord(props.coordinates.x, props.coordinates.y, props.coordinates.z);
+  SetBlipSprite(ref, BLIP_SPRITES.RADAR_LEVEL);
+  SetBlipColour(ref, DEFAULT_BLIP_COLOR);
+  SetBlipAlpha(ref, props.alpha);
+  SetBlipDisplay(ref, BLIP_DISPLAY_MODE.MAIN_MAP_AND_MINIMAP_SELECTABLE_ON_MAP);
+  SetBlipScale(ref, props.scale);
+  return ref;
+}
+
+export function removeBlip(ref: number) {
+  if (0 !== ref) {
+    RemoveBlip(ref);
   }
 }

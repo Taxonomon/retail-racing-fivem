@@ -100,7 +100,10 @@ function pressHotLapSubMenuItem(item: Item) {
 
 async function pressHotLapJobItemInFreeMode(job: AvailableJob) {
   try {
+    playSound.select();
+    toast.showInfo(`Setting up hot lap session...`);
     await startHotLap(job.hash);
+    toast.showInfo(`Started hot lap on "${job.name}"`);
     playSound.select();
   } catch (error: any) {
     logger.error(`Failed to start hot lap for track "${job.name}" (hash=${job.hash}): ${error.message}`);

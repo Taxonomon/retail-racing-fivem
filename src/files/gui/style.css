@@ -41,6 +41,7 @@ html, body {
 
   /* font families */
   --font-family-geist: 'Geist', sans-serif;
+  --font-family-geist-mono: 'Geist Mono', monospace;
 
   /* font sizes */
   --font-size-1-vh: 1.000vh;
@@ -163,9 +164,10 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: var(--20-px-vh);
+  font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-1c25-vh);
   color: var(--color-mono-900);
-  text-shadow: var(--drop-shadow-1c5-px-vh);
+  text-shadow: var(--drop-shadow-2-px-vh);
 }
 
 /*.drop-shadow-1px {*/
@@ -252,7 +254,6 @@ html, body {
 .hud .speed {
   display: flex;
   vertical-align: bottom;
-  gap: var(--10-px-vh);
   justify-content: flex-end;
   align-items: flex-end;
   font-weight: var(--font-weight-semibold);
@@ -274,10 +275,18 @@ html, body {
 
 .lap-timer {
   position: fixed;
+  display: flex;
+  vertical-align: bottom;
+  justify-content: flex-end;
+  align-items: flex-end;
   bottom: 1.5%;
   left: 50%;
   transform: translateX(-50%);
   font-size: var(--font-size-4-vh);
   font-weight: var(--font-weight-semibold);
   text-shadow: var(--drop-shadow-3-px-vh);
+}
+
+.lap-timer .wrapper {
+  display: inline-block;
 }

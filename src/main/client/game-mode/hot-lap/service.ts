@@ -1,6 +1,9 @@
 import gameModeState from "../state";
 import {
-  getPreLoadedJobObjectsFromAvailableJob, JobObjects, placeJobCheckpoint, removeJobCheckpoint,
+  drawBlip,
+  getPreLoadedJobObjectsFromAvailableJob,
+  placeJobCheckpoint, removeBlip,
+  removeJobCheckpoint,
   startUpdatingNearbyJobPropsAndFixtures,
   stopUpdatingNearbyJobPropsAndFixtures,
   tearDownPlacedJob
@@ -15,8 +18,21 @@ import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
 import {waitOneFrame} from "../../../common/wait";
 import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
 import playerState from "../../player/state";
+import playSound from "../../sound";
+import {updateLapTimer} from "../../gui/lap-timer/service";
 
 const FREEZE_CLIENT_ON_SPAWN_POINT_FOR_MS = 1000;
+
+const DRAW_BLIP_PROPS = {
+  TARGET: {
+    SCALE: 1.3,
+    ALPHA: 255
+  },
+  FOLLOW_UP: {
+    SCALE: 0.65,
+    ALPHA: 130
+  }
+};
 
 export async function startHotLap(jobHash: string) {
   if ('RACE' === gameModeState.gameMode) {
@@ -109,45 +125,61 @@ function tearDownCurrentHotLap() {
 
 function startUpdatingHotLapCheckpoints() {
   hotLapState.updateCheckpoints.start(() => {
+    if (0 !== hotLapState.lap && -1 !== hotLapState.lapStartedAt) {
+      updateLapTimer(GetGameTimer() - hotLapState.lapStartedAt);
+    }
+
     const { checkpoints } = rockstarJobState.loadedJob;
 
-    const targetIndex = hotLapState.currentCheckpoint;
+    const currentIndex = hotLapState.currentCheckpoint;
+    const targetIndex = currentIndex === checkpoints.length - 1 ? 0 : currentIndex + 1;
     const followUpIndex = targetIndex === checkpoints.length - 1 ? 0 : targetIndex + 1;
+
+    // logger.trace(
+    //   `(update checkpoints) `
+    //   + `current: ${currentIndex} | `
+    //   + `target: ${targetIndex} | `
+    //   + `followUp: ${followUpIndex} | `
+    //   + `total: ${checkpoints.length}`
+    // );
 
     const target = checkpoints.at(targetIndex);
     const followUp = checkpoints.at(followUpIndex);
 
-    if (undefined === target) {
-      logger.trace(`target checkpoint undefined`);
-      return;
-    } else if (undefined === followUp) {
-      logger.trace(`follow up checkpoint undefined`);
+    if (undefined === target || undefined === followUp) {
       return;
     }
 
     if (undefined === target.ref) {
       placeJobCheckpoint(target, followUp.coordinates);
+      target.blipRef = drawBlip({
+        coordinates: target.coordinates,
+        scale: DRAW_BLIP_PROPS.TARGET.SCALE,
+        alpha: DRAW_BLIP_PROPS.TARGET.ALPHA
+      });
+      followUp.blipRef = drawBlip({
+        coordinates: followUp.coordinates,
+        scale: DRAW_BLIP_PROPS.FOLLOW_UP.SCALE,
+        alpha: DRAW_BLIP_PROPS.FOLLOW_UP.ALPHA
+      });
     }
 
     const distanceToTarget = distanceBetweenVector3s(playerState.coords, target.coordinates);
 
     if (distanceToTarget <= target.size) {
-      logger.trace(`Client is touching target checkpoint (distance: ${distanceToTarget}, target.size: ${target.size})`);
-      hotLapState.currentCheckpoint = followUpIndex;
+      if (0 === targetIndex) {
+        hotLapState.lap++;
+        hotLapState.lapStartedAt = GetGameTimer();
+      }
+      hotLapState.currentCheckpoint = targetIndex;
       removeJobCheckpoint(target);
-    } else {
-      logger.trace(`Client isn't touching target checkpoint (distance: ${distanceToTarget}, target.size: ${target.size})`);
+      removeBlip(target.blipRef);
+      removeBlip(followUp.blipRef);
+      playSound.checkpointHit();
     }
-  }, 100);
+  });
 }
 
 async function stopUpdatingHotLapCheckpoints() {
   hotLapState.updateCheckpoints.stop();
-}
-
-function placeInitialCheckpoints(targetCheckpoint: Checkpoint) {
-  const { checkpoints } = rockstarJobState.loadedJob;
-  const targetIndex = checkpoints.findIndex(checkpoint => checkpoint.coordinates === targetCheckpoint.coordinates);
-  const followUpIndex = targetIndex === checkpoints.length - 1 ? 0 : targetIndex + 1;
-  const followUpCheckpoint = checkpoints[followUpIndex];
 }

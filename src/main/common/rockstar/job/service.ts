@@ -181,7 +181,7 @@ export function parseJobCheckpoints(json: any) {
       result.push({
         coordinates: json.mission.race.chl[i],
         heading: json.mission.race.chh[i],
-        size: Math.max(json?.mission?.race?.chs[i] ?? 0, MINIMUM_CHECKPOINT_SIZE),
+        size: parseJobCheckpointSize(json?.mission?.race?.chs[i]),
         effects: parseJobCheckpointEffects(json, i),
         secondaryCheckpoint: parseJobSecondaryCheckpoint(json, i)
       });
@@ -196,7 +196,7 @@ export function parseJobCheckpoints(json: any) {
   try {
     return [
       result.at(-1)!,
-      ...result.slice(0, -2)
+      ...result.slice(0, -1)
     ];
   } catch (error: any) {
     return result;
@@ -208,15 +208,23 @@ export function parseJobSecondaryCheckpoint(json: any, index: number) {
     return {
       coordinates: {
         x: json.mission.race.sndchk[index].x,
-          y: json.mission.race.sndchk[index].y,
-          z: json.mission.race.sndchk[index].z,
+        y: json.mission.race.sndchk[index].y,
+        z: json.mission.race.sndchk[index].z,
       },
       heading: json.mission.race.sndrsp[index],
-      size: Math.max(json?.mission?.race?.chs2[index] ?? 0, MINIMUM_CHECKPOINT_SIZE),
+      size: parseJobCheckpointSize(json?.mission?.race?.chs2[index]),
     }
   } catch (error: any) {
     return undefined;
   }
+}
+
+function parseJobCheckpointSize(size: number | undefined) {
+  if (undefined === size) {
+    return DEFAULT_FIXTURE_REMOVAL_RADIUS;
+  }
+  let finalSize = size * 10;
+  return Math.max(finalSize, DEFAULT_FIXTURE_REMOVAL_RADIUS);
 }
 
 function parseJobCheckpointEffects(json: any, index: number) {
