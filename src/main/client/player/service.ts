@@ -8,17 +8,8 @@ export function getClientCoordinates(): Vector3 {
 }
 
 export function setClientCoordinates(coordinates: Vector3) {
-  const vehicleRef = getCurrentVehicleRef()
-  SetEntityCoords(
-    0 === vehicleRef ? PlayerPedId() : vehicleRef,
-    coordinates.x,
-    coordinates.y,
-    coordinates.z,
-    true,
-    true,
-    false,
-    false
-  );
+  const { x, y, z } = coordinates;
+  SetPedCoordsKeepVehicle(PlayerPedId(), x, y, z);
   logger.debug(`Set client's coordinates to ${JSON.stringify(coordinates)}`);
 }
 

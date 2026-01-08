@@ -7,7 +7,7 @@ import {
   parseJobName,
   parseJobType,
   parseRaceType
-} from "../../../../common/rockstar/job/service";
+} from "../../../../common/rockstar/job/parse";
 import {hashWithMd5} from "../../../../common/hash";
 import logger from "../../../logging/logger";
 import {LOG_LEVELS} from "../../../../common/logging/level";

@@ -7,28 +7,22 @@ import toast from "../../gui/toasts/service";
 import {updateGameModeMenus} from "../../game-mode/menu";
 import {Prop, PROP_ROTATION_ORDER} from "../../../common/rockstar/job/prop";
 import {FixtureRemoval} from "../../../common/rockstar/job/fixture-removal";
-import {Checkpoint, CheckpointProps} from "../../../common/rockstar/job/checkpoint";
-import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/service";
+import {Checkpoint} from "../../../common/rockstar/job/checkpoint";
+import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../common/rockstar/job/parse";
 import playerState from "../../player/state";
 import playerUtilService from "../../player/util/service";
 import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
 import {loadModelByHash} from "../../../common/model";
-import {RGBColor} from "../../../common/color";
-import {CheckpointEffect, ROUND, ROUND_SECONDARY} from "../../../common/rockstar/job/checkpoint-effect";
+import {CheckpointDisplay} from "../../../common/rockstar/job/checkpoint-display";
 
 const PLAYER_DETECTION_RADIUS = 500;
 const PROP_LOD_DISTANCE = 16960;
-const ROUND_CHECKPOINT_SIZE_MULTIPLIER = 2.25;
 
-const DEFAULT_CHECKPOINT_CYLINDER_COLOR: RGBColor = { r: 237,  g: 234,  b: 194,  a: 75 };
-const DEFAULT_CHECKPOINT_ICON_COLOR: RGBColor = { r: 18,  g: 122,  b: 219,  a: 100 };
+// moves the checkpoint a little bit down, so that the cylinder doesn't cut off right before the ground
+// on tilted surfaces. the detection should still work the same, as it doesn't take into account height
+// (although it should for air checkpoints in the future)
+const DEFAULT_OFFSET: Vector3 = { x: 0, y: 0, z: 5 };
 const DEFAULT_BLIP_COLOR = 5;
-
-const CHECKPOINT_ICON = {
-  SINGLE_ARROW: 1,
-  NO_ICON: 49,
-  FINISH: 4
-};
 
 const BLIP_SPRITES = {
   RADAR_LEVEL: 1
@@ -46,12 +40,12 @@ export type JobObjects = {
   checkpoints: Checkpoint[];
 };
 
-export type PlaceCheckpointProps = CheckpointProps & {
-  isSecondary: boolean;
-  effects?: CheckpointEffect[];
-  followUpCheckpointCoordinates?: Vector3;
-  cylinderColor?: RGBColor;
-  iconColor?: RGBColor;
+export type PlaceCheckpointProps = {
+  display: CheckpointDisplay;
+  coordinates: Vector3;
+  followUpCoordinates: Vector3;
+  size: number;
+  offset?: Vector3;
 };
 
 export type DrawBlipProps = {
@@ -158,7 +152,7 @@ async function updateNearbyFixtureRemovals(
 }
 
 export function tearDownPlacedJob() {
-  const { props, fixtureRemovals } = rockstarJobState.loadedJob;
+  const { props, fixtureRemovals, checkpoints } = rockstarJobState.loadedJob;
 
   // remove placed props
   props.forEach(prop => {
@@ -172,6 +166,17 @@ export function tearDownPlacedJob() {
   fixtureRemovals.forEach(fixtureRemoval => {
     if (fixtureRemoval.enabled) {
       disableFixtureRemoval(fixtureRemoval);
+    }
+  });
+
+  // remove placed checkpoints
+  checkpoints.forEach(checkpoint => {
+    const { ref, blipRef } = checkpoint;
+    if (undefined !== ref && 0 !== ref) {
+      removeJobCheckpoint(checkpoint);
+    }
+    if (undefined !== blipRef && 0 !== blipRef) {
+      removeBlip(blipRef);
     }
   });
 }
@@ -248,70 +253,57 @@ function disableFixtureRemoval(fixtureRemoval: FixtureRemoval) {
   fixtureRemoval.enabled = false;
 }
 
-export function placeJobCheckpoint(checkpoint: Checkpoint, followUpCheckpointCoordinates: Vector3) {
+export function placeJobCheckpoint(checkpoint: Checkpoint, followUpCoordinates: Vector3) {
   checkpoint.ref ??= placeCheckpoint({
     ...checkpoint,
-    followUpCheckpointCoordinates,
-    isSecondary: false
+    followUpCoordinates,
+    offset: DEFAULT_OFFSET
   });
 
   if (undefined !== checkpoint.secondaryCheckpoint) {
     checkpoint.secondaryCheckpoint.ref ??= placeCheckpoint({
       ...checkpoint.secondaryCheckpoint,
-      followUpCheckpointCoordinates,
-      isSecondary: true
+      followUpCoordinates,
+      offset: DEFAULT_OFFSET
     });
   }
 }
 
 function placeCheckpoint(props: PlaceCheckpointProps): number {
-  const withArrowIcon = undefined !== props.followUpCheckpointCoordinates;
-  const finalProps = undefined === props.effects ? props : applyCheckpointEffects(props);
-
   const ref = CreateCheckpoint(
-    withArrowIcon ? CHECKPOINT_ICON.SINGLE_ARROW : CHECKPOINT_ICON.NO_ICON,
-    finalProps.coordinates.x,
-    finalProps.coordinates.y,
-    finalProps.coordinates.z,
-    finalProps.followUpCheckpointCoordinates?.x ?? finalProps.coordinates.x,
-    finalProps.followUpCheckpointCoordinates?.y ?? finalProps.coordinates.y,
-    finalProps.followUpCheckpointCoordinates?.z ?? finalProps.coordinates.z,
-    finalProps.size,
-    DEFAULT_CHECKPOINT_CYLINDER_COLOR.r,
-    DEFAULT_CHECKPOINT_CYLINDER_COLOR.g,
-    DEFAULT_CHECKPOINT_CYLINDER_COLOR.b,
-    DEFAULT_CHECKPOINT_CYLINDER_COLOR.a ?? 100,
+    props.display.type.index,
+    props.coordinates.x - (props?.offset?.x ?? 0),
+    props.coordinates.y - (props?.offset?.y ?? 0),
+    props.coordinates.z - (props?.offset?.z ?? 0),
+    props.followUpCoordinates?.x ?? props.coordinates.x,
+    props.followUpCoordinates?.y ?? props.coordinates.y,
+    props.followUpCoordinates?.z ?? props.coordinates.z,
+    props.size,
+    props.display.color.cylinder.r,
+    props.display.color.cylinder.g,
+    props.display.color.cylinder.b,
+    props.display.color.cylinder.a ?? 100,
     0
   );
 
-  if (withArrowIcon) {
-    SetCheckpointRgba2(
-      ref,
-      DEFAULT_CHECKPOINT_ICON_COLOR.r,
-      DEFAULT_CHECKPOINT_ICON_COLOR.g,
-      DEFAULT_CHECKPOINT_ICON_COLOR.b,
-      DEFAULT_CHECKPOINT_ICON_COLOR.a ?? 100,
-    );
-  }
+  SetCheckpointRgba2(
+    ref,
+    props.display.color.icon.r,
+    props.display.color.icon.g,
+    props.display.color.icon.b,
+    props.display.color.icon.a ?? 100,
+  );
+
+  // mimic retail checkpoint heights (they are small)
+  SetCheckpointCylinderHeight(
+    ref,
+    10,
+    10,
+    props.size
+  );
 
   logger.debug(`Placed checkpoint at ${JSON.stringify(props.coordinates)}`);
   return ref;
-}
-
-function applyCheckpointEffects(props: PlaceCheckpointProps) {
-  const result: PlaceCheckpointProps = { ...props };
-
-  // this can be done better, but for now this suffices
-  if (undefined === props.effects) {
-    return result;
-  } else if (
-    (props.effects.includes(ROUND) && !props.isSecondary)
-    || (props.effects.includes(ROUND_SECONDARY) && props.isSecondary)
-  ) {
-    result.size *= ROUND_CHECKPOINT_SIZE_MULTIPLIER;
-  }
-
-  return result;
 }
 
 export function removeJobCheckpoint(checkpoint: Checkpoint) {

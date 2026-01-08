@@ -1,8 +1,21 @@
-export type CheckpointEffect = {
+// checkpoint effects taken from:
+// https://github.com/taoletsgo/custom_races/blob/f96528d4665d83281ecfd8c93c857d19ffeefefb/main%20script/custom_races/server/races_room.lua
+
+import {Checkpoint} from "./checkpoint";
+
+const ROUND_MULTIPLIER = 2.25;
+
+export interface CheckpointEffect {
   identifier: string;
   nativeCpbsType: 1 | 2;
   index: number;
-};
+  apply?: (checkpoint: Checkpoint) => Checkpoint;
+}
+
+export type CheckpointEffects = [
+  cpbs1?: CheckpointEffect,
+  cpbs2?: CheckpointEffect
+];
 
 export const LEGACY_CONVERSION: CheckpointEffect = {
   identifier: 'CHECKPOINT_LEGACY_CONVERSION',
@@ -13,13 +26,23 @@ export const LEGACY_CONVERSION: CheckpointEffect = {
 export const ROUND: CheckpointEffect = {
   identifier: 'CHECKPOINT_ROUND',
   nativeCpbsType: 1,
-  index: 1
+  index: 1,
+  apply: (checkpoint: Checkpoint) => {
+    checkpoint.size *= ROUND_MULTIPLIER;
+    return checkpoint;
+  }
 };
 
 export const ROUND_SECONDARY: CheckpointEffect = {
   identifier: 'CHECKPOINT_ROUND_SECONDARY',
   nativeCpbsType: 1,
-  index: 2
+  index: 2,
+  apply: (checkpoint: Checkpoint) => {
+    if (undefined !== checkpoint.secondaryCheckpoint) {
+      checkpoint.secondaryCheckpoint.size *= ROUND_MULTIPLIER;
+    }
+    return checkpoint;
+  }
 };
 
 export const DISABLE_CATCHUP: CheckpointEffect = {

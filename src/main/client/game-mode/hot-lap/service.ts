@@ -20,8 +20,9 @@ import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
 import playerState from "../../player/state";
 import playSound from "../../sound";
 import {updateLapTimer} from "../../gui/lap-timer/service";
+import {getCurrentVehicleRef} from "../../vehicle/service";
 
-const FREEZE_CLIENT_ON_SPAWN_POINT_FOR_MS = 1000;
+const FREEZE_CLIENT_ON_SPAWN_POINT_FOR_MS = 500;
 
 const DRAW_BLIP_PROPS = {
   TARGET: {
@@ -47,36 +48,51 @@ export async function startHotLap(jobHash: string) {
     throw new Error(`Could not find R* job for hash ${jobHash}`);
   }
 
+  if ('HOT_LAP' !== gameModeState.gameMode) {
+    switchGameModeTo('HOT_LAP');
+  }
+
   rockstarJobState.loadedJob = { ...job, ...await getPreLoadedJobObjectsFromAvailableJob(job) };
 
   const spawnCheckpoint = getHotLapSpawnCheckPoint();
   hotLapState.currentCheckpoint = spawnCheckpoint.index;
-
   startUpdatingNearbyJobPropsAndFixtures();
   startUpdatingHotLapCheckpoints();
 
+  // check if setImmediate is even needed here
+  // also, this sometimes still puts the client below the track if spawned on props (e.g. BGNZ Granite)
   await teleportClientToHotLapSpawnPoint(
     spawnCheckpoint.checkpoint.coordinates,
     spawnCheckpoint.checkpoint.heading
   );
-
-  switchGameModeTo('HOT_LAP');
 }
 
 async function teleportClientToHotLapSpawnPoint(coordinates: Vector3, heading: number) {
+  let entityToFreeze: number = getCurrentVehicleRef();
+  let offset: Vector3 = { x: 0, y: 0, z: 0 };
+
+  if (0 === entityToFreeze) {
+    entityToFreeze = PlayerPedId();
+  }
   // The client's hot lap spawn point may be on top of a prop.
   // In that case: freeze the client's position for a guesstimated amount of time
   // until the prop below them is placed.
-  FreezeEntityPosition(PlayerId(), true);
-  setClientCoordinates(coordinates);
+  FreezeEntityPosition(entityToFreeze, true);
+  setClientCoordinates({
+    x: coordinates.x - (offset?.x ?? 0),
+    y: coordinates.y - (offset?.y ?? 0),
+    z: coordinates.z - (offset?.z ?? 0)
+  });
   setClientHeading(heading);
 
   const teleportFinishedAt = GetGameTimer();
+
   while (GetGameTimer() - teleportFinishedAt < FREEZE_CLIENT_ON_SPAWN_POINT_FOR_MS) {
     await waitOneFrame();
+    logger.debug(`Waiting to unfreeze client...`);
   }
 
-  FreezeEntityPosition(PlayerId(), false);
+  FreezeEntityPosition(entityToFreeze, false);
   logger.debug(`Teleported client to hot lap spawn point`);
 }
 
@@ -152,11 +168,13 @@ function startUpdatingHotLapCheckpoints() {
 
     if (undefined === target.ref) {
       placeJobCheckpoint(target, followUp.coordinates);
+
       target.blipRef = drawBlip({
         coordinates: target.coordinates,
         scale: DRAW_BLIP_PROPS.TARGET.SCALE,
         alpha: DRAW_BLIP_PROPS.TARGET.ALPHA
       });
+
       followUp.blipRef = drawBlip({
         coordinates: followUp.coordinates,
         scale: DRAW_BLIP_PROPS.FOLLOW_UP.SCALE,
@@ -167,19 +185,43 @@ function startUpdatingHotLapCheckpoints() {
     const distanceToTarget = distanceBetweenVector3s(playerState.coords, target.coordinates);
 
     if (distanceToTarget <= target.size) {
+      hotLapState.currentCheckpoint = targetIndex;
+      removeJobCheckpoint(target);
+      removeBlip(target.blipRef ?? 0);
+      removeBlip(followUp.blipRef ?? 0);
+
+
       if (0 === targetIndex) {
         hotLapState.lap++;
         hotLapState.lapStartedAt = GetGameTimer();
+        playSound.lapCompleted();
+      } else {
+        playSound.checkpointHit();
       }
-      hotLapState.currentCheckpoint = targetIndex;
-      removeJobCheckpoint(target);
-      removeBlip(target.blipRef);
-      removeBlip(followUp.blipRef);
-      playSound.checkpointHit();
     }
   });
 }
 
-async function stopUpdatingHotLapCheckpoints() {
+function stopUpdatingHotLapCheckpoints() {
   hotLapState.updateCheckpoints.stop();
+}
+
+export async function resetHotLap() {
+  stopUpdatingHotLapCheckpoints();
+  tearDownPlacedJob();
+  hotLapState.lap = 0;
+  hotLapState.lapStartedAt = -1000;
+  const spawnCheckpoint = getHotLapSpawnCheckPoint();
+  hotLapState.currentCheckpoint = spawnCheckpoint.index;
+  startUpdatingNearbyJobPropsAndFixtures();
+  startUpdatingHotLapCheckpoints();
+
+  // check if setImmediate is even needed here
+  // also, this sometimes still puts the client below the track if spawned on props (e.g. BGNZ Granite)
+  await teleportClientToHotLapSpawnPoint(
+    spawnCheckpoint.checkpoint.coordinates,
+    spawnCheckpoint.checkpoint.heading
+  );
+
+  logger.info(`Reset current hot lap`);
 }

@@ -19,7 +19,11 @@ function error(): void {
 }
 
 function checkpointHit(): void {
-  play('HUD_MINI_GAME_SOUNDSET', 'CHECKPOINT_NORMAL');
+  play('DLC_Stunt_Race_Frontend_Sounds', 'Checkpoint');
+}
+
+function lapCompleted() {
+  play('DLC_Stunt_Race_Frontend_Sounds', 'Checkpoint_Lap');
 }
 
 function play(set: string, name: string): void {
@@ -31,7 +35,8 @@ const playSound = {
   back,
   navigate,
   error,
-  checkpointHit
+  checkpointHit,
+  lapCompleted
 };
 
 export default playSound;

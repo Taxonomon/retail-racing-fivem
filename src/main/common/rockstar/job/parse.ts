@@ -5,12 +5,14 @@ import {RaceDistance} from "./race-distance";
 import {METER} from "../../unit/unit";
 import {Prop} from "./prop";
 import {FixtureRemoval} from "./fixture-removal";
-import {Checkpoint} from "./checkpoint";
-import {CHECKPOINT_EFFECTS, CheckpointEffect} from "./checkpoint-effect";
+import {Checkpoint, CheckpointProps} from "./checkpoint";
+import {CHECKPOINT_EFFECTS, CheckpointEffect, CheckpointEffects} from "./checkpoint-effect";
 import logger from "../../../client/logging/logger";
+import {SINGLE_ARROW} from "./checkpoint-display-type";
+import {RETAIL} from "./checkpoint-display-color";
+import {DEFAULT} from "./checkpoint-display";
 
 const DEFAULT_FIXTURE_REMOVAL_RADIUS = 3;
-const MINIMUM_CHECKPOINT_SIZE = 5;
 
 type PropProps = {
   hasLODDistances: boolean;
@@ -178,13 +180,26 @@ export function parseJobCheckpoints(json: any) {
   for (let i = 0; i < count; i++) {
     logger.trace(`Parsing checkpoint ${i}/${count - 1}`);
     try {
-      result.push({
+      let checkpoint: Checkpoint = {
         coordinates: json.mission.race.chl[i],
         heading: json.mission.race.chh[i],
         size: parseJobCheckpointSize(json?.mission?.race?.chs[i]),
-        effects: parseJobCheckpointEffects(json, i),
-        secondaryCheckpoint: parseJobSecondaryCheckpoint(json, i)
-      });
+        secondaryCheckpoint: parseJobSecondaryCheckpoint(json, i),
+        // default for all checkpoints
+        // hot lap/race mode may use other display properties (e.g. for pit/finish checkpoints)
+        display: DEFAULT,
+        effects: parseJobCheckpointEffects(json, i)
+      };
+
+      if (undefined !== checkpoint.effects[0]?.apply) {
+        checkpoint = checkpoint.effects[0].apply(checkpoint);
+      }
+
+      if (undefined !== checkpoint.effects[1]?.apply) {
+        checkpoint = checkpoint.effects[1].apply(checkpoint);
+      }
+
+      result.push(checkpoint);
     } catch (error: any) {
       logger.warn(`Failed to parse checkpoint ${i}: ${error.message}`);
     }
@@ -203,7 +218,10 @@ export function parseJobCheckpoints(json: any) {
   }
 }
 
-export function parseJobSecondaryCheckpoint(json: any, index: number) {
+export function parseJobSecondaryCheckpoint(
+  json: any,
+  index: number
+): CheckpointProps | undefined {
   try {
     return {
       coordinates: {
@@ -213,6 +231,7 @@ export function parseJobSecondaryCheckpoint(json: any, index: number) {
       },
       heading: json.mission.race.sndrsp[index],
       size: parseJobCheckpointSize(json?.mission?.race?.chs2[index]),
+      display: DEFAULT
     }
   } catch (error: any) {
     return undefined;
@@ -227,21 +246,41 @@ function parseJobCheckpointSize(size: number | undefined) {
   return Math.max(finalSize, DEFAULT_FIXTURE_REMOVAL_RADIUS);
 }
 
-function parseJobCheckpointEffects(json: any, index: number) {
-  const result: CheckpointEffect[] = [];
+function parseJobCheckpointEffects(json: any, index: number): CheckpointEffects {
   const cpbs1Value: number = json?.mission?.race?.cpbs1[index] ?? -1;
   const cpbs2Value: number = json?.mission?.race?.cpbs2[index] ?? -1;
 
-  CHECKPOINT_EFFECTS.forEach(effect => {
-    if (
-      (1 === effect.nativeCpbsType && -1 !== cpbs1Value && isBitSet(cpbs1Value, effect.index))
-      || (2 === effect.nativeCpbsType && -1 !== cpbs2Value && isBitSet(cpbs2Value, effect.index))
-    ) {
-      result.push(effect);
-    }
-  });
+  let cpbs1Effect: CheckpointEffect | undefined;
+  let cpbs2Effect: CheckpointEffect | undefined;
 
-  return result;
+  for (const effect of CHECKPOINT_EFFECTS) {
+    // detect cpbs1 effect
+    if (
+      -1 !== cpbs1Value
+      && undefined === cpbs1Effect
+      && 1 === effect.nativeCpbsType
+      && isBitSet(cpbs1Value, effect.index)
+    ) {
+      cpbs1Effect = effect;
+    }
+
+    // detect cpbs2 effect
+    if (
+      -1 !== cpbs2Value
+      && undefined === cpbs2Effect
+      && 2 === effect.nativeCpbsType
+      && isBitSet(cpbs2Value, effect.index)
+    ) {
+      cpbs2Effect = effect;
+    }
+
+    // stop once everything has been found
+    if (undefined !== cpbs1Effect && undefined !== cpbs2Effect) {
+      break;
+    }
+  }
+
+  return [ cpbs1Effect, cpbs2Effect ];
 }
 
 function isBitSet(x: number, n: number): boolean {

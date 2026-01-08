@@ -1,15 +1,17 @@
 import {Vector3} from "../../vector";
-import {CheckpointEffect} from "./checkpoint-effect";
+import {CheckpointDisplay} from "./checkpoint-display";
+import {CheckpointEffects} from "./checkpoint-effect";
 
 export type CheckpointProps = {
   ref?: number;
-  blipRef: number;
+  blipRef?: number;
   coordinates: Vector3;
   heading: number;
   size: number;
+  display: CheckpointDisplay;
 };
 
 export type Checkpoint = CheckpointProps & {
-  effects: CheckpointEffect[];
   secondaryCheckpoint?: CheckpointProps;
+  effects: CheckpointEffects;
 };
