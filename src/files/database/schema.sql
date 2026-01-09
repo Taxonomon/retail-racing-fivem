@@ -97,26 +97,26 @@ CREATE TABLE txn.player_principals (
     UNIQUE (player, principal)
 );
 
-CREATE TABLE txn.rockstar_jobs (
+CREATE TABLE txn.tracks (
   id bigint GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
   author text NOT NULL,
   description text,
-  job_id text NOT NULL,
+  rockstar_job_id text NOT NULL,
   added_at timestamptz NOT NULL,
   added_by bigint,
   enabled bool NOT NULL,
   original_data jsonb NOT NULL,
   current_data jsonb NOT NULL,
   hash_md5 text NOT NULL,
-  CONSTRAINT rockstar_jobs_pk_id
+  CONSTRAINT tracks_pk_id
     PRIMARY KEY (id),
-  CONSTRAINT rockstar_jobs_fk_added_by
+  CONSTRAINT tracks_fk_added_by
     FOREIGN KEY (added_by)
     REFERENCES txn.players (id)
     ON UPDATE CASCADE
     ON DELETE SET NULL,
-  CONSTRAINT rockstar_jobs_uk_hash_md5
+  CONSTRAINT tracks_uk_hash_md5
     UNIQUE (hash_md5)
 );
 

@@ -12,6 +12,7 @@ import {
 } from "../player/authorization/database";
 import {PastNicknamesTable, PlayersTable} from "../player/database";
 import {PlayerSettingsTable} from "../player/settings/database";
+import {TracksTable} from "../track/repo";
 
 const QUERY_LOG_PARAMS_LENGTH_MAX = 1028;
 const CONNECTION_HEALTH_CHECK_FALLBACK_INTERVAL_MS = 60000;
@@ -23,7 +24,7 @@ export interface DatabaseSchema {
   permissions: PermissionsTable;
   principal_permissions: PrincipalPermissionsTable;
   player_principals: PlayerPrincipalsTable;
-  rockstar_jobs: RockstarJobsTable;
+  tracks: TracksTable;
   player_settings: PlayerSettingsTable;
 }
 

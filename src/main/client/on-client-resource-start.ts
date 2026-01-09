@@ -6,15 +6,15 @@ import startReceivingPingUpdates from "./player/ping";
 import registerMessageFromServerEventListener from "./logging/msg-from-server";
 import startTrackingPlayerCoordinates from "./player/coords";
 import wantedLevelService from "./wanted-level/menu";
-import callbackService from "./callback/outbound";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 import startTrackingPlayerSpeed from "./player/speed";
 import {initializeMainMenu} from "./gui/menu/main-menu";
 import {fetchAndApplyPlayerSettings, startSavingPlayerSettingsPeriodically} from "./player/settings/service";
 import {initializeMenuInputBindings} from "./gui/menu/api/input";
 import {startUpdatingHud} from "./gui/hud/service";
-import {fetchAllRockstarJobs} from "./rockstar/job/service";
 import {switchGameModeTo} from "./game-mode/service";
+import {register as registerCallbackEventListeners} from "./callback/events";
+import {updateTrackList} from "./track/service/tracklist";
 
 export default function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
@@ -34,7 +34,7 @@ async function handleOnClientResourceStart() {
   // other one-time process calls
   await initializeMainMenu();
   await fetchAndApplyPlayerSettings();
-  await fetchAllRockstarJobs();
+  await updateTrackList();
   wantedLevelService.disable();
   switchGameModeTo('FREE_MODE');
 
@@ -42,8 +42,8 @@ async function handleOnClientResourceStart() {
 }
 
 function initializeEventListeners() {
-  callbackService.registerServerCallbackResponseEventListener();
   registerMessageFromServerEventListener();
+  registerCallbackEventListeners();
 }
 
 function initializeInputs() {

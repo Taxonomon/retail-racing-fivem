@@ -6,7 +6,8 @@ const CALLBACK_NAMES = {
     }
   },
   TRACK: {
-    IMPORT: 'txn:callback:track:import'
+    IMPORT: 'txn:callback:track:import',
+    FETCH_TRACKLIST: 'txn:callback:track:fetch-all-available'
   },
   PLAYER: {
     SETTINGS: {
@@ -19,9 +20,6 @@ const CALLBACK_NAMES = {
       IS_BLOCKED_MODEL_ID: 'txn:callback:vehicle:spawn:is-blocked-model-id',
       FILTER_BLOCKED_MODEL_IDS: 'txn:callback:vehicle:filter-blocked-model-ids'
     }
-  },
-  ROCKSTAR_JOB: {
-    FETCH_ALL: 'txn:callback:rockstar-job:fetch-all-available'
   }
 };
 

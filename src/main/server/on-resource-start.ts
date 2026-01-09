@@ -7,7 +7,7 @@ import {kickAllPlayers, registerPlayerConnectionEventListeners} from "./player/c
 import registerPlayerAuthorizationCallbacks from "./player/authorization/service";
 import {startUpdatingPlayerPings} from "./player/service";
 import {registerBlockedVehicleCallbacks} from "./vehicle/service";
-import {registerRockstarJobCallbacks} from "./rockstar/job/service";
+import {register as registerTrackCallbacks} from "./track/callbacks";
 
 export default function registerOnResourceStartListener() {
   on('onServerResourceStart', async (resource: string) => {
@@ -41,7 +41,7 @@ function registerCallbacks() {
   registerPlayerAuthorizationCallbacks();
   registerPlayerSettingsCallbacks();
   registerBlockedVehicleCallbacks();
-  registerRockstarJobCallbacks();
+  registerTrackCallbacks();
 }
 
 function registerCommands() {

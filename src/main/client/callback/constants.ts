@@ -1,0 +1,3 @@
+export const TRIGGER_SERVER_CALLBACK = {
+  TIMEOUT_MS: 5000
+};

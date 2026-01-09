@@ -1,12 +1,13 @@
-import databaseState from "../../database/state";
-import {ColumnType, Generated, Insertable, Selectable, Updateable} from "kysely";
+import databaseState from "../database/state";
 
-export interface RockstarJobsTable {
+import {ColumnType, Generated, Insertable, Selectable, Updateable} from "kysely/dist/esm";
+
+export interface TracksTable {
   id: Generated<number>;
   name: string;
   author: string;
   description: string | null;
-  job_id: string;
+  rockstar_job_id: string;
   added_at: ColumnType<Date, Date, never>;
   added_by: ColumnType<number, number, never>;
   enabled: boolean;
@@ -17,17 +18,17 @@ export interface RockstarJobsTable {
   hash_md5: ColumnType<string, string, never>;
 }
 
-export type RockstarJob = Selectable<RockstarJobsTable>;
-export type NewRockstarJob = Insertable<RockstarJobsTable>;
-export type RockstarJobUpdate = Updateable<RockstarJobsTable>;
+export type Track = Selectable<TracksTable>;
+export type NewTrack = Insertable<TracksTable>;
+export type TrackUpdate = Updateable<TracksTable>;
 
-export async function insertRockstarJob(
-  rockstarJob: NewRockstarJob
-): Promise<RockstarJob> {
-  const result: RockstarJob | undefined = await databaseState.db
+export async function insert(
+  track: NewTrack
+): Promise<Track> {
+  const result: Track | undefined = await databaseState.db
     .withSchema('txn')
-    .insertInto('rockstar_jobs')
-    .values(rockstarJob)
+    .insertInto('tracks')
+    .values(track)
     .returningAll()
     .executeTakeFirst();
 
@@ -38,42 +39,42 @@ export async function insertRockstarJob(
   return result;
 }
 
-export async function findAllRockstarJobs() {
+export async function findAll(): Promise<Track[]> {
   return databaseState.db
     .withSchema('txn')
-    .selectFrom('rockstar_jobs')
+    .selectFrom('tracks')
     .selectAll()
     .execute();
 }
 
-export async function findRockstarJobByJobId(
-  jobId: string
-): Promise<RockstarJob | undefined> {
+export async function findByRockstarJobId(
+  rockstarJobId: string
+): Promise<Track | undefined> {
   return databaseState.db
     .withSchema('txn')
-    .selectFrom('rockstar_jobs')
+    .selectFrom('tracks')
     .selectAll()
-    .where('job_id', '=', jobId)
+    .where('rockstar_job_id', '=', rockstarJobId)
     .executeTakeFirst();
 }
 
-export async function findRockstarJobByHashMd5(
+export async function findByHashMd5(
   hashMd5: string
-): Promise<RockstarJob | undefined> {
+): Promise<Track | undefined> {
   return databaseState.db
     .withSchema('txn')
-    .selectFrom('rockstar_jobs')
+    .selectFrom('tracks')
     .selectAll()
     .where('hash_md5', '=', hashMd5)
     .executeTakeFirst();
 }
 
-export async function findRockstarJobsByEnabled(
+export async function findByEnabled(
   enabled: boolean
-): Promise<RockstarJob[]> {
+): Promise<Track[]> {
   return databaseState.db
     .withSchema('txn')
-    .selectFrom('rockstar_jobs')
+    .selectFrom('tracks')
     .selectAll()
     .where('enabled', '=', enabled)
     .execute();

@@ -1,23 +1,11 @@
-import {getJobTypeById, JobType} from "./job-type";
-import {JOB_AREAS, JobArea} from "./job-area";
-import {getRaceTypeById, RaceType} from "./race-type";
-import {RaceDistance} from "./race-distance";
+import {Checkpoint, CheckpointEffect, CheckpointEffects, CheckpointProps, FixtureRemoval, Prop} from "../schemas";
+import {IdentifiableConstant, LabeledConstant, ValueWithUnit} from "../../schemas";
+import {
+  CHECKPOINT_DISPLAY,
+  CHECKPOINT_DISPLAY_COLOR,
+  CHECKPOINT_DISPLAY_TYPE, CHECKPOINT_EFFECT, FIXTURE_REMOVAL, JOB_AREA, JOB_TYPE, RACE_TYPE
+} from "../constants";
 import {METER} from "../../unit/unit";
-import {Prop} from "./prop";
-import {FixtureRemoval} from "./fixture-removal";
-import {Checkpoint, CheckpointProps} from "./checkpoint";
-import {CHECKPOINT_EFFECTS, CheckpointEffect, CheckpointEffects} from "./checkpoint-effect";
-import logger from "../../../client/logging/logger";
-import {SINGLE_ARROW} from "./checkpoint-display-type";
-import {RETAIL} from "./checkpoint-display-color";
-import {DEFAULT} from "./checkpoint-display";
-
-const DEFAULT_FIXTURE_REMOVAL_RADIUS = 3;
-
-type PropProps = {
-  hasLODDistances: boolean;
-  hasCollisions: boolean;
-};
 
 export function parseJobName(json: any): string | undefined {
   return json?.mission?.gen?.nm?.toString();
@@ -32,16 +20,16 @@ export function parseJobDescription(json: any): string | undefined {
   return undefined === description ? undefined : description.join('');
 }
 
-export function parseJobType(json: any): JobType | undefined {
+export function parseJobType(json: any): IdentifiableConstant | undefined {
   return getJobTypeById(json?.mission?.gen?.type);
 }
 
-export function parseJobAreas(json: any): JobArea[] {
-  const result: JobArea[] = [];
+export function parseJobAreas(json: any): LabeledConstant[] {
+  const result: LabeledConstant[] = [];
   const values: string[] = json?.meta?.loc;
 
   values.forEach(value => {
-    const jobArea = JOB_AREAS.find((ja) => value === ja.id);
+    const jobArea = getJobAreaById(value);
     if (undefined !== jobArea) {
       result.push(jobArea);
     }
@@ -50,7 +38,7 @@ export function parseJobAreas(json: any): JobArea[] {
   return result;
 }
 
-export function parseRaceType(json: any): RaceType | undefined {
+export function parseRaceType(json: any): IdentifiableConstant | undefined {
   return getRaceTypeById(json?.mission?.race?.type);
 }
 
@@ -58,23 +46,25 @@ export function parseIsLapRace(json: any): boolean {
   return undefined !== json?.mission?.race?.lap;
 }
 
-export function parseRaceDistance(json: any): RaceDistance | undefined {
+export function parseRaceDistance(json: any): ValueWithUnit | undefined {
   const value = json?.mission?.race?.rdis;
   return undefined === value ? undefined : { value, unit: METER };
 }
 
 export function parseJobProps(json: any): Prop[] {
-  const propProps: PropProps = {
-    hasLODDistances: undefined !== json?.mission?.prop?.pLODDist,
-    hasCollisions: undefined !== json?.mission?.prop?.collision
-  };
+  const hasLODDistances = undefined !== json?.mission?.prop?.pLODDist;
+  const hasCollisions = undefined !== json?.mission?.prop?.collision;
   return [
-    ...parseJobStaticProps(json, propProps),
-    ...parseDynamicProps(json, propProps),
+    ...parseJobStaticProps(json, hasLODDistances, hasCollisions),
+    ...parseDynamicProps(json, hasLODDistances, hasCollisions),
   ];
 }
 
-function parseJobStaticProps(json: any, propProps: PropProps): Prop[] {
+function parseJobStaticProps(
+  json: any,
+  hasLODDistances: boolean,
+  hasCollisions: boolean
+): Prop[] {
   const result: Prop[] = [];
   const count: number = json?.mission?.prop?.no ?? 0;
 
@@ -83,7 +73,6 @@ function parseJobStaticProps(json: any, propProps: PropProps): Prop[] {
   }
 
   for (let i = 0; i < count; i++) {
-    logger.trace(`Parsing static prop ${i}/${count - 1}`);
     try {
       result.push({
         hash: json.mission.prop.model[i],
@@ -98,18 +87,22 @@ function parseJobStaticProps(json: any, propProps: PropProps): Prop[] {
           y: json?.mission.prop.vRot[i].y,
           z: json?.mission.prop.vRot[i].z
         },
-        hasCollision: propProps.hasCollisions && 1 === json?.mission?.prop?.collision[i],
+        hasCollision: hasCollisions && 1 === json?.mission?.prop?.collision[i],
         color: json?.mission?.prop?.prpclr[i] ?? 0
       });
     } catch (error: any) {
-      logger.warn(`Failed to parse static prop ${i}: ${error.message}`);
+      // swallow & do nothing
     }
   }
 
   return result;
 }
 
-function parseDynamicProps(json: any, propProps: PropProps): Prop[] {
+function parseDynamicProps(
+  json: any,
+  hasLODDistances: boolean,
+  hasCollisions: boolean
+): Prop[] {
   const result: Prop[] = [];
   const count: number = json?.mission?.dprop?.no ?? 0;
 
@@ -118,7 +111,6 @@ function parseDynamicProps(json: any, propProps: PropProps): Prop[] {
   }
 
   for (let i = 0; i < count; i++) {
-    logger.trace(`Parsing dynamic prop ${i}/${count - 1}`);
     try {
       result.push({
         hash: json.mission.dprop.model[i],
@@ -133,11 +125,11 @@ function parseDynamicProps(json: any, propProps: PropProps): Prop[] {
           y: json?.mission.dprop.vRot[i].y,
           z: json?.mission.dprop.vRot[i].z
         },
-        hasCollision: propProps.hasCollisions && 1 === json?.mission?.dprop?.collision[i],
+        hasCollision: hasCollisions && 1 === json?.mission?.dprop?.collision[i],
         color: json?.mission?.dprop?.prpdclr[i] ?? 0
       });
     } catch (error: any) {
-      logger.warn(`Failed to parse dynamic prop ${i}: ${error.message}`);
+      // swallow & do nothing
     }
   }
 
@@ -153,7 +145,6 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
   }
 
   for (let i = 0; i < count; i++) {
-    logger.trace(`Parsing fixture removal ${i}/${count - 1}`);
     try {
       result.push({
         enabled: false,
@@ -163,10 +154,10 @@ export function parseJobFixtureRemovals(json: any): FixtureRemoval[] {
           y: json.mission.dhprop.pos[i].y,
           z: json.mission.dhprop.pos[i].z
         },
-        radius: json?.mission?.dhprop?.wprad[i] ?? DEFAULT_FIXTURE_REMOVAL_RADIUS
+        radius: json?.mission?.dhprop?.wprad[i] ?? FIXTURE_REMOVAL.DEFAULT_RADIUS
       });
     } catch (error: any) {
-      logger.warn(`Failed to parse fixture removal ${i}: ${error.message}`);
+      // swallow & do nothing
     }
   }
 
@@ -178,7 +169,6 @@ export function parseJobCheckpoints(json: any) {
   const count = json?.mission?.race?.chp ?? 0;
 
   for (let i = 0; i < count; i++) {
-    logger.trace(`Parsing checkpoint ${i}/${count - 1}`);
     try {
       let checkpoint: Checkpoint = {
         coordinates: json.mission.race.chl[i],
@@ -187,7 +177,7 @@ export function parseJobCheckpoints(json: any) {
         secondaryCheckpoint: parseJobSecondaryCheckpoint(json, i),
         // default for all checkpoints
         // hot lap/race mode may use other display properties (e.g. for pit/finish checkpoints)
-        display: DEFAULT,
+        display: CHECKPOINT_DISPLAY.RETAIL,
         effects: parseJobCheckpointEffects(json, i)
       };
 
@@ -201,7 +191,7 @@ export function parseJobCheckpoints(json: any) {
 
       result.push(checkpoint);
     } catch (error: any) {
-      logger.warn(`Failed to parse checkpoint ${i}: ${error.message}`);
+      // swallow & do nothing
     }
   }
 
@@ -231,7 +221,7 @@ export function parseJobSecondaryCheckpoint(
       },
       heading: json.mission.race.sndrsp[index],
       size: parseJobCheckpointSize(json?.mission?.race?.chs2[index]),
-      display: DEFAULT
+      display: CHECKPOINT_DISPLAY.RETAIL
     }
   } catch (error: any) {
     return undefined;
@@ -240,10 +230,10 @@ export function parseJobSecondaryCheckpoint(
 
 function parseJobCheckpointSize(size: number | undefined) {
   if (undefined === size) {
-    return DEFAULT_FIXTURE_REMOVAL_RADIUS;
+    return FIXTURE_REMOVAL.DEFAULT_RADIUS;
   }
   let finalSize = size * 10;
-  return Math.max(finalSize, DEFAULT_FIXTURE_REMOVAL_RADIUS);
+  return Math.max(finalSize, FIXTURE_REMOVAL.DEFAULT_RADIUS);
 }
 
 function parseJobCheckpointEffects(json: any, index: number): CheckpointEffects {
@@ -253,13 +243,13 @@ function parseJobCheckpointEffects(json: any, index: number): CheckpointEffects 
   let cpbs1Effect: CheckpointEffect | undefined;
   let cpbs2Effect: CheckpointEffect | undefined;
 
-  for (const effect of CHECKPOINT_EFFECTS) {
+  for (const effect of Object.values(CHECKPOINT_EFFECT)) {
     // detect cpbs1 effect
     if (
       -1 !== cpbs1Value
       && undefined === cpbs1Effect
-      && 1 === effect.nativeCpbsType
-      && isBitSet(cpbs1Value, effect.index)
+      && 1 === effect.cpbsType
+      && isBitSet(cpbs1Value, effect.id as number)
     ) {
       cpbs1Effect = effect;
     }
@@ -268,8 +258,8 @@ function parseJobCheckpointEffects(json: any, index: number): CheckpointEffects 
     if (
       -1 !== cpbs2Value
       && undefined === cpbs2Effect
-      && 2 === effect.nativeCpbsType
-      && isBitSet(cpbs2Value, effect.index)
+      && 2 === effect.cpbsType
+      && isBitSet(cpbs2Value, effect.id as number)
     ) {
       cpbs2Effect = effect;
     }
@@ -281,6 +271,33 @@ function parseJobCheckpointEffects(json: any, index: number): CheckpointEffects 
   }
 
   return [ cpbs1Effect, cpbs2Effect ];
+}
+
+function getJobAreaById(id: string) {
+  for (const jobArea of Object.values(JOB_AREA)) {
+    if (id === jobArea.id) {
+      return jobArea;
+    }
+  }
+  return undefined;
+}
+
+function getJobTypeById(id: number) {
+  for (const jobType of Object.values(JOB_TYPE)) {
+    if (id === jobType.id) {
+      return jobType;
+    }
+  }
+  return undefined;
+}
+
+function getRaceTypeById(id: number) {
+  for (const raceType of Object.values(RACE_TYPE)) {
+    if (id === raceType.id) {
+      return raceType;
+    }
+  }
+  return undefined;
 }
 
 function isBitSet(x: number, n: number): boolean {

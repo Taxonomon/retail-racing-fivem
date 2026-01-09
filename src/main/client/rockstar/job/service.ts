@@ -54,18 +54,6 @@ export type DrawBlipProps = {
   alpha: number;
 };
 
-export async function fetchAllRockstarJobs() {
-  const callbackResult = await callbackService.triggerServerCallback(CALLBACK_NAMES.ROCKSTAR_JOB.FETCH_ALL);
-  if (!callbackResult.error) {
-    rockstarJobState.availableJobs = callbackResult.data as AvailableJob[];
-    logger.info(`Fetched ${rockstarJobState.availableJobs.length} R* jobs from server`);
-    updateGameModeMenus();
-  } else {
-    logger.error(`Failed to fetch all R* jobs: callback returned an error: ${callbackResult.error}`);
-    toast.showError(`Failed to fetch R* jobs from server (see logs for details)`);
-  }
-}
-
 export async function getPreLoadedJobObjectsFromAvailableJob(job: AvailableJob) {
   const jobObjects: JobObjects = {
     props: parseJobProps(job.data),
