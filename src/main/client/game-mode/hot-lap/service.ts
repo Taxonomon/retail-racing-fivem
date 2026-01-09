@@ -2,7 +2,7 @@ import gameModeState from "../state";
 import {
   drawBlip,
   getPreLoadedJobObjectsFromAvailableJob,
-  placeJobCheckpoint, removeBlip,
+  placeJobCheckpoint, PLAYER_DETECTION_RADIUS, removeBlip,
   removeJobCheckpoint,
   startUpdatingNearbyJobPropsAndFixtures,
   stopUpdatingNearbyJobPropsAndFixtures,
@@ -56,11 +56,11 @@ export async function startHotLap(jobHash: string) {
 
   const spawnCheckpoint = getHotLapSpawnCheckPoint();
   hotLapState.currentCheckpoint = spawnCheckpoint.index;
-  startUpdatingNearbyJobPropsAndFixtures();
+  setPersistingSpawnPointPropsAndFixtureRemovals(spawnCheckpoint.checkpoint.coordinates);
   startUpdatingHotLapCheckpoints();
+  startUpdatingNearbyJobPropsAndFixtures();
 
-  // check if setImmediate is even needed here
-  // also, this sometimes still puts the client below the track if spawned on props (e.g. BGNZ Granite)
+  // this sometimes still puts the client below the track if spawned on props (e.g. BGNZ Granite)
   await teleportClientToHotLapSpawnPoint(
     spawnCheckpoint.checkpoint.coordinates,
     spawnCheckpoint.checkpoint.heading
@@ -206,6 +206,19 @@ function stopUpdatingHotLapCheckpoints() {
   hotLapState.updateCheckpoints.stop();
 }
 
+function setPersistingSpawnPointPropsAndFixtureRemovals(spawnPointCoordinates: Vector3) {
+  const isWithinSpawnPointDetectionRadius = (coordinates: Vector3) =>
+    distanceBetweenVector3s(coordinates, spawnPointCoordinates) <= PLAYER_DETECTION_RADIUS;
+
+  rockstarJobState.loadedJob.props.forEach(prop =>
+    prop.persistWhileOutOfRange = isWithinSpawnPointDetectionRadius(prop.coordinates)
+  );
+
+  rockstarJobState.loadedJob.fixtureRemovals.forEach(fixtureRemoval =>
+    fixtureRemoval.persistWhileOutOfRange = isWithinSpawnPointDetectionRadius(fixtureRemoval.coordinates)
+  );
+}
+
 export async function resetHotLap() {
   stopUpdatingHotLapCheckpoints();
   tearDownPlacedJob();
@@ -213,6 +226,7 @@ export async function resetHotLap() {
   hotLapState.lapStartedAt = -1000;
   const spawnCheckpoint = getHotLapSpawnCheckPoint();
   hotLapState.currentCheckpoint = spawnCheckpoint.index;
+  setPersistingSpawnPointPropsAndFixtureRemovals(spawnCheckpoint.checkpoint.coordinates);
   startUpdatingNearbyJobPropsAndFixtures();
   startUpdatingHotLapCheckpoints();
 

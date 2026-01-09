@@ -8,6 +8,7 @@ export type Prop = {
   rotation: Vector3;
   hasCollision: boolean;
   color?: number;
+  persistWhileOutOfRange?: boolean;
 };
 
 export const PROP_ROTATION_ORDER = {

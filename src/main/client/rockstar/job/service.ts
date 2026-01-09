@@ -15,7 +15,7 @@ import {distanceBetweenVector3s, Vector3} from "../../../common/vector";
 import {loadModelByHash} from "../../../common/model";
 import {CheckpointDisplay} from "../../../common/rockstar/job/checkpoint-display";
 
-const PLAYER_DETECTION_RADIUS = 500;
+export const PLAYER_DETECTION_RADIUS = 500;
 const PROP_LOD_DISTANCE = 16960;
 
 // moves the checkpoint a little bit down, so that the cylinder doesn't cut off right before the ground
@@ -82,14 +82,12 @@ export async function getPreLoadedJobObjectsFromAvailableJob(job: AvailableJob) 
 }
 
 export function startUpdatingNearbyJobPropsAndFixtures() {
-  if (!rockstarJobState.updateNearbyPropsAndFixtures.isRunning()) {
-    rockstarJobState.updateNearbyPropsAndFixtures.start(async () => {
-      const { props, fixtureRemovals } = rockstarJobState.loadedJob;
-      const playerCoordinates = playerState.coords ?? playerUtilService.getCoords();
-      await updateNearbyProps(playerCoordinates, props, PLAYER_DETECTION_RADIUS);
-      await updateNearbyFixtureRemovals(playerCoordinates, fixtureRemovals, PLAYER_DETECTION_RADIUS);
-    });
-  }
+  rockstarJobState.updateNearbyPropsAndFixtures.start(async () => {
+    const { props, fixtureRemovals } = rockstarJobState.loadedJob;
+    const playerCoordinates = playerState.coords ?? playerUtilService.getCoords();
+    await updateNearbyProps(playerCoordinates, props, PLAYER_DETECTION_RADIUS);
+    await updateNearbyFixtureRemovals(playerCoordinates, fixtureRemovals, PLAYER_DETECTION_RADIUS);
+  });
 }
 
 export function stopUpdatingNearbyJobPropsAndFixtures() {
@@ -109,7 +107,7 @@ async function updateNearbyProps(
       prop.coordinates
     ) <= detectionRadius;
 
-    if (withinPlayerDistance && undefined === prop.ref) {
+    if ((withinPlayerDistance || prop.persistWhileOutOfRange) && undefined === prop.ref) {
       try {
         prop.ref = await placeProp(prop);
       } catch (error: any) {
@@ -118,7 +116,7 @@ async function updateNearbyProps(
           + `${error.message}`
         );
       }
-    } else if (!withinPlayerDistance && undefined !== prop.ref) {
+    } else if (!withinPlayerDistance && undefined !== prop.ref && !prop.persistWhileOutOfRange) {
       removeProp(prop);
     }
   }
@@ -135,7 +133,7 @@ async function updateNearbyFixtureRemovals(
       fixtureRemoval.coordinates
     ) <= detectionRadius;
 
-    if (withinPlayerDistance && !fixtureRemoval.enabled) {
+    if ((withinPlayerDistance || fixtureRemoval.persistWhileOutOfRange) && !fixtureRemoval.enabled) {
       try {
         enableFixtureRemoval(fixtureRemoval);
       } catch (error: any) {
@@ -145,7 +143,7 @@ async function updateNearbyFixtureRemovals(
           + `${error.message}`
         );
       }
-    } else if (!withinPlayerDistance && fixtureRemoval.enabled) {
+    } else if (!withinPlayerDistance && fixtureRemoval.enabled && !fixtureRemoval.persistWhileOutOfRange) {
       disableFixtureRemoval(fixtureRemoval);
     }
   }
@@ -169,7 +167,7 @@ export function tearDownPlacedJob() {
     }
   });
 
-  // remove placed checkpoints
+  // remove placed checkpoints and their blips
   checkpoints.forEach(checkpoint => {
     const { ref, blipRef } = checkpoint;
     if (undefined !== ref && 0 !== ref) {

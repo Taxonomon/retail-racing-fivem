@@ -5,4 +5,5 @@ export type FixtureRemoval = {
   hash: number;
   coordinates: Vector3;
   radius: number;
+  persistWhileOutOfRange?: boolean;
 };
