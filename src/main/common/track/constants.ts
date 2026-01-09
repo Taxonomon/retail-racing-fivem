@@ -774,6 +774,73 @@ export const JOB_TYPE: Record<string, IdentifiableConstant> = {
   }
 };
 
+export const PROP_COLOR: Record<string, IdentifiableConstant> = {
+  PACIFIC: {
+    id: 0,
+    identifier: 'PACIFIC'
+  },
+  AZURE: {
+    id: 1,
+    identifier: 'AZURE'
+  },
+  NAUTICAL: {
+    id: 2,
+    identifier: 'NAUTICAL'
+  },
+  CONTINENTAL: {
+    id: 3,
+    identifier: 'CONTINENTAL'
+  },
+  BATTLESHIP: {
+    id: 4,
+    identifier: 'BATTLESHIP'
+  },
+  INTREPID: {
+    id: 5,
+    identifier: 'INTREPID'
+  },
+  UNIFORM: {
+    id: 6,
+    identifier: 'UNIFORM'
+  },
+  CLASSICO: {
+    id: 7,
+    identifier: 'CLASSICO'
+  },
+  MEDITERRANEAN: {
+    id: 8,
+    identifier: 'MEDITERRANEAN'
+  },
+  COMMAND: {
+    id: 9,
+    identifier: 'COMMAND'
+  },
+  MARINER: {
+    id: 10,
+    identifier: 'MARINER'
+  },
+  RUBY: {
+    id: 11,
+    identifier: 'RUBY'
+  },
+  VINTAGE: {
+    id: 12,
+    identifier: 'VINTAGE'
+  },
+  PRISTINE: {
+    id: 13,
+    identifier: 'PRISTINE'
+  },
+  MERCHANT: {
+    id: 14,
+    identifier: 'MERCHANT'
+  },
+  VOYAGER: {
+    id: 15,
+    identifier: 'VOYAGER'
+  }
+};
+
 export const RACE_TYPE: Record<string, IdentifiableConstant> = {
   LAND: {
     id: 0,

@@ -1,9 +1,10 @@
 import {CreatePropProps, GetPropsOptions, RemovePropProps} from "../../schemas";
-import {Prop, PROP_ROTATION_ORDER} from "../../../../common/rockstar/job/prop";
-import {parseJobProps} from "../../../../common/rockstar/job/parse";
 import {getTrackByHash} from "../tracklist";
 import {loadModelByHash} from "../../../../common/model";
 import logger from "../../../logging/logger";
+import {parseJobProps} from "../../../../common/track/service/parse";
+import {Prop} from "../../../../common/track/schemas";
+import {CREATE_PROP} from "../../constants";
 
 export async function getTrackProps(trackHash: string, options: GetPropsOptions): Promise<Prop[]> {
   try {
@@ -48,12 +49,12 @@ export async function createProp(props: CreatePropProps) {
     props.rotation.x,
     props.rotation.y,
     props.rotation.z,
-    PROP_ROTATION_ORDER.Z_Y_X,
+    CREATE_PROP.ROTATION_ORDER.Z_Y_X,
     false
   );
 
-  if (undefined !== props.color) {
-    SetObjectTextureVariant(ref, props.color.id);
+  if (undefined !== props.textureVariant) {
+    SetObjectTextureVariant(ref, props.textureVariant);
   }
 
   SetEntityLodDist(ref, props.lodDistance);

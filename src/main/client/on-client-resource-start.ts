@@ -16,7 +16,7 @@ import {switchGameModeTo} from "./game-mode/service";
 import {register as registerCallbackEventListeners} from "./callback/events";
 import {updateTrackList} from "./track/service/tracklist";
 
-export default function registerOnClientResourceStartListener() {
+export function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
     if (resource === GetCurrentResourceName()) {
       await handleOnClientResourceStart();

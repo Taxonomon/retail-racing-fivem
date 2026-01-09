@@ -68,6 +68,6 @@ export interface Prop {
   coordinates: Vector3;
   rotation: Vector3;
   hasCollision: boolean;
-  color?: number;
+  textureVariant?: number;
   persistWhileOutOfRange?: boolean;
 }

@@ -5,7 +5,7 @@ import {UnitValue} from "../../common/unit/unit-value";
 import {getClientCoordinates} from "./service";
 
 class PlayerState {
-  private _coords?: Vector3;
+  private _coordinates?: Vector3;
 
   trackCoords: Tick = new Tick('track player coordinates', logger);
   trackSpeed: Tick = new Tick('track player speed', logger);
@@ -15,15 +15,13 @@ class PlayerState {
   lastSavedSettings: Map<string, any> = new Map();
   settings: Map<string, any> = new Map();
 
-  get coords() {
-    return this._coords ?? getClientCoordinates();
+  get coordinates() {
+    return this._coordinates ?? getClientCoordinates();
   }
 
-  set coords(value: Vector3) {
-    this._coords = value;
+  set coordinates(value: Vector3) {
+    this._coordinates = value;
   }
 }
 
-const playerState = new PlayerState();
-
-export default playerState;
+export const playerState = new PlayerState();

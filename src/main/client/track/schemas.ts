@@ -1,5 +1,5 @@
-import {BlipColor, BlipSprite, CheckpointDisplayProps, PropColor} from "../../common/track/schemas";
-import {Vector3} from "../../common/schemas";
+import {CheckpointDisplayProps} from "../../common/track/schemas";
+import {IdentifiableConstant, Vector3} from "../../common/schemas";
 
 export interface GetPropsOptions {
   preload?: boolean;
@@ -9,7 +9,7 @@ export interface CreatePropProps {
   hash: number;
   coordinates: Vector3;
   rotation: Vector3;
-  color: PropColor;
+  textureVariant?: number;
   lodDistance: number;
   hasCollision: boolean;
 }
@@ -42,8 +42,8 @@ export interface ToggleFixtureRemovalProps {
 
 export interface CreateBlipProps {
   coordinates: Vector3;
-  color: BlipColor;
-  sprite: BlipSprite;
+  color: IdentifiableConstant;
+  sprite: IdentifiableConstant;
   scale: number;
   alpha: number;
 }

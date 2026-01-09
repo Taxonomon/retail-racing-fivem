@@ -1,5 +1,14 @@
-export const TRACK_PLACEMENT = {
+export const UPDATE_NEARBY_TRACK_OBJECTS = {
+  INTERVAL_MS: 500
+};
 
+export const CREATE_PROP = {
+  LOD_DISTANCE: {
+    DEFAULT: 16960
+  },
+  ROTATION_ORDER: {
+    Z_Y_X: 0
+  }
 };
 
 export const CREATE_BLIP = {

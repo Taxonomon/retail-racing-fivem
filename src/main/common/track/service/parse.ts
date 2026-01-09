@@ -3,7 +3,7 @@ import {IdentifiableConstant, LabeledConstant, ValueWithUnit} from "../../schema
 import {
   CHECKPOINT_DISPLAY,
   CHECKPOINT_DISPLAY_COLOR,
-  CHECKPOINT_DISPLAY_TYPE, CHECKPOINT_EFFECT, FIXTURE_REMOVAL, JOB_AREA, JOB_TYPE, RACE_TYPE
+  CHECKPOINT_DISPLAY_TYPE, CHECKPOINT_EFFECT, FIXTURE_REMOVAL, JOB_AREA, JOB_TYPE, PROP_COLOR, RACE_TYPE
 } from "../constants";
 import {METER} from "../../unit/unit";
 
@@ -88,7 +88,7 @@ function parseJobStaticProps(
           z: json?.mission.prop.vRot[i].z
         },
         hasCollision: hasCollisions && 1 === json?.mission?.prop?.collision[i],
-        color: json?.mission?.prop?.prpclr[i] ?? 0
+        textureVariant: json?.mission?.prop?.prpclr[i]
       });
     } catch (error: any) {
       // swallow & do nothing
@@ -126,7 +126,7 @@ function parseDynamicProps(
           z: json?.mission.dprop.vRot[i].z
         },
         hasCollision: hasCollisions && 1 === json?.mission?.dprop?.collision[i],
-        color: json?.mission?.dprop?.prpdclr[i] ?? 0
+        textureVariant: json?.mission?.dprop?.prpdclr[i]
       });
     } catch (error: any) {
       // swallow & do nothing
@@ -286,6 +286,15 @@ function getJobTypeById(id: number) {
   for (const jobType of Object.values(JOB_TYPE)) {
     if (id === jobType.id) {
       return jobType;
+    }
+  }
+  return undefined;
+}
+
+function getPropColorById(id: number) {
+  for (const propColor of Object.values(PROP_COLOR)) {
+    if (id === propColor.id) {
+      return propColor;
     }
   }
   return undefined;
