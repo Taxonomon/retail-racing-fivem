@@ -7,6 +7,24 @@ import {
   CheckpointEffect
 } from "./schemas";
 
+export const BLIP_COLOR: Record<string, IdentifiableConstant> = {
+  YELLOW: {
+    id: 5,
+    identifier: 'YELLOW'
+  },
+  DARK_YELLOW: {
+    id: 28,
+    identifier: 'DARK_YELLOW'
+  }
+};
+
+export const BLIP_SPRITE: Record<string, IdentifiableConstant> = {
+  RADAR_LEVEL: {
+    id: 1,
+    identifier: 'RADAR_LEVEL'
+  }
+};
+
 export const CHECKPOINT = {
   ROUND_MULTIPLIER: 2.25
 };

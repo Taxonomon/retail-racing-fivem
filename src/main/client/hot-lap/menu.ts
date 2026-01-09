@@ -1,20 +1,18 @@
-import {addItemToMenu, addMenu, openMenu, removeAllItemsFromMenu, setMenuDisabled} from "../../gui/menu/api/service";
-import MENU_IDS from "../../gui/menu/menu-ids";
-import rockstarJobState from "../../rockstar/job/state";
-import {ItemIconType} from "../../../common/gui/menu/item-icon-type";
-import {GameMode} from "../../../common/game-mode/game-mode";
-import logger from "../../logging/logger";
-import playSound from "../../sound";
-import toast from "../../gui/toasts/service";
-import Item from "../../gui/menu/api/item";
-import {resetHotLap, startHotLap} from "./service";
-import {AvailableJob} from "../../../common/rockstar/job/available-job";
+import {addItemToMenu, addMenu, openMenu, removeAllItemsFromMenu, setMenuDisabled} from "../gui/menu/api/service";
+import MENU_IDS from "../gui/menu/menu-ids";
+import {MENU} from "./constants";
+import {ItemIconType} from "../../common/gui/menu/item-icon-type";
+import Item from "../gui/menu/api/item";
+import {GameMode} from "../../common/game-mode/game-mode";
+import logger from "../logging/logger";
+import {trackState} from "../track/state";
+import {TrackFromServer} from "../../common/track/schemas";
+import playSound from "../sound";
+import toast from "../gui/toasts/service";
+import {setUpHotLap} from "./service";
+import {hotLapState} from "./state";
 
-const HOT_LAP_MENU_ITEM_IDS = {
-  HOT_LAP: 'hot-lap'
-};
-
-export function initializeHotLapMenu() {
+export function initialize() {
   addMenu({
     id: MENU_IDS.HOT_LAP.MAIN,
     title: 'Hot Lap',
@@ -22,7 +20,7 @@ export function initializeHotLapMenu() {
   });
 
   addItemToMenu(MENU_IDS.MAIN, {
-    id: HOT_LAP_MENU_ITEM_IDS.HOT_LAP,
+    id: MENU.ITEM_IDS.HOT_LAP,
     title: 'Hot Lap',
     description: 'Run time trials on various R* tracks.',
     icon: ItemIconType.SUB_MENU,
@@ -79,13 +77,13 @@ export function loadHotLapMenu(gameMode: GameMode) {
 
 function loadHotLapMenuForFreeMode() {
   removeAllItemsFromMenu(MENU_IDS.HOT_LAP.MAIN);
-  rockstarJobState.availableJobs.forEach(job => {
+  trackState.trackList.forEach(track => {
     addItemToMenu(MENU_IDS.HOT_LAP.MAIN, {
-      id: job.hash,
-      title: job.name,
-      description: `${job.name}<br><br>Author: ${job.author}`,
+      id: track.hash,
+      title: track.name,
+      description: `${track.name}<br><br>Author: ${track.author}`,
       icon: ItemIconType.NONE,
-      onPressed: async () => await pressHotLapJobItemInFreeMode(job)
+      onPressed: async () => await pressSetUpHotLapItem(track)
     });
   });
   setMenuDisabled(MENU_IDS.HOT_LAP.MAIN, false);
@@ -100,7 +98,7 @@ function loadHotLapMenuForHotLapMode() {
     title: 'Reset',
     description: `Resets the hot lap and places you back at your hot lap's spawn point.`,
     icon: ItemIconType.NONE,
-    onPressed: pressResetItemInHotLapMode
+    onPressed: async () => await pressSetUpHotLapItem(hotLapState.track!)
   });
 
   addItemToMenu(MENU_IDS.HOT_LAP.MAIN, {
@@ -127,13 +125,13 @@ function loadHotLapMenuForHotLapMode() {
     onPressed: pressStopItemInHotLapMode
   });
 
-  rockstarJobState.availableJobs.forEach(job => {
+  trackState.trackList.forEach(track => {
     addItemToMenu(MENU_IDS.HOT_LAP.TRACKS.MAIN, {
-      id: job.hash,
-      title: job.name,
-      description: `${job.name}<br><br>Author: ${job.author}`,
+      id: track.hash,
+      title: track.name,
+      description: `${track.name}<br><br>Author: ${track.author}`,
       icon: ItemIconType.NONE,
-      onPressed: async () => await pressHotLapJobItemInHotLapMode(job)
+      onPressed: async () => await pressSetUpHotLapItem(track)
     });
   });
 }
@@ -147,31 +145,6 @@ function pressHotLapSubMenuItem(item: Item) {
   openSubMenuFromItem(item, MENU_IDS.HOT_LAP.MAIN);
 }
 
-async function pressHotLapJobItemInFreeMode(job: AvailableJob) {
-  try {
-    playSound.select();
-    toast.showInfo(`Setting up hot lap session...`);
-    await startHotLap(job.hash);
-    toast.showInfo(`Started hot lap on "${job.name}"`);
-    playSound.select();
-  } catch (error: any) {
-    logger.error(`Failed to start hot lap for track "${job.name}" (hash=${job.hash}): ${error.message}`);
-    toast.showError(`Failed to start hot lap (see logs for details)`);
-    playSound.error();
-  }
-}
-
-async function pressResetItemInHotLapMode() {
-  try {
-    await resetHotLap();
-    playSound.select();
-  } catch (error: any) {
-    logger.error(`Failed to reset current hot lap: ${error.message}`);
-    toast.showError(`Failed to reset current hot lap (see logs for details)`);
-    playSound.error();
-  }
-}
-
 function pressRespawnItemInHotLapMode() {
   // TODO impl
 }
@@ -180,8 +153,18 @@ function pressStopItemInHotLapMode() {
   // TODO impl
 }
 
-async function pressHotLapJobItemInHotLapMode(job: AvailableJob) {
-  // TODO impl
+async function pressSetUpHotLapItem(track: TrackFromServer) {
+  try {
+    playSound.select();
+    toast.showInfo(`Setting up hot lap on "${track.name}"...`);
+    await setUpHotLap(track);
+    toast.showInfo(`Started hot lap on "${track.name}"`);
+    playSound.select();
+  } catch (error: any) {
+    logger.error(`Failed to start hot lap for track "${track.name}" (hash=${track.hash}): ${error.message}`);
+    toast.showError(`Failed to start hot lap (see logs for details)`);
+    playSound.error();
+  }
 }
 
 function openSubMenuFromItem(item: Item, subMenuId: string) {

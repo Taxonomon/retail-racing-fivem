@@ -1,8 +1,8 @@
-import {parseJobCheckpoints} from "../../../../common/rockstar/job/parse";
 import {getTrackByHash} from "../tracklist";
 import {CreateCheckpointProps} from "../../schemas";
 import logger from "../../../logging/logger";
 import {Checkpoint, CheckpointProps} from "../../../../common/track/schemas";
+import {parseJobCheckpoints} from "../../../../common/track/service/parse";
 
 export function getTrackCheckpoints(trackHash: string): Checkpoint[] {
   try {
