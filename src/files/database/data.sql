@@ -12,8 +12,8 @@ DELETE FROM txn.permissions
 WHERE identifier IN (
   'menu:moderation:open',
   'menu:administration:open',
-  'command:job:import',
-  'job:available:refresh'
+  'command:track:import',
+  'track:list:refresh'
 );
 
 INSERT INTO txn.permissions (identifier, description) VALUES
@@ -26,12 +26,12 @@ INSERT INTO txn.permissions (identifier, description) VALUES
     NULL
   ),
   (
-    'command:job:import',
-    'Allows execution of the importjob command.'
+    'command:track:import',
+    'Allows execution of the importtrack command.'
   ),
   (
-    'job:available:refresh',
-    'Refreshes the list of available jobs for all connected clients'
+    'track:list:refresh',
+    'Refreshes the list of available tracks for all connected clients'
   )
 ;
 
@@ -60,6 +60,6 @@ FROM txn.principals, txn.permissions
 WHERE principals.identifier = 'administrator'
 AND permissions.identifier IN (
   'menu:administration:open',
-  'command:job:import',
-  'job:available:refresh'
+  'command:track:import',
+  'track:list:refresh'
 );

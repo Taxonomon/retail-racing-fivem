@@ -6,7 +6,7 @@ export function register() {
   registerAuthorizedCommand({
     name: 'importtrack',
     handler: handleImportTrackCommand,
-    permissions: [ PERMISSIONS.JOB.IMPORT ]
+    permissions: [ PERMISSIONS.TRACK.IMPORT ]
   });
 }
 

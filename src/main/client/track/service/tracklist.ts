@@ -7,6 +7,7 @@ import logger from "../../logging/logger";
 export async function updateTrackList(): Promise<void> {
   try {
     trackState.trackList = await fetchTrackList();
+    logger.info(`Fetched ${trackState.trackList.length} tracks from server`);
   } catch (error: any) {
     logger.error(`Failed to update track list: ${error.message}`);
     trackState.trackList = [];

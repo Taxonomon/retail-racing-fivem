@@ -16,8 +16,8 @@ export const PERMISSIONS = {
       OPEN: 'menu:administration:open'
     }
   },
-  JOB: {
-    IMPORT: 'command:job:import'
+  TRACK: {
+    IMPORT: 'command:track:import'
   }
 };
 
