@@ -2,14 +2,16 @@ import CALLBACK_NAMES from "../../common/callback/callback-names";
 import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
-import callbackService from "../callback/outbound";
 import {addItemToMenu, addMenu, hasMenu, openMenu} from "../gui/menu/api/service";
 import playSound from "../sound";
 import toast from "../gui/toasts/service";
 import Item from "../gui/menu/api/item";
+import {triggerServerCallback} from "../callback/service/request";
 
 export async function initializeAdministrationMenu() {
-  const accessResult = await callbackService.triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.ADMINISTRATION);
+  const accessResult = await triggerServerCallback({
+    identifier: CALLBACK_NAMES.MENU.ACCESS.ADMINISTRATION
+  });
 
   if (undefined !== accessResult.error) {
     logger.warn(`Error whilst checking access to administration menu: ${accessResult.error}`);

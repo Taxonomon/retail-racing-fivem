@@ -1,5 +1,4 @@
-import {RACE} from "../../common/rockstar/job/job-type";
-import {LAND, STUNT} from "../../common/rockstar/job/race-type";
+import {JOB_TYPE, RACE_TYPE} from "../../common/track/constants";
 
 export const TRACK_IMPORT = {
   EXPECTED_JOB_ID_LENGTH: 22,
@@ -13,7 +12,7 @@ export const TRACK_IMPORT = {
     'AppleWebKit/537.36 (KHTML, like Gecko)',
     'Chrome/91.0.4472.124 Safari/537.36'
   ],
-  SUPPORTED_JOB_TYPES: [ RACE ],
-  SUPPORTED_RACE_TYPES: [ LAND, STUNT ],
+  SUPPORTED_JOB_TYPES: [ JOB_TYPE.RACE ],
+  SUPPORTED_RACE_TYPES: [ RACE_TYPE.LAND, RACE_TYPE.STUNT ],
   FETCH_TIMEOUT_MS: 100
 };

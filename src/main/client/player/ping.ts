@@ -1,5 +1,5 @@
 import EVENT_NAMES from "../../common/event-names";
-import playerState from "./state";
+import {playerState} from "./state";
 
 export default function startReceivingPingUpdates() {
   onNet(

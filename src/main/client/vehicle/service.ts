@@ -1,8 +1,6 @@
 import vehicleState from "./state";
 import logger from "../logging/logger";
-import callbackService from "../callback/outbound";
 import CALLBACK_NAMES from "../../common/callback/callback-names";
-import playerState from "../player/state";
 import {getClientCoordinates} from "../player/service";
 import {loadModelByHash} from "../../common/model";
 import {getBooleanPlayerSetting, getStringArrayPlayerSetting, updatePlayerSetting} from "../player/settings/service";
@@ -14,6 +12,8 @@ import {
   TELEPORT_OUTSIDE_KEEP_DOOR_CLOSED
 } from "../../common/rockstar/vehicle/leave-vehicle-flag";
 import {VEHICLE_CLASSES} from "../../common/rockstar/vehicle/vehicle-class";
+import {playerState} from "../player/state";
+import {triggerServerCallback} from "../callback/service/request";
 
 const CAR_NOT_FOUND = 'CARNOTFOUND';
 const REGEX_STARTS_WITH_NUMBER = /^\d/;
@@ -138,7 +138,7 @@ export async function spawnVehicleByModelId(modelId: string, options?: {
 
   const pedId = PlayerPedId();
   const heading = GetEntityHeading(pedId);
-  const { x, y, z } = playerState.coords ?? getClientCoordinates();
+  const { x, y, z } = playerState.coordinates ?? getClientCoordinates();
   const seat = options?.placeClientInSeat ?? FRONT_DRIVER;
 
   const newVehicleRef = CreateVehicle(modelHash, x, y, z, heading, true, true);
@@ -168,10 +168,10 @@ export async function spawnVehicleByModelId(modelId: string, options?: {
 }
 
 export async function isVehicleModelIdBlocked(modelId: string): Promise<boolean> {
-  const callbackResult = await callbackService.triggerServerCallback(
-    CALLBACK_NAMES.VEHICLE.SPAWN.IS_BLOCKED_MODEL_ID,
-    modelId
-  );
+  const callbackResult = await triggerServerCallback({
+    identifier: CALLBACK_NAMES.VEHICLE.SPAWN.IS_BLOCKED_MODEL_ID,
+    data: modelId
+  });
 
   if (callbackResult.error) {
     throw new Error(
@@ -284,10 +284,10 @@ export async function getAllSpawnableVehicles(): Promise<SpawnableVehicle[]> {
 }
 
 async function filterOutBlockedVehicleModelIds(vehicleModelIds: string[]): Promise<string[]> {
-  const callbackResult = await callbackService.triggerServerCallback(
-    CALLBACK_NAMES.VEHICLE.SPAWN.FILTER_BLOCKED_MODEL_IDS,
-    vehicleModelIds
-  );
+  const callbackResult = await triggerServerCallback({
+    identifier: CALLBACK_NAMES.VEHICLE.SPAWN.FILTER_BLOCKED_MODEL_IDS,
+    data: vehicleModelIds
+  });
 
   if (callbackResult.error) {
     throw new Error(`server callback resulted in error: ${callbackResult.error}`);

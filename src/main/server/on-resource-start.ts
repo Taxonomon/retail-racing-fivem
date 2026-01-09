@@ -1,6 +1,5 @@
 import logger from "./logging/logger";
 import {registerClientCallbackRequestEventListener} from "./callback/service";
-import {registerImportJobCommand} from "./rockstar/job/import/service";
 import {configureDatabaseConnection, startMonitoringDatabaseConnectionHealth} from "./database/service";
 import {registerPlayerSettingsCallbacks} from "./player/settings/service";
 import {kickAllPlayers, registerPlayerConnectionEventListeners} from "./player/connection/service";
@@ -8,6 +7,7 @@ import registerPlayerAuthorizationCallbacks from "./player/authorization/service
 import {startUpdatingPlayerPings} from "./player/service";
 import {registerBlockedVehicleCallbacks} from "./vehicle/service";
 import {register as registerTrackCallbacks} from "./track/callbacks";
+import {register as registerTrackCommands} from "./track/commands";
 
 export default function registerOnResourceStartListener() {
   on('onServerResourceStart', async (resource: string) => {
@@ -45,7 +45,7 @@ function registerCallbacks() {
 }
 
 function registerCommands() {
-  registerImportJobCommand();
+  registerTrackCommands();
 }
 
 function startSubProcesses() {

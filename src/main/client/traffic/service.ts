@@ -2,7 +2,7 @@ import trafficState from "./state";
 import toast from "../gui/toasts/service";
 import logger from "../logging/logger";
 import {Vector3} from "../../common/vector";
-import playerState from "../player/state";
+import {playerState} from "../player/state";
 import {getBooleanPlayerSetting, updatePlayerSetting} from "../player/settings/service";
 import PLAYER_SETTING_NAMES from "../../common/player/setting-names";
 import {updateDisableTrafficItemIcon} from "./menu";
@@ -92,7 +92,7 @@ export function disableTraffic() {
   }
 
   trafficState.disableTraffic.start(() => {
-    const coords = playerState.coords;
+    const coords = playerState.coordinates;
     if (undefined !== coords) {
       disableTrafficThisFrame(coords, DISABLE_RADIUS);
       disablePedestriansThisFrame(coords, DISABLE_RADIUS);

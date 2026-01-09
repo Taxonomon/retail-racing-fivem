@@ -12,10 +12,11 @@ import {addMenu, setMainMenu, setMenuDisabled} from "./api/service";
 import {initializeWeatherMenu} from "../../weather/menu";
 import {initializeTimeMenu} from "../../time/menu";
 import {initializeTrafficMenu} from "../../traffic/menu";
-import {initializeHotLapMenu} from "../../game-mode/hot-lap/menu";
-import {updateGameModeMenus} from "../../game-mode/menu";
 import logger from "../../logging/logger";
 import menuState from "./state";
+import {initialize as initializeHotLapMenu} from "../../hot-lap/menu";
+import {updateGameModeMenus} from "../../player/game-mode";
+import {playerState} from "../../player/state";
 
 export async function initializeMainMenu() {
   addMenu({
@@ -60,7 +61,7 @@ export async function initializeMainMenu() {
   initializeHotLapMenu();
 
   // game mode menus will be set dynamically, based on the client's current game mode
-  updateGameModeMenus();
+  updateGameModeMenus(playerState.gameMode);
 
   setMenuDisabled(MENU_IDS.MAIN, false);
   menuState.initialized = true;

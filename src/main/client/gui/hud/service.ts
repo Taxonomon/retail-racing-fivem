@@ -1,5 +1,5 @@
 import hudState from "./state";
-import playerState from "../../player/state";
+import {playerState} from "../../player/state";
 import sendNuiMessage from "../send-nui-message";
 import {NUI_MSG_IDS} from "../../../common/gui/nui-message";
 import {HudRenderProps} from "../../../common/gui/hud/render-props";

@@ -1,12 +1,12 @@
 import logger from "../../logging/logger";
 import toast from "../../gui/toasts/service";
-import callbackService from "../../callback/outbound";
 import CALLBACK_NAMES from "../../../common/callback/callback-names";
-import playerState from "../state";
+import {playerState} from "../state";
 import {applyHudPlayerSettings} from "../../gui/hud/service";
 import {applyTrafficPlayerSettings} from "../../traffic/service";
 import {applyWeatherPlayerSettings} from "../../weather/service";
 import {applyVehiclePlayerSettings} from "../../vehicle/service";
+import {triggerServerCallback} from "../../callback/service/request";
 
 export const SAVE_PLAYER_SETTINGS_INTERVAL_MS = 30000;
 
@@ -21,7 +21,9 @@ export async function fetchAndApplyPlayerSettings() {
 
 async function fetchFromServer() {
   try {
-    const { data, error } = await callbackService.triggerServerCallback(CALLBACK_NAMES.PLAYER.SETTINGS.FETCH);
+    const { data, error } = await triggerServerCallback({
+      identifier: CALLBACK_NAMES.PLAYER.SETTINGS.FETCH
+    });
 
     if (undefined !== error) {
       logger.error(`Failed to fetch player settings from server: ${error}`);
@@ -93,10 +95,10 @@ export async function savePlayerSettings() {
   const rawSettings = Object.fromEntries(playerState.settings);
   logger.debug(`Will save the following raw player settings: ${JSON.stringify(rawSettings)}`);
 
-  const result = await callbackService.triggerServerCallback(
-    CALLBACK_NAMES.PLAYER.SETTINGS.SAVE,
-    rawSettings
-  );
+  const result = await triggerServerCallback({
+    identifier: CALLBACK_NAMES.PLAYER.SETTINGS.SAVE,
+    data: rawSettings
+  });
 
   if (result.error) {
     throw new Error(result.error);

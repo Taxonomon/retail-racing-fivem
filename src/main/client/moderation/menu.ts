@@ -2,14 +2,16 @@ import CALLBACK_NAMES from "../../common/callback/callback-names";
 import MENU_IDS from "../gui/menu/menu-ids";
 import {ItemIconType} from "../../common/gui/menu/item-icon-type";
 import logger from "../logging/logger";
-import callbackService from "../callback/outbound";
 import {addItemToMenu, addMenu, openMenu} from "../gui/menu/api/service";
 import Item from "../gui/menu/api/item";
 import playSound from "../sound";
 import toast from "../gui/toasts/service";
+import {triggerServerCallback} from "../callback/service/request";
 
 export async function initializeModerationMenu() {
-  const accessResult = await callbackService.triggerServerCallback(CALLBACK_NAMES.MENU.ACCESS.MODERATION);
+  const accessResult = await triggerServerCallback({
+    identifier: CALLBACK_NAMES.MENU.ACCESS.MODERATION
+  });
 
   if (undefined !== accessResult.error) {
     logger.warn(`error whilst checking access to moderation menu: ${accessResult.error}`);

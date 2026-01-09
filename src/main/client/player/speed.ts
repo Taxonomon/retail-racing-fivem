@@ -1,4 +1,4 @@
-import playerState from "./state";
+import {playerState} from "./state";
 import {METERS_PER_SECOND} from "../../common/unit/unit";
 
 export default function startTrackingPlayerSpeed() {

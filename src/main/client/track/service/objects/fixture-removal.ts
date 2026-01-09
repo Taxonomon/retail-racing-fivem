@@ -1,8 +1,8 @@
-import {parseJobFixtureRemovals} from "../../../../common/rockstar/job/parse";
 import {getTrackByHash} from "../tracklist";
 import {ToggleFixtureRemovalProps} from "../../schemas";
 import logger from "../../../logging/logger";
-import {FixtureRemoval} from "../../../../common/rockstar/job/fixture-removal";
+import {parseJobFixtureRemovals} from "../../../../common/track/service/parse";
+import {FixtureRemoval} from "../../../../common/track/schemas";
 
 export function getTrackFixtureRemovals(trackHash: string): FixtureRemoval[] {
   try {

@@ -4,7 +4,7 @@ import logger from "./logging/logger";
 import startUpdatingBreadcrumps from "./gui/breadcrumps/service";
 import startReceivingPingUpdates from "./player/ping";
 import registerMessageFromServerEventListener from "./logging/msg-from-server";
-import startTrackingPlayerCoordinates from "./player/coords";
+import startTrackingPlayerCoordinates from "./player/coordinates";
 import wantedLevelService from "./wanted-level/menu";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
 import startTrackingPlayerSpeed from "./player/speed";
@@ -12,9 +12,9 @@ import {initializeMainMenu} from "./gui/menu/main-menu";
 import {fetchAndApplyPlayerSettings, startSavingPlayerSettingsPeriodically} from "./player/settings/service";
 import {initializeMenuInputBindings} from "./gui/menu/api/input";
 import {startUpdatingHud} from "./gui/hud/service";
-import {switchGameModeTo} from "./game-mode/service";
 import {register as registerCallbackEventListeners} from "./callback/events";
 import {updateTrackList} from "./track/service/tracklist";
+import {switchGameModeTo} from "./player/game-mode";
 
 export function registerOnClientResourceStartListener() {
   on('onClientResourceStart', async (resource: string) => {
