@@ -13,7 +13,8 @@ export function loadLapTimerRootNode() {
 export function renderLapTimer(props: LapTimerRenderProps) {
   lapTimerState.rootNode?.empty();
   if (undefined !== props) {
-    lapTimerState.rootNode?.html(toFormattedTime(props.lapTimeMs));
+    lapTimerState.rootNode?.html(toFormattedTime(props.lapTimeMs))
+      .css('opacity', 0 === props.lapTimeMs ? '0.5' : '1.0');
   }
 }
 

@@ -31,7 +31,7 @@ export async function setUpHotLap(track: TrackFromServer) {
 
   try {
     const parsedTrack: ParsedTrack = toParsedTrack(track);
-    const { spawnPoint, spawnCheckpointIndex } = getSpawnPoint(parsedTrack.checkpoints);
+    const { checkpoint, index } = getSpawnCheckpoint(parsedTrack.checkpoints);
 
     startRenderingTrack({
       track: parsedTrack,
@@ -40,12 +40,12 @@ export async function setUpHotLap(track: TrackFromServer) {
         fixtureRemovals: 'NEARBY',
         checkpoints: 'NEXT'
       },
-      spawnPoint,
-      initialCheckpointIndex: spawnCheckpointIndex,
+      spawnPoint: checkpoint.coordinates,
+      initialCheckpointIndex: index,
       withSound: true
     });
 
-    await teleportClientToSpawnPoint(spawnPoint);
+    await teleportClientToCheckpoint(checkpoint);
   } catch (error: any) {
     stopRenderingTrack();
     switchGameModeTo('FREE_MODE');
@@ -53,8 +53,8 @@ export async function setUpHotLap(track: TrackFromServer) {
   }
 }
 
-function getSpawnPoint(checkpoints: Checkpoint[]): { spawnPoint: Vector3, spawnCheckpointIndex: number } {
-  let coordinates: Vector3 | undefined;
+function getSpawnCheckpoint(checkpoints: Checkpoint[]): { checkpoint: Checkpoint, index: number } {
+  let checkpoint: Checkpoint | undefined;
   let index: number | undefined;
 
   switch (checkpoints.length) {
@@ -84,16 +84,16 @@ function getSpawnPoint(checkpoints: Checkpoint[]): { spawnPoint: Vector3, spawnC
     }
   }
 
-  coordinates = checkpoints.at(index)?.coordinates;
+  checkpoint = checkpoints.at(index);
 
-  if (undefined === coordinates) {
-    throw new Error('Spawn point undefined');
+  if (undefined === checkpoint) {
+    throw new Error('Spawn checkpoint undefined');
   }
 
-  return { spawnPoint: coordinates, spawnCheckpointIndex: index };
+  return { checkpoint, index };
 }
 
-async function teleportClientToSpawnPoint(coordinates: Vector3) {
+async function teleportClientToCheckpoint(checkpoint: Checkpoint) {
   let ref = getCurrentVehicleRef();
 
   if (0 === ref) {
@@ -102,7 +102,17 @@ async function teleportClientToSpawnPoint(coordinates: Vector3) {
 
   FreezeEntityPosition(ref, true);
 
-  setClientCoordinates(coordinates);
+  SetEntityCoords(
+    ref,
+    checkpoint.coordinates.x,
+    checkpoint.coordinates.y,
+    checkpoint.coordinates.z,
+    false,
+    false,
+    false,
+    false,
+  );
+  SetEntityHeading(ref, checkpoint.heading);
   const teleportedAt = GetGameTimer();
 
   while (GetGameTimer() - teleportedAt < FREEZE_CLIENT_ON_TELEPORT_FOR_MS) {
@@ -110,7 +120,7 @@ async function teleportClientToSpawnPoint(coordinates: Vector3) {
   }
 
   FreezeEntityPosition(ref, false);
-  logger.debug(`Teleported client to hot lap spawn point at ${JSON.stringify(coordinates)}`);
+  logger.debug(`Teleported client to hot lap spawn point at ${JSON.stringify(checkpoint.coordinates)}`);
 }
 
 export function handleOnTrackCheckpointPassedEvent(data: OnTrackCheckpointPassedEventProps) {
@@ -132,12 +142,22 @@ export async function resetHotLap() {
     throw new Error('No track is currently loaded');
   }
 
-  const { spawnPoint, spawnCheckpointIndex } = getSpawnPoint(track.checkpoints);
-  trackState.currentCheckpointIndex = spawnCheckpointIndex;
+  const { checkpoint, index } = getSpawnCheckpoint(track.checkpoints);
+  trackState.currentCheckpointIndex = index;
   trackState.currentLap = 0;
   hotLapState.lapStartedAt = Number.NaN;
   clearAllRenderedCheckpoints();
-  await teleportClientToSpawnPoint(spawnPoint);
+  await teleportClientToCheckpoint(checkpoint);
+}
+
+export async function respawn() {
+  const checkpoint = trackState.currentTrack?.checkpoints[trackState.currentCheckpointIndex];
+
+  if (undefined === checkpoint) {
+    throw new Error('No checkpoint found to teleport to');
+  }
+
+  await teleportClientToCheckpoint(checkpoint);
 }
 
 export function stopHotLap() {

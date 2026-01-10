@@ -9,7 +9,7 @@ import {trackState} from "../track/state";
 import {TrackFromServer} from "../../common/track/schemas";
 import playSound from "../sound";
 import toast from "../gui/toasts/service";
-import {resetHotLap, setUpHotLap, stopHotLap} from "./service";
+import {resetHotLap, respawn, setUpHotLap, stopHotLap} from "./service";
 import {hotLapState} from "./state";
 
 export function initialize() {
@@ -145,14 +145,22 @@ function pressHotLapSubMenuItem(item: Item) {
   openSubMenuFromItem(item, MENU_IDS.HOT_LAP.MAIN);
 }
 
-function pressRespawnItemInHotLapMode() {
-  // TODO impl
+async function pressRespawnItemInHotLapMode() {
+  try {
+    await respawn();
+    playSound.select();
+    toast.showInfo(`Respawned at checkpoint ${trackState.currentCheckpointIndex}`);
+  } catch (error: any) {
+    logger.error(`Failed to respawn: ${error.message}`);
+    toast.showError(`Failed to respawn (see logs for details)`);
+    playSound.error();
+  }
 }
 
 function pressStopItemInHotLapMode() {
   try {
-    playSound.select();
     stopHotLap();
+    playSound.select();
     toast.showInfo('Stopped hot lap');
   } catch (error: any) {
     logger.error(`Failed to stop current hot lap: ${error.message}`);
@@ -163,8 +171,8 @@ function pressStopItemInHotLapMode() {
 
 async function pressResetHotLapItem() {
   try {
+    await resetHotLap();
     playSound.select();
-    resetHotLap();
     toast.showInfo(`Reset hot lap`);
   } catch (error: any) {
     logger.info(`Failed to reset hot lap: ${error.message}`);
