@@ -820,5 +820,5 @@ export const RACE_TYPE = {
 	BIKE: {
 		id: 13,
 		identifier: 'BIKE'
-	} satisfies IdentifiableConstant
+	}
 };

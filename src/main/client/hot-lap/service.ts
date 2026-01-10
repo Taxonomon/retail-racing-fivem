@@ -15,6 +15,7 @@ import { BLIP_COLOR, BLIP_SPRITE } from "../../common/track/constants";
 import { getCurrentVehicleRef } from "../vehicle/service";
 import { setClientCoordinates } from "../player/service";
 import { waitOneFrame } from "../../common/wait";
+import playSound from "../sound";
 
 export async function setUpHotLap(track: TrackFromServer) {
 	if ('RACE' === playerState.gameMode) {
@@ -114,7 +115,7 @@ async function teleportClientToSpawnPoint(coordinates: Vector3) {
 }
 
 function startUpdatingCheckpoints(checkpoints: Checkpoint[]) {
-	hotLapState.updateCheckpoints.start(() => updateCheckpoints(checkpoints), 100);
+	hotLapState.updateCheckpoints.start(() => updateCheckpoints(checkpoints));
 }
 
 function stopUpdatingCheckpoints() {
@@ -132,8 +133,6 @@ function updateCheckpoints(checkpoints: Checkpoint[]) {
 	const followUpIndex = targetIndex === checkpoints.length - 1 ? 0 : targetIndex + 1;
 	const followUp = checkpoints.at(followUpIndex);
 
-	logger.debug(`[updateCheckpoints] current: ${currentIndex} | target: ${targetIndex} | followUp: ${followUpIndex}`);
-
 	if (undefined === target || undefined === followUp) {
 		return;
 	}
@@ -147,12 +146,12 @@ function updateCheckpoints(checkpoints: Checkpoint[]) {
 		}
 	});
 
-	if (undefined !== target.secondaryCheckpoint) {
+	if (undefined !== target.secondaryCheckpoint?.coordinates) {
 		target.secondaryCheckpoint.ref ??= createCheckpoint({
 			...target,
 			height: DEFAULT_CHECKPOINT_HEIGHT,
 			coordinates: {
-				target: target.coordinates,
+				target: target.secondaryCheckpoint.coordinates,
 				followUp: followUp.coordinates
 			}
 		});
@@ -166,13 +165,78 @@ function updateCheckpoints(checkpoints: Checkpoint[]) {
 		scale: BLIP.TARGET.SCALE
 	});
 
+	if (undefined !== target.secondaryCheckpoint?.coordinates) {
+		target.secondaryCheckpoint.blipRef ??= createBlip({
+			coordinates: target.secondaryCheckpoint.coordinates,
+			sprite: BLIP_SPRITE.RADAR_LEVEL,
+			color: BLIP_COLOR.YELLOW,
+			alpha: BLIP.TARGET.ALPHA,
+			scale: BLIP.TARGET.SCALE
+		});
+	}
+
 	followUp.blipRef ??= createBlip({
-		coordinates: target.coordinates,
+		coordinates: followUp.coordinates,
 		sprite: BLIP_SPRITE.RADAR_LEVEL,
 		color: BLIP_COLOR.DARK_YELLOW,
 		alpha: BLIP.FOLLOW_UP.ALPHA,
 		scale: BLIP.FOLLOW_UP.SCALE
 	});
+
+	if (undefined !== followUp.secondaryCheckpoint?.coordinates) {
+		followUp.secondaryCheckpoint.blipRef ??= createBlip({
+			coordinates: followUp.secondaryCheckpoint.coordinates,
+			sprite: BLIP_SPRITE.RADAR_LEVEL,
+			color: BLIP_COLOR.DARK_YELLOW,
+			alpha: BLIP.FOLLOW_UP.ALPHA,
+			scale: BLIP.FOLLOW_UP.SCALE
+		});
+	}
+
+	const withinPlayerDistance = distanceBetweenVector3s(
+		playerState.coordinates,
+		target.coordinates
+	) <= target.size;
+
+	if (withinPlayerDistance) {
+		hotLapState.checkpoint = currentIndex === checkpoints.length - 1 ? 0 : currentIndex + 1;
+
+		removeCheckpoint({ ...target });
+		target.ref = undefined;
+
+		removeBlip({ ref: target.blipRef, coordinates: target.coordinates });
+		target.blipRef = undefined;
+
+		if (undefined !== target.secondaryCheckpoint?.ref) {
+			removeCheckpoint({ ...target.secondaryCheckpoint });
+			target.secondaryCheckpoint.ref = undefined;
+
+			if (undefined !== target.secondaryCheckpoint.blipRef) {
+				removeBlip({
+					ref: target.secondaryCheckpoint.blipRef,
+					coordinates: target.secondaryCheckpoint.coordinates
+				});
+			}
+		}
+
+		removeBlip({ ref: followUp.blipRef, coordinates: followUp.coordinates });
+		followUp.blipRef = undefined;
+
+		if (undefined !== followUp.secondaryCheckpoint?.blipRef) {
+			removeBlip({
+				ref: followUp.secondaryCheckpoint.blipRef,
+				coordinates: followUp.secondaryCheckpoint.coordinates
+			});
+		}
+
+		if (0 === targetIndex) {
+			playSound.lapCompleted();
+			hotLapState.lap++;
+			hotLapState.lapStartedAt = GetGameTimer();
+		} else {
+			playSound.checkpointHit();
+		}
+	}
 }
 
 function tearDownHotLap() {
