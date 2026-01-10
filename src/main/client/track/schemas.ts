@@ -1,4 +1,4 @@
-import {CheckpointDisplayProps} from "../../common/track/schemas";
+import {Checkpoint, CheckpointDisplayProps, FixtureRemoval, Prop, TrackFromServer} from "../../common/track/schemas";
 import {IdentifiableConstant, Vector3} from "../../common/schemas";
 
 export interface GetPropsOptions {
@@ -53,6 +53,19 @@ export interface RemoveBlipProps {
   coordinates: Vector3;
 }
 
-export type CheckpointPlacementStrategy = 'NONE' | 'ALL' | 'NEXT';
-export type PropPlacementStrategy = 'NONE' | 'ALL' | 'NEARBY';
-export type FixtureRemovalStrategy = 'NONE' | 'ALL' | 'NEARBY';
+export type CheckpointRenderStrategy = 'NONE' | 'ALL' | 'NEXT';
+export type PropRenderStrategy = 'NONE' | 'ALL' | 'NEARBY';
+export type FixtureRemovalRenderStrategy = 'NONE' | 'ALL' | 'NEARBY';
+
+export interface TrackRenderStrategy {
+  props: PropRenderStrategy;
+  fixtureRemovals: FixtureRemovalRenderStrategy;
+  checkpoints: CheckpointRenderStrategy;
+}
+
+export interface ParsedTrack extends TrackFromServer {
+  props: Prop[];
+  fixtureRemovals: FixtureRemoval[];
+  checkpoints: Checkpoint[];
+  renderStrategy: TrackRenderStrategy;
+}

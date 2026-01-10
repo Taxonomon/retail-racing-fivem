@@ -1,4 +1,4 @@
-import {CheckpointPlacementStrategy} from "./schemas";
+import {CheckpointRenderStrategy, FixtureRemovalRenderStrategy, PropRenderStrategy} from "./schemas";
 
 export const UPDATE_NEARBY_TRACK_OBJECTS = {
 	INTERVAL_MS: 1500,
@@ -22,8 +22,20 @@ export const CREATE_BLIP = {
 	}
 };
 
-export const CHECKPOINT_PLACEMENT_STRATEGY = {
-  NONE: 'NONE' satisfies CheckpointPlacementStrategy,
-  ALL: 'ALL' satisfies CheckpointPlacementStrategy,
-  NEXT: 'NEXT' satisfies CheckpointPlacementStrategy
+export const TRACK_RENDER_STRATEGY = {
+  PROPS: {
+    NONE: 'NONE' satisfies PropRenderStrategy,
+    ALL: 'ALL' satisfies PropRenderStrategy,
+    NEARBY: 'NEARBY' satisfies PropRenderStrategy
+  },
+  FIXTURE_REMOVALS: {
+    NONE: 'NONE' satisfies FixtureRemovalRenderStrategy,
+    ALL: 'ALL' satisfies FixtureRemovalRenderStrategy,
+    NEARBY: 'NEARBY' satisfies FixtureRemovalRenderStrategy
+  },
+  CHECKPOINTS: {
+    NONE: 'NONE' satisfies CheckpointRenderStrategy,
+    ALL: 'ALL' satisfies CheckpointRenderStrategy,
+    NEXT: 'NEXT' satisfies CheckpointRenderStrategy
+  }
 };
