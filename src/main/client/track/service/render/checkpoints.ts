@@ -9,6 +9,7 @@ import {BLIP_COLOR, BLIP_SPRITE} from "../../../../common/track/constants";
 import {Vector3} from "../../../../common/schemas";
 import {withinPlayerRadius} from "../../../player/coordinates";
 import playSound from "../../../sound";
+import EVENT_NAMES from "../../../../common/event-names";
 
 export function start(track: ParsedTrack, options?: { withSound?: boolean }) {
   trackState.currentTrack = track;
@@ -89,6 +90,11 @@ function renderNext(options?: { withSound?: boolean }) {
     } else if (withSound) {
       playSound.checkpointHit();
     }
+
+    emit(EVENT_NAMES.TRACK.CHECKPOINT.PASSED, {
+      index: currentIndex,
+      timestamp: now
+    });
   }
 }
 

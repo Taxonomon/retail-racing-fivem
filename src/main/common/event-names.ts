@@ -19,6 +19,11 @@ const EVENT_NAMES = {
     FROM: {
       SERVER: 'txn:message:from:server'
     }
+  },
+  TRACK: {
+    CHECKPOINT: {
+      PASSED:'txn:track:checkpoint:passed'
+    }
   }
 };
 
