@@ -66,8 +66,8 @@ function renderNext(options?: { withSound?: boolean }) {
     return;
   }
 
-  renderTarget(target, followUp.coordinates, targetIndex, { withBlip: true });
-  renderFollowUp(followUp, followUpIndex, { withBlip: true });
+  renderTarget(target, followUp.coordinates, targetIndex);
+  renderFollowUp(followUp, followUpIndex);
 
   const withinTargetRadius = withinPlayerRadius(target.coordinates, target.size);
   const withinTargetSecondaryRadius = undefined !== target.secondaryCheckpoint
@@ -98,19 +98,9 @@ function renderNext(options?: { withSound?: boolean }) {
   }
 }
 
-function renderTarget(
-  c: Checkpoint,
-  followUpCoordinates: Vector3,
-  index: number,
-  options?: { withBlip?: boolean }
-) {
-  const withBlip = options?.withBlip ?? false;
-
+function renderTarget(c: Checkpoint, followUpCoordinates: Vector3, index: number,) {
   c.ref ??= renderCheckpoint(c, followUpCoordinates);
-
-  if (withBlip) {
-    c.blipRef ??= renderTargetBlip(c.coordinates, index);
-  }
+  c.blipRef ??= renderTargetBlip(c.coordinates, index);
 
   const sc = c.secondaryCheckpoint;
 
@@ -120,17 +110,9 @@ function renderTarget(
   }
 }
 
-function renderFollowUp(
-  c: Checkpoint,
-  index: number,
-  options?: { withBlip?: boolean }
-) {
-  const withBlip = options?.withBlip ?? false;
-
+function renderFollowUp(c: Checkpoint, index: number,) {
   c.blipRef ??= renderFollowUpBlip(c.coordinates, index);
-
   const sc = c.secondaryCheckpoint;
-
   if (undefined !== sc) {
     sc.blipRef ??= renderFollowUpBlip(sc.coordinates, index);
   }
