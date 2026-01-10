@@ -44,7 +44,7 @@ export function stop() {
   if (trackState.renderNextCheckpoints.isRunning()) {
     trackState.renderNextCheckpoints.stop();
   }
-  clearAll({ includingBlips: true });
+  clearAll();
   logger.debug(`Stopped rendering checkpoints of current track`);
 }
 
@@ -98,8 +98,8 @@ function renderNext(options?: { withSound?: boolean }) {
     const now = GetGameTimer();
     const withSound = options?.withSound ?? false;
 
-    clear(target, { includingBlips: true });
-    clear(followUp, { includingBlips: true });
+    clear(target);
+    clear(followUp);
 
     trackState.currentCheckpointIndex = targetIndex;
 
@@ -119,23 +119,25 @@ function renderNext(options?: { withSound?: boolean }) {
   }
 }
 
-function renderTarget(c: Checkpoint, followUpCoordinates: Vector3, index: number,) {
-  c.ref ??= renderCheckpoint(c, followUpCoordinates);
-  c.blipRef ??= renderTargetBlip(c.coordinates, index);
+function renderTarget(checkpoint: Checkpoint, followUpCoordinates: Vector3, index: number) {
+  checkpoint.ref ??= renderCheckpoint(checkpoint, followUpCoordinates);
+  checkpoint.blipRef ??= renderTargetBlip(checkpoint.coordinates, index);
 
-  const sc = c.secondaryCheckpoint;
+  const secondaryCheckpoint = checkpoint.secondaryCheckpoint;
 
-  if (undefined !== sc) {
-    sc.ref ??= renderCheckpoint(sc, followUpCoordinates);
-    sc.blipRef ??= renderTargetBlip(sc.coordinates, index);
+  if (undefined !== secondaryCheckpoint) {
+    secondaryCheckpoint.ref ??= renderCheckpoint(secondaryCheckpoint, followUpCoordinates);
+    secondaryCheckpoint.blipRef ??= renderTargetBlip(secondaryCheckpoint.coordinates, index);
   }
 }
 
-function renderFollowUp(c: Checkpoint, index: number,) {
-  c.blipRef ??= renderFollowUpBlip(c.coordinates, index);
-  const sc = c.secondaryCheckpoint;
-  if (undefined !== sc) {
-    sc.blipRef ??= renderFollowUpBlip(sc.coordinates, index);
+function renderFollowUp(checkpoint: Checkpoint, index: number,) {
+  checkpoint.blipRef ??= renderFollowUpBlip(checkpoint.coordinates, index);
+
+  const secondaryCheckpoint = checkpoint.secondaryCheckpoint;
+
+  if (undefined !== secondaryCheckpoint) {
+    secondaryCheckpoint.blipRef ??= renderFollowUpBlip(secondaryCheckpoint.coordinates, index);
   }
 }
 
@@ -172,15 +174,17 @@ function renderFollowUpBlip(coordinates: Vector3, index: number) {
   });
 }
 
-function clear(checkpoint: Checkpoint, options?: { includingBlips?: boolean }) {
-  const includeBlips = options?.includingBlips ?? false;
-
+function clear(checkpoint: Checkpoint) {
   if (undefined === checkpoint) {
     return;
-  } else if (undefined !== checkpoint.ref) {
+  }
+
+  if (undefined !== checkpoint.ref) {
     removeCheckpoint({ ...checkpoint });
     checkpoint.ref = undefined;
-  } else if (includeBlips && undefined !== checkpoint.blipRef) {
+  }
+
+  if (undefined !== checkpoint.blipRef) {
     removeBlip({ ref: checkpoint.blipRef, coordinates: checkpoint.coordinates });
     checkpoint.blipRef = undefined;
   }
@@ -190,17 +194,15 @@ function clear(checkpoint: Checkpoint, options?: { includingBlips?: boolean }) {
   if (undefined !== sc?.ref) {
     removeCheckpoint({ ...sc });
     sc.ref = undefined;
-  } else if (includeBlips && undefined !== sc?.blipRef) {
+  }
+
+  if (undefined !== sc?.blipRef) {
     removeBlip({ ref: sc.blipRef, coordinates: sc.coordinates });
     sc.blipRef = undefined;
   }
 }
 
-export function clearAll(options?: { includingBlips?: boolean }) {
-  const withBlips = options?.includingBlips ?? false;
-  (trackState.currentTrack?.checkpoints ?? []).forEach(c => clear(c, options));
-  logger.debug(
-    `Cleared all currently rendered checkpoints `
-    + `${withBlips ? '(including blips)' : ''}`
-  );
+export function clearAll() {
+  (trackState.currentTrack?.checkpoints ?? []).forEach(c => clear(c));
+  logger.debug('Cleared all currently rendered checkpoints');
 }
