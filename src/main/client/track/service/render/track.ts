@@ -2,31 +2,29 @@ import {TrackFromServer} from "../../../../common/track/schemas";
 import {stop as stopRenderingProps, start as startRenderingProps} from "./props";
 import {stop as stopRenderingFixtureRemovals, start as startRenderingFixtureRemovals} from "./fixture-removals";
 import {stop as stopRenderingCheckpoints, start as startRenderingCheckpoints} from "./checkpoints";
-import {ParsedTrack, TrackRenderStrategy} from "../../schemas";
+import {ParsedTrack, StartRenderTrackProps} from "../../schemas";
 import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../../common/track/service/parse";
 import {trackState} from "../../state";
 import logger from "../../../logging/logger";
-import {Vector3} from "../../../../common/vector";
 
-export function start(
-  track: ParsedTrack,
-  renderStrategy: TrackRenderStrategy,
-  spawnPoint: Vector3,
-  options?: { withSound: boolean }
-) {
-  trackState.currentTrack = track;
-  trackState.renderStrategy = renderStrategy;
-  trackState.spawnPoint = spawnPoint;
+export function start(props: StartRenderTrackProps) {
+  trackState.currentTrack = props.track;
+  trackState.renderStrategy = props.renderStrategy;
+  trackState.spawnPoint = props.spawnPoint;
+  trackState.initialCheckpointIndex = props.initialCheckpointIndex;
+
   startRenderingProps();
   startRenderingFixtureRemovals();
-  startRenderingCheckpoints(options);
-  logger.debug(`Started rendering current track "${track.name}"`);
+  startRenderingCheckpoints({ withSound: props.withSound });
+
+  logger.debug(`Started rendering current track "${props.track.name}"`);
 }
 
 export function stop() {
   stopRenderingProps();
   stopRenderingFixtureRemovals();
   stopRenderingCheckpoints();
+  trackState.currentCheckpointIndex = Number.NaN;
   logger.debug(`Stopped rendering current track "${trackState.currentTrack?.name}"`);
 }
 

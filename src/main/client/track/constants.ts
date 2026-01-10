@@ -25,7 +25,7 @@ export const CHECKPOINT = {
   OFFSET: {
     x: 0,
     y: 0,
-    z: -5
+    z: -2.5
   } satisfies Vector3,
   RENDER_STRATEGY: {
     NONE: 'NONE' satisfies CheckpointRenderStrategy,

@@ -75,7 +75,11 @@ function renderNext(options?: { withSound?: boolean }) {
     return;
   }
 
-  const currentIndex = Number.isNaN(trackState.currentCheckpointIndex) ? 0 : trackState.currentCheckpointIndex;
+  let currentIndex: number = trackState.currentCheckpointIndex;
+
+  if (Number.isNaN(currentIndex)) {
+    currentIndex = Number.isNaN(trackState.initialCheckpointIndex) ? 0 : trackState.initialCheckpointIndex;
+  }
 
   const targetIndex = currentIndex === checkpoints.length - 1 ? 0 : currentIndex + 1;
   const target = checkpoints.at(targetIndex);
@@ -148,7 +152,8 @@ function renderCheckpoint(c: CheckpointProps, followUpCoordinates: Vector3) {
     coordinates: {
       target: c.coordinates,
       followUp: followUpCoordinates
-    }
+    },
+    offset: CHECKPOINT.OFFSET
   });
 }
 

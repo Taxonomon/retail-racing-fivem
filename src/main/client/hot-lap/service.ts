@@ -26,14 +26,19 @@ export async function setUpHotLap(track: TrackFromServer) {
 
   try {
     const parsedTrack: ParsedTrack = toParsedTrack(track);
-    const spawnPoint: Vector3 = getSpawnPoint(parsedTrack.checkpoints);
+    const { spawnPoint, spawnCheckpointIndex } = getSpawnPoint(parsedTrack.checkpoints);
 
-    startRenderingTrack(
-      parsedTrack,
-      {props: 'NEARBY', fixtureRemovals: 'NEARBY', checkpoints: 'NEXT'},
+    startRenderingTrack({
+      track: parsedTrack,
+      renderStrategy: {
+        props: 'NEARBY',
+        fixtureRemovals: 'NEARBY',
+        checkpoints: 'NEXT'
+      },
       spawnPoint,
-      {withSound: true}
-    );
+      initialCheckpointIndex: spawnCheckpointIndex,
+      withSound: true
+    });
 
     await teleportClientToSpawnPoint(spawnPoint);
   } catch (error: any) {
@@ -43,8 +48,9 @@ export async function setUpHotLap(track: TrackFromServer) {
   }
 }
 
-function getSpawnPoint(checkpoints: Checkpoint[]): Vector3 {
+function getSpawnPoint(checkpoints: Checkpoint[]): { spawnPoint: Vector3, spawnCheckpointIndex: number } {
   let coordinates: Vector3 | undefined;
+  let index: number | undefined;
 
   switch (checkpoints.length) {
     case 0:
@@ -52,32 +58,34 @@ function getSpawnPoint(checkpoints: Checkpoint[]): Vector3 {
     case 1:
       throw new Error('Track only has a single checkpoint');
     case 2: {
-      coordinates = checkpoints.at(0)?.coordinates;
+      index = 0;
       break;
     }
     case 3: {
-      coordinates = checkpoints.at(-1)?.coordinates;
+      index = -1;
       break;
     }
     case 4: {
-      coordinates = checkpoints.at(-2)?.coordinates;
+      index = -2;
       break;
     }
     case 5: {
-      coordinates = checkpoints.at(-3)?.coordinates;
+      index = -3;
       break;
     }
     default: {
-      coordinates = checkpoints.at(-4)?.coordinates;
+      index = -4;
       break;
     }
   }
+
+  coordinates = checkpoints.at(index)?.coordinates;
 
   if (undefined === coordinates) {
     throw new Error('Spawn point undefined');
   }
 
-  return coordinates;
+  return { spawnPoint: coordinates, spawnCheckpointIndex: index };
 }
 
 async function teleportClientToSpawnPoint(coordinates: Vector3) {

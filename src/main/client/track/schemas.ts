@@ -70,3 +70,11 @@ export interface ParsedTrack extends TrackFromServer {
   fixtureRemovals: FixtureRemoval[];
   checkpoints: Checkpoint[];
 }
+
+export interface StartRenderTrackProps {
+  track: ParsedTrack;
+  renderStrategy: TrackRenderStrategy;
+  spawnPoint: Vector3;
+  initialCheckpointIndex: number;
+  withSound: boolean;
+}

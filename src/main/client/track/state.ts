@@ -13,6 +13,7 @@ class TrackState {
 
   // checkpoint stuff
   currentLap: number = 0; // can only be counted if checkpoint render strategy is 'NEXT'
+  initialCheckpointIndex: number = Number.NaN;
   currentCheckpointIndex: number = Number.NaN;
   renderNextCheckpoints: Tick = new Tick('render next checkpoints of current track', logger);
 

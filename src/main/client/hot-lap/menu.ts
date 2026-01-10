@@ -98,7 +98,7 @@ function loadHotLapMenuForHotLapMode() {
     title: 'Reset',
     description: `Resets the hot lap and places you back at your hot lap's spawn point.`,
     icon: ItemIconType.NONE,
-    onPressed: async () => await pressSetUpHotLapItem(hotLapState.track!)
+    onPressed: async () => await pressSetUpHotLapItem(trackState.currentTrack!)
   });
 
   addItemToMenu(MENU_IDS.HOT_LAP.MAIN, {
