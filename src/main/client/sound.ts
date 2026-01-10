@@ -19,11 +19,11 @@ function error(): void {
 }
 
 function checkpointHit(): void {
-  play('DLC_Stunt_Race_Frontend_Sounds', 'Checkpoint');
+  play('DLC_AW_Frontend_Sounds', 'Checkpoint');
 }
 
 function lapCompleted() {
-  play('DLC_Stunt_Race_Frontend_Sounds', 'Checkpoint_Lap');
+  play('DLC_AW_Frontend_Sounds', 'Checkpoint_Lap');
 }
 
 function play(set: string, name: string): void {

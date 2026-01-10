@@ -211,7 +211,7 @@ export function parseJobSecondaryCheckpoint(
 	index: number
 ): CheckpointProps | undefined {
 	try {
-		return {
+		const result: CheckpointProps = {
 			coordinates: {
 				x: json.mission.race.sndchk[index].x,
 				y: json.mission.race.sndchk[index].y,
@@ -220,7 +220,13 @@ export function parseJobSecondaryCheckpoint(
 			heading: json.mission.race.sndrsp[index],
 			size: parseJobCheckpointSize(json?.mission?.race?.chs2[index]),
 			display: CHECKPOINT_DISPLAY.RETAIL
-		}
+		};
+    // if there's no secondary checkpoint, R* zeroes the coordinates
+    return (
+      0 === result.coordinates.x
+      && 0 === result.coordinates.y
+      && 0 === result.coordinates.z
+    ) ? undefined : result;
 	} catch (error: any) {
 		return undefined;
 	}

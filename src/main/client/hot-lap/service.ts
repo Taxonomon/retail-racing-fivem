@@ -6,7 +6,7 @@ import { getTrackProps, removeProp } from "../track/service/objects/prop";
 import { getTrackFixtureRemovals, toggleFixtureRemoval } from "../track/service/objects/fixture-removal";
 import { createCheckpoint, getTrackCheckpoints, removeCheckpoint } from "../track/service/objects/checkpoint";
 import { createBlip, removeBlip } from "../track/service/objects/blip";
-import { ActiveHotLapTrack } from "./schemas";
+import {ActiveHotLapTrack, CreateCheckpointWithBlipProps} from "./schemas";
 import logger from "../logging/logger";
 import { distanceBetweenVector3s, Vector3 } from "../../common/vector";
 import { BLIP, DEFAULT_CHECKPOINT_HEIGHT, FREEZE_CLIENT_ON_TELEPORT_FOR_MS, UPDATE_OBJECTS_DETECTION_RADIUS } from "./constants";
@@ -16,17 +16,18 @@ import { getCurrentVehicleRef } from "../vehicle/service";
 import { setClientCoordinates } from "../player/service";
 import { waitOneFrame } from "../../common/wait";
 import playSound from "../sound";
+import {switchGameModeTo} from "../player/game-mode";
 
 export async function setUpHotLap(track: TrackFromServer) {
 	if ('RACE' === playerState.gameMode) {
 		throw new Error('Cannot start a hot lap while in a race');
 	}
 
-	// TODO disable full menu to prevent client from interfering with hot lap set up
-
 	if ('HOT_LAP' === playerState.gameMode) {
 		tearDownHotLap();
 	}
+
+  switchGameModeTo('HOT_LAP');
 
 	const hotLapTrack: ActiveHotLapTrack = await initializeHotLapTrack(track);
 	const spawnCheckpointIndex = getSpawnCheckpointIndex(hotLapTrack);
@@ -52,7 +53,7 @@ export async function setUpHotLap(track: TrackFromServer) {
 
 async function initializeHotLapTrack(track: TrackFromServer) {
 	try {
-		return toActiveHotLapTrack(track);
+		return await toActiveHotLapTrack(track);
 	} catch (error: any) {
 		throw new Error('Failed to initialize hot lap track', { cause: error });
 	}
@@ -137,43 +138,41 @@ function updateCheckpoints(checkpoints: Checkpoint[]) {
 		return;
 	}
 
-	target.ref ??= createCheckpoint({
-		...target,
-		height: DEFAULT_CHECKPOINT_HEIGHT,
-		coordinates: {
-			target: target.coordinates,
-			followUp: followUp.coordinates
-		}
-	});
+  target.ref ??= createCheckpoint({
+    ...target,
+    coordinates: {
+      target: target.coordinates,
+      followUp: followUp.coordinates
+    },
+    height: DEFAULT_CHECKPOINT_HEIGHT
+  });
 
-	if (undefined !== target.secondaryCheckpoint?.coordinates) {
-		target.secondaryCheckpoint.ref ??= createCheckpoint({
-			...target,
-			height: DEFAULT_CHECKPOINT_HEIGHT,
-			coordinates: {
-				target: target.secondaryCheckpoint.coordinates,
-				followUp: followUp.coordinates
-			}
-		});
-	}
+  target.blipRef ??= createBlip({
+    coordinates: target.coordinates,
+    sprite: BLIP_SPRITE.RADAR_LEVEL,
+    color: BLIP_COLOR.YELLOW,
+    alpha: BLIP.TARGET.ALPHA,
+    scale: BLIP.TARGET.SCALE
+  });
 
-	target.blipRef ??= createBlip({
-		coordinates: target.coordinates,
-		sprite: BLIP_SPRITE.RADAR_LEVEL,
-		color: BLIP_COLOR.YELLOW,
-		alpha: BLIP.TARGET.ALPHA,
-		scale: BLIP.TARGET.SCALE
-	});
+  if (undefined !== target.secondaryCheckpoint) {
+    target.secondaryCheckpoint.ref ??= createCheckpoint({
+      ...target.secondaryCheckpoint,
+      coordinates: {
+        target: target.secondaryCheckpoint.coordinates,
+        followUp: followUp.coordinates
+      },
+      height: DEFAULT_CHECKPOINT_HEIGHT
+    });
 
-	if (undefined !== target.secondaryCheckpoint?.coordinates) {
-		target.secondaryCheckpoint.blipRef ??= createBlip({
-			coordinates: target.secondaryCheckpoint.coordinates,
-			sprite: BLIP_SPRITE.RADAR_LEVEL,
-			color: BLIP_COLOR.YELLOW,
-			alpha: BLIP.TARGET.ALPHA,
-			scale: BLIP.TARGET.SCALE
-		});
-	}
+    target.secondaryCheckpoint.blipRef ??= createBlip({
+      coordinates: target.secondaryCheckpoint.coordinates,
+      sprite: BLIP_SPRITE.RADAR_LEVEL,
+      color: BLIP_COLOR.DARK_YELLOW,
+      alpha: BLIP.TARGET.ALPHA,
+      scale: BLIP.TARGET.SCALE
+    });
+  }
 
 	followUp.blipRef ??= createBlip({
 		coordinates: followUp.coordinates,
@@ -183,7 +182,7 @@ function updateCheckpoints(checkpoints: Checkpoint[]) {
 		scale: BLIP.FOLLOW_UP.SCALE
 	});
 
-	if (undefined !== followUp.secondaryCheckpoint?.coordinates) {
+	if (undefined !== followUp.secondaryCheckpoint) {
 		followUp.secondaryCheckpoint.blipRef ??= createBlip({
 			coordinates: followUp.secondaryCheckpoint.coordinates,
 			sprite: BLIP_SPRITE.RADAR_LEVEL,

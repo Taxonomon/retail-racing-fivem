@@ -17,12 +17,12 @@ export interface CheckpointProps {
   heading: number;
   size: number;
   display: CheckpointDisplay;
-};
+}
 
 export interface Checkpoint extends CheckpointProps {
   secondaryCheckpoint?: CheckpointProps;
   effects: CheckpointEffects;
-};
+}
 
 export interface CheckpointDisplayProps {
   type: CheckpointDisplayType;
