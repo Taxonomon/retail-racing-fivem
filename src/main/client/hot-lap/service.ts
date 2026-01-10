@@ -1,4 +1,4 @@
-import {TrackFromServer} from "../../common/track/schemas";
+import {Checkpoint, TrackFromServer} from "../../common/track/schemas";
 import {playerState} from "../player/state";
 import {hotLapState} from "./state";
 import {getTrackProps} from "../track/service/objects/prop";
@@ -12,26 +12,30 @@ import {getCurrentVehicleRef} from "../vehicle/service";
 import {setClientCoordinates} from "../player/service";
 import {waitOneFrame} from "../../common/wait";
 import {switchGameModeTo} from "../player/game-mode";
-import {start as startRenderingTrack, stop as stopRenderingTrack} from "../track/service/render/track";
-import {trackState} from "../track/state";
+import {start as startRenderingTrack, stop as stopRenderingTrack, toParsedTrack} from "../track/service/render/track";
+import {ParsedTrack} from "../track/schemas";
 
 export async function setUpHotLap(track: TrackFromServer) {
   if ('RACE' === playerState.gameMode) {
     throw new Error('Cannot start a hot lap while in a race');
-  }
-
-  if ('HOT_LAP' !== playerState.gameMode) {
+  } else if ('HOT_LAP' === playerState.gameMode) {
+    stopRenderingTrack();
+  } else {
     switchGameModeTo('HOT_LAP');
   }
 
   try {
+    const parsedTrack: ParsedTrack = toParsedTrack(track);
+    const spawnPoint: Vector3 = getSpawnPoint(parsedTrack.checkpoints);
+
     startRenderingTrack(
-      track,
+      parsedTrack,
       {props: 'NEARBY', fixtureRemovals: 'NEARBY', checkpoints: 'NEXT'},
+      spawnPoint,
       {withSound: true}
     );
-    hotLapState.spawnPoint = getSpawnPoint();
-    await teleportClientToSpawnPoint();
+
+    await teleportClientToSpawnPoint(spawnPoint);
   } catch (error: any) {
     stopRenderingTrack();
     switchGameModeTo('FREE_MODE');
@@ -39,8 +43,7 @@ export async function setUpHotLap(track: TrackFromServer) {
   }
 }
 
-function getSpawnPoint(): Vector3 {
-  const checkpoints = trackState.currentTrack?.checkpoints ?? [];
+function getSpawnPoint(checkpoints: Checkpoint[]): Vector3 {
   let coordinates: Vector3 | undefined;
 
   switch (checkpoints.length) {
@@ -77,9 +80,7 @@ function getSpawnPoint(): Vector3 {
   return coordinates;
 }
 
-async function teleportClientToSpawnPoint() {
-  const coordinates: Vector3 = hotLapState.spawnPoint;
-
+async function teleportClientToSpawnPoint(coordinates: Vector3) {
   let ref = getCurrentVehicleRef();
 
   if (0 === ref) {

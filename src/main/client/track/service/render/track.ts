@@ -6,13 +6,17 @@ import {ParsedTrack, TrackRenderStrategy} from "../../schemas";
 import {parseJobCheckpoints, parseJobFixtureRemovals, parseJobProps} from "../../../../common/track/service/parse";
 import {trackState} from "../../state";
 import logger from "../../../logging/logger";
+import {Vector3} from "../../../../common/vector";
 
 export function start(
-  track: TrackFromServer,
+  track: ParsedTrack,
   renderStrategy: TrackRenderStrategy,
+  spawnPoint: Vector3,
   options?: { withSound: boolean }
 ) {
-  trackState.currentTrack = toParsedTrack(track, renderStrategy);
+  trackState.currentTrack = track;
+  trackState.renderStrategy = renderStrategy;
+  trackState.spawnPoint = spawnPoint;
   startRenderingProps();
   startRenderingFixtureRemovals();
   startRenderingCheckpoints(options);
@@ -26,10 +30,9 @@ export function stop() {
   logger.debug(`Stopped rendering current track "${trackState.currentTrack?.name}"`);
 }
 
-function toParsedTrack(track: TrackFromServer, renderStrategy: TrackRenderStrategy): ParsedTrack {
+export function toParsedTrack(track: TrackFromServer,): ParsedTrack {
   return {
     ...track,
-    renderStrategy,
     props: parseJobProps(track.data),
     fixtureRemovals: parseJobFixtureRemovals(track.data),
     checkpoints: parseJobCheckpoints(track.data),

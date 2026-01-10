@@ -3,7 +3,7 @@ import {Vector3} from "../../common/schemas";
 
 export const RENDER_NEARBY = {
 	INTERVAL_MS: 1500,
-  DETECTION_RADIUS: 1000
+  DETECTION_RADIUS: 750
 };
 
 export const BLIP = {

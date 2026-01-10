@@ -19,7 +19,7 @@ export function start(options?: { withSound?: boolean }) {
 
   stop();
 
-  switch (track.renderStrategy.checkpoints) {
+  switch (trackState.renderStrategy.checkpoints) {
     case 'ALL': {
       renderAll({ withBlips: true });
       break;
@@ -36,7 +36,7 @@ export function start(options?: { withSound?: boolean }) {
 
   logger.debug(
     `Started rendering checkpoints of current track `
-    + `using render strategy ${track.renderStrategy.checkpoints}`
+    + `using render strategy ${trackState.renderStrategy.checkpoints}`
   );
 }
 

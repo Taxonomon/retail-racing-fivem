@@ -1,10 +1,13 @@
 import {TrackFromServer} from "../../common/track/schemas";
 import {Tick} from "../../common/tick";
 import logger from "../logging/logger";
-import {ParsedTrack} from "./schemas";
+import {ParsedTrack, TrackRenderStrategy} from "./schemas";
+import {Vector3} from "../../common/schemas";
 
 class TrackState {
   private _trackList?: TrackFromServer[];
+  private _spawnPoint?: Vector3;
+  private _renderStrategy?: TrackRenderStrategy;
 
   currentTrack?: ParsedTrack;
 
@@ -22,6 +25,28 @@ class TrackState {
 
   set trackList(value: TrackFromServer[]) {
     this._trackList = value;
+  }
+
+  get spawnPoint() {
+    if (undefined === this._spawnPoint) {
+      throw new Error('Spawn point undefined');
+    }
+    return this._spawnPoint;
+  }
+
+  set spawnPoint(value: Vector3) {
+    this._spawnPoint = value;
+  }
+
+  get renderStrategy() {
+    if (undefined === this._renderStrategy) {
+      throw new Error('Render strategy undefined');
+    }
+    return this._renderStrategy;
+  }
+
+  set renderStrategy(value: TrackRenderStrategy) {
+    this._renderStrategy = value;
   }
 }
 

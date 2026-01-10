@@ -14,13 +14,13 @@ export function start() {
 
   stop();
 
-  switch (track.renderStrategy.props) {
+  switch (trackState.renderStrategy.props) {
     case 'ALL': {
       renderAll();
       break;
     }
     case 'NEARBY': {
-      trackState.renderNearbyProps.start(() => renderNearby());
+      trackState.renderNearbyProps.start(() => renderNearby(), RENDER_NEARBY.INTERVAL_MS);
       break;
     }
     case 'NONE': {
@@ -28,6 +28,11 @@ export function start() {
       break;
     }
   }
+
+  logger.debug(
+    `Started rendering props of current track `
+    + `using render strategy ${trackState.renderStrategy.checkpoints}`
+  );
 }
 
 export function stop() {

@@ -69,5 +69,4 @@ export interface ParsedTrack extends TrackFromServer {
   props: Prop[];
   fixtureRemovals: FixtureRemoval[];
   checkpoints: Checkpoint[];
-  renderStrategy: TrackRenderStrategy;
 }

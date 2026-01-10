@@ -14,13 +14,13 @@ export function start() {
 
   stop();
 
-  switch (track.renderStrategy.fixtureRemovals) {
+  switch (trackState.renderStrategy.fixtureRemovals) {
     case 'ALL': {
       renderAll();
       break;
     }
     case 'NEARBY': {
-      trackState.renderNearbyFixtureRemovals.start(() => renderNearby());
+      trackState.renderNearbyFixtureRemovals.start(() => renderNearby(), RENDER_NEARBY.INTERVAL_MS);
       break;
     }
     case 'NONE': {
@@ -28,6 +28,11 @@ export function start() {
       break;
     }
   }
+
+  logger.debug(
+    `Started rendering fixture removals of current track `
+    + `using render strategy ${trackState.renderStrategy.checkpoints}`
+  );
 }
 
 export function stop() {
