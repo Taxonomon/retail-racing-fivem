@@ -4,7 +4,7 @@ import { loadModelByHash } from "../../../../common/model";
 import logger from "../../../logging/logger";
 import { parseJobProps } from "../../../../common/track/service/parse";
 import { Prop } from "../../../../common/track/schemas";
-import { CREATE_PROP } from "../../constants";
+import { PROP } from "../../constants";
 
 export async function getTrackProps(trackHash: string, options: GetPropsOptions): Promise<Prop[]> {
 	try {
@@ -49,7 +49,7 @@ export async function createProp(props: CreatePropProps) {
 		props.rotation.x,
 		props.rotation.y,
 		props.rotation.z,
-		CREATE_PROP.ROTATION_ORDER.Z_X_Y,
+		PROP.ROTATION_ORDER.Z_X_Y,
 		false
 	);
 

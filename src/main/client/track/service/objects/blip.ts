@@ -1,5 +1,5 @@
 import { CreateBlipProps, RemoveBlipProps } from "../../schemas";
-import { CREATE_BLIP } from "../../constants";
+import { BLIP } from "../../constants";
 import logger from "../../../logging/logger";
 
 export function createBlip(props: CreateBlipProps) {
@@ -8,8 +8,12 @@ export function createBlip(props: CreateBlipProps) {
 	SetBlipSprite(ref, props.sprite.id as number);
 	SetBlipColour(ref, props.color.id as number);
 	SetBlipAlpha(ref, props.alpha);
-	SetBlipDisplay(ref, CREATE_BLIP.PLACEMENT_MODE.MAIN_MAP_AND_MINIMAP_SELECTABLE_ON_MAP);
+	SetBlipDisplay(ref, BLIP.PLACEMENT_MODE.MAIN_MAP_AND_MINIMAP_SELECTABLE_ON_MAP);
 	SetBlipScale(ref, props.scale);
+
+  if (undefined !== props.index) {
+    ShowNumberOnBlip(ref, props.index);
+  }
 
 	if (0 === ref) {
 		throw new Error(`Internal game error`);

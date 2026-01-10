@@ -1,6 +1,6 @@
 import { playerState } from "../../player/state";
 import { trackState } from "../state";
-import { CREATE_PROP, UPDATE_NEARBY_TRACK_OBJECTS } from "../constants";
+import { PROP, UPDATE_NEARBY_TRACK_OBJECTS } from "../constants";
 import { FixtureRemoval, Prop } from "../../../common/track/schemas";
 import { Vector3 } from "../../../common/schemas";
 import { distanceBetweenVector3s } from "../../../common/vector";
@@ -62,7 +62,7 @@ async function updateNearbyProps(
 			try {
 				prop.ref = await createProp({
 					...prop,
-					lodDistance: CREATE_PROP.LOD_DISTANCE.DEFAULT
+					lodDistance: PROP.LOD_DISTANCE.DEFAULT
 				});
 			} catch (error: any) {
 				logger.warn(

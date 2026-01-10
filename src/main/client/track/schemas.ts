@@ -46,6 +46,7 @@ export interface CreateBlipProps {
   sprite: IdentifiableConstant;
   scale: number;
   alpha: number;
+  index?: number;
 }
 
 export interface RemoveBlipProps {

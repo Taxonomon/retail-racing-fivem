@@ -145,19 +145,28 @@ function updateCheckpoints(checkpoints: Checkpoint[]) {
   // place target checkpoints + blips
 
   target.ref ??= placeTargetCheckpoint(target, followUp.coordinates);
-  target.blipRef ??= placeTargetBlip(target.coordinates);
+  target.blipRef ??= placeTargetBlip(target.coordinates, targetIndex);
 
   if (undefined !== target.secondaryCheckpoint) {
-    target.secondaryCheckpoint.ref ??= placeTargetSecondaryCheckpoint(target.secondaryCheckpoint, followUp.coordinates);
-    target.secondaryCheckpoint.blipRef ??= placeTargetBlip(target.secondaryCheckpoint.coordinates);
+    target.secondaryCheckpoint.ref ??= placeTargetSecondaryCheckpoint(
+      target.secondaryCheckpoint,
+      followUp.coordinates
+    );
+    target.secondaryCheckpoint.blipRef ??= placeTargetBlip(
+      target.secondaryCheckpoint.coordinates,
+      targetIndex
+    );
   }
 
   // place follow-up checkpoints + blips
 
-	followUp.blipRef ??= placeFollowUpBlip(followUp.coordinates);
+	followUp.blipRef ??= placeFollowUpBlip(followUp.coordinates, followUpIndex);
 
 	if (undefined !== followUp.secondaryCheckpoint) {
-		followUp.secondaryCheckpoint.blipRef ??= placeFollowUpBlip(followUp.secondaryCheckpoint.coordinates)
+		followUp.secondaryCheckpoint.blipRef ??= placeFollowUpBlip(
+      followUp.secondaryCheckpoint.coordinates,
+      followUpIndex
+    );
 	}
 
 	const withinTargetCheckpointDistance = distanceBetweenVector3s(
@@ -256,13 +265,28 @@ function removeActiveTrackObjects() {
 	track.checkpoints.forEach(checkpoint => {
 		if (undefined !== checkpoint.ref) {
 			removeCheckpoint(checkpoint);
+      checkpoint.ref = undefined;
 			if (undefined !== checkpoint.blipRef) {
 				removeBlip({
 					ref: checkpoint.blipRef,
 					coordinates: checkpoint.coordinates
 				});
+        checkpoint.blipRef = undefined;
 			}
 		}
+    if (undefined !== checkpoint.secondaryCheckpoint) {
+      if (undefined !== checkpoint.secondaryCheckpoint.ref) {
+        removeCheckpoint({ ...checkpoint.secondaryCheckpoint });
+        checkpoint.secondaryCheckpoint.ref = undefined;
+      }
+      if (undefined !== checkpoint.secondaryCheckpoint.blipRef) {
+        removeBlip({
+          ref: checkpoint.secondaryCheckpoint.blipRef,
+          coordinates: checkpoint.secondaryCheckpoint.coordinates
+        });
+        checkpoint.secondaryCheckpoint.blipRef = undefined;
+      }
+    }
 	});
 }
 
@@ -290,22 +314,24 @@ function placeTargetSecondaryCheckpoint(secondaryCheckpoint: CheckpointProps, fo
   });
 }
 
-function placeTargetBlip(coordinates: Vector3) {
+function placeTargetBlip(coordinates: Vector3, index: number) {
   return createBlip({
     coordinates: coordinates,
     sprite: BLIP_SPRITE.RADAR_LEVEL,
     color: BLIP_COLOR.YELLOW,
     alpha: BLIP.TARGET.ALPHA,
-    scale: BLIP.TARGET.SCALE
+    scale: BLIP.TARGET.SCALE,
+    index
   });
 }
 
-function placeFollowUpBlip(coordinates: Vector3) {
+function placeFollowUpBlip(coordinates: Vector3, index: number) {
   return createBlip({
     coordinates: coordinates,
     sprite: BLIP_SPRITE.RADAR_LEVEL,
     color: BLIP_COLOR.DARK_YELLOW,
     alpha: BLIP.FOLLOW_UP.ALPHA,
-    scale: BLIP.FOLLOW_UP.SCALE
+    scale: BLIP.FOLLOW_UP.SCALE,
+    index
   });
 }
