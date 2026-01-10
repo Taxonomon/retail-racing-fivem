@@ -18,9 +18,9 @@ export function getTrackCheckpoints(trackHash: string): Checkpoint[] {
 export function createCheckpoint(props: CreateCheckpointProps) {
 	const ref = CreateCheckpoint(
 		props.display.type.id,
-		props.coordinates.target.x - (props?.offset?.x ?? 0),
-		props.coordinates.target.y - (props?.offset?.y ?? 0),
-		props.coordinates.target.z - (props?.offset?.z ?? 0),
+		props.coordinates.target.x + (props?.offset?.x ?? 0),
+		props.coordinates.target.y + (props?.offset?.y ?? 0),
+		props.coordinates.target.z + (props?.offset?.z ?? 0),
 		props.coordinates.followUp.x,
 		props.coordinates.followUp.y,
 		props.coordinates.followUp.z,

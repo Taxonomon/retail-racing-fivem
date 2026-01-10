@@ -52,3 +52,7 @@ export interface RemoveBlipProps {
   ref: number;
   coordinates: Vector3;
 }
+
+export type CheckpointPlacementStrategy = 'NONE' | 'ALL' | 'NEXT';
+export type PropPlacementStrategy = 'NONE' | 'ALL' | 'NEARBY';
+export type FixtureRemovalStrategy = 'NONE' | 'ALL' | 'NEARBY';

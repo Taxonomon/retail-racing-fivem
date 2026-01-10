@@ -11,7 +11,6 @@ import { toggleFixtureRemoval } from "./objects/fixture-removal";
 export function startUpdatingNearbyTrackObjects(
 	props: Prop[],
 	fixtureRemovals: FixtureRemoval[],
-	detectionRadius: number
 ): void {
 	// Start the process with the currently loaded track
 	if (trackState.updateNearbyTrackObjects.isRunning()) {
@@ -19,7 +18,11 @@ export function startUpdatingNearbyTrackObjects(
 	}
 
 	trackState.updateNearbyTrackObjects.start(
-		async () => await updateNearbyTrackObjects(props, fixtureRemovals, detectionRadius),
+		async () => await updateNearbyTrackObjects(
+      props,
+      fixtureRemovals,
+      UPDATE_NEARBY_TRACK_OBJECTS.DETECTION_RADIUS
+    ),
 		UPDATE_NEARBY_TRACK_OBJECTS.INTERVAL_MS
 	);
 }

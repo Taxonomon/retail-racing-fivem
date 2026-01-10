@@ -1,10 +1,12 @@
 import {TrackFromServer} from "../../common/track/schemas";
 import {Tick} from "../../common/tick";
 import logger from "../logging/logger";
+import {CheckpointPlacementStrategy} from "./schemas";
 
 class TrackState {
   private _trackList?: TrackFromServer[];
   updateNearbyTrackObjects: Tick = new Tick('update nearby track objects', logger);
+  checkpointPlacementStrategy?: CheckpointPlacementStrategy;
 
   get trackList() {
     return this._trackList ?? [];
