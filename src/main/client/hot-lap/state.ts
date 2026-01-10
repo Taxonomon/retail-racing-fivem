@@ -1,14 +1,18 @@
-import {ActiveHotLapTrack} from "./schemas";
-import {Tick} from "../../common/tick";
-import logger from "../logging/logger";
+import {Vector3} from "../../common/schemas";
 
 class HotLapState {
-  track?: ActiveHotLapTrack;
-  lap: number = 0;
-  lapStartedAt: number = -1;
-  checkpoint?: number;
-  spawnCheckpointIndex?: number;
-  updateCheckpoints: Tick = new Tick('update hot lap checkpoints', logger);
+  _spawnPoint?: Vector3;
+
+  get spawnPoint() {
+    if (undefined === this._spawnPoint) {
+      throw new Error('Spawn point undefined');
+    }
+    return this._spawnPoint;
+  }
+
+  set spawnPoint(value: Vector3) {
+    this._spawnPoint = value;
+  }
 }
 
 export const hotLapState = new HotLapState();

@@ -1,7 +1,7 @@
 import {CheckpointRenderStrategy, FixtureRemovalRenderStrategy, PropRenderStrategy} from "./schemas";
 import {Vector3} from "../../common/schemas";
 
-export const UPDATE_NEARBY_TRACK_OBJECTS = {
+export const RENDER_NEARBY = {
 	INTERVAL_MS: 1500,
   DETECTION_RADIUS: 1000
 };
@@ -17,9 +17,6 @@ export const BLIP = {
   SCALE: {
     TARGET: 1.3,
     FOLLOW_UP: 0.65
-  },
-  SPRITE: {
-    TARGET:
   }
 };
 

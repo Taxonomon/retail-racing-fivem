@@ -13,8 +13,8 @@ class TrackState {
   currentCheckpointIndex: number = Number.NaN;
   renderNextCheckpoints: Tick = new Tick('render next checkpoints of current track', logger);
 
-  renderProps: Tick = new Tick('render current track props', logger);
-  renderFixtureRemovals: Tick = new Tick('render current track fixture removals', logger);
+  renderNearbyProps: Tick = new Tick('render nearby props of current track', logger);
+  renderNearbyFixtureRemovals: Tick = new Tick('render nearby fixture removals of current track', logger);
 
   get trackList() {
     return this._trackList ?? [];

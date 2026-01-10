@@ -18,6 +18,7 @@ export interface RemovePropProps {
   ref: number;
   hash: number;
   coordinates: Vector3;
+  unload?: boolean;
 }
 
 export interface CreateCheckpointProps {

@@ -74,6 +74,10 @@ export function removeProp(props: RemovePropProps) {
 	if (0 === props.ref) {
 		throw new Error(`Prop has not been created`);
 	}
+  const unload = props.unload ?? true;
+  if (unload) {
+    SetObjectAsNoLongerNeeded(props.ref);
+  }
 	DeleteObject(props.ref);
 	logger.debug(`Removed prop ${props.hash} at ${JSON.stringify(props.coordinates)}`);
 }

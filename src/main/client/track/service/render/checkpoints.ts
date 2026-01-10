@@ -1,4 +1,3 @@
-import {ParsedTrack} from "../../schemas";
 import {createCheckpoint, removeCheckpoint} from "../objects/checkpoint";
 import {createBlip, removeBlip} from "../objects/blip";
 import logger from "../../../logging/logger";
@@ -11,13 +10,18 @@ import {withinPlayerRadius} from "../../../player/coordinates";
 import playSound from "../../../sound";
 import EVENT_NAMES from "../../../../common/event-names";
 
-export function start(track: ParsedTrack, options?: { withSound?: boolean }) {
-  trackState.currentTrack = track;
-  clearAll({ includingBlips: true });
+export function start(options?: { withSound?: boolean }) {
+  const track = trackState.currentTrack;
+
+  if (undefined === track) {
+    throw new Error('No current track found to render checkpoints for');
+  }
+
+  stop();
 
   switch (track.renderStrategy.checkpoints) {
     case 'ALL': {
-      renderAll();
+      renderAll({ withBlips: true });
       break;
     }
     case 'NEXT': {
@@ -36,15 +40,32 @@ export function start(track: ParsedTrack, options?: { withSound?: boolean }) {
   );
 }
 
-function renderAll() {
+export function stop() {
+  if (trackState.renderNextCheckpoints.isRunning()) {
+    trackState.renderNextCheckpoints.stop();
+  }
+  clearAll({ includingBlips: true });
+  logger.debug(`Stopped rendering checkpoints of current track`);
+}
+
+function renderAll(options?: { withBlips?: boolean }) {
+  const withBlips = options?.withBlips ?? false;
+
   (trackState.currentTrack?.checkpoints ?? []).forEach((
     curr: Checkpoint,
     i: number,
     all: Checkpoint[]
   ) => {
     curr.ref ??= renderCheckpoint(curr, (all[i + 1] ?? all[0]).coordinates);
-    curr.blipRef ??= renderTargetBlip(curr.coordinates, i);
+    if (withBlips) {
+      curr.blipRef ??= renderTargetBlip(curr.coordinates, i);
+    }
   });
+
+  logger.debug(
+    `Rendered all checkpoints of current track `
+    + `${withBlips ? '(including blips)' : ''}`
+  );
 }
 
 function renderNext(options?: { withSound?: boolean }) {
@@ -151,11 +172,6 @@ function renderFollowUpBlip(coordinates: Vector3, index: number) {
   });
 }
 
-export function stop() {
-  clearAll({ includingBlips: true });
-  logger.debug(`Stopped rendering checkpoints of current track`);
-}
-
 function clear(checkpoint: Checkpoint, options?: { includingBlips?: boolean }) {
   const includeBlips = options?.includingBlips ?? false;
 
@@ -180,7 +196,11 @@ function clear(checkpoint: Checkpoint, options?: { includingBlips?: boolean }) {
   }
 }
 
-function clearAll(options?: { includingBlips?: boolean }) {
+export function clearAll(options?: { includingBlips?: boolean }) {
+  const withBlips = options?.includingBlips ?? false;
   (trackState.currentTrack?.checkpoints ?? []).forEach(c => clear(c, options));
-  logger.debug(`Cleared all currently rendered checkpoints (including blips)`);
+  logger.debug(
+    `Cleared all currently rendered checkpoints `
+    + `${withBlips ? '(including blips)' : ''}`
+  );
 }
