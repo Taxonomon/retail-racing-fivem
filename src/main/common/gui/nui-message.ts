@@ -13,5 +13,8 @@ export const NUI_MSG_IDS = {
     ADD: 'txn:gui:toasts:add'
   },
   HUD: 'txn:gui:hud',
-  LAP_TIMER: 'txn:gui:lap-timer'
+  LAP_TIMER: {
+    RENDER: 'txn:gui:lap-timer:render',
+    HIDE: 'txn:gui:lap-timer:hide'
+  }
 };

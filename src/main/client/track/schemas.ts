@@ -78,3 +78,9 @@ export interface StartRenderTrackProps {
   initialCheckpointIndex: number;
   withSound: boolean;
 }
+
+export interface OnTrackCheckpointPassedEventProps {
+  lap: number;
+  checkpointIndex: number;
+  passedAt: number;
+}

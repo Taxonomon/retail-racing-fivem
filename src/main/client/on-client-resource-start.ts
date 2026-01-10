@@ -13,6 +13,7 @@ import {fetchAndApplyPlayerSettings, startSavingPlayerSettingsPeriodically} from
 import {initializeMenuInputBindings} from "./gui/menu/api/input";
 import {startUpdatingHud} from "./gui/hud/service";
 import {register as registerCallbackEventListeners} from "./callback/events";
+import {register as registerHotlapEventListeners} from "./hot-lap/events";
 import {updateTrackList} from "./track/service/tracklist";
 import {switchGameModeTo} from "./player/game-mode";
 
@@ -44,6 +45,7 @@ async function handleOnClientResourceStart() {
 function initializeEventListeners() {
   registerMessageFromServerEventListener();
   registerCallbackEventListeners();
+  registerHotlapEventListeners();
 }
 
 function initializeInputs() {

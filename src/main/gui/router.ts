@@ -4,7 +4,7 @@ import logger from "./logging/logger";
 import breadcrumps from "./breadcrumps/render";
 import toasts from "./toasts/render";
 import hud from "./hud/render";
-import {renderLapTimer} from "./lap-timer/render";
+import {hideLapTimer, renderLapTimer} from "./lap-timer/render";
 
 // @ts-ignore
 const ROUTES = new Map([
@@ -13,7 +13,8 @@ const ROUTES = new Map([
   [ NUI_MSG_IDS.BREADCRUMPS, breadcrumps.render ],
   [ NUI_MSG_IDS.TOASTS.ADD, toasts.addToast ],
   [ NUI_MSG_IDS.HUD, hud.render ],
-  [ NUI_MSG_IDS.LAP_TIMER, renderLapTimer ]
+  [ NUI_MSG_IDS.LAP_TIMER.RENDER, renderLapTimer ],
+  [ NUI_MSG_IDS.LAP_TIMER.HIDE, hideLapTimer ]
 ]);
 
 class MessageRouter {
@@ -24,7 +25,7 @@ class MessageRouter {
   }
 
   async route(messageId: string, data?: any) {
-    logger.debug(`routing NUI message "${messageId}"`);
+    logger.trace(`Routing NUI message "${messageId}"`);
     const handler: Function | undefined = this._entries.get(messageId);
     if (undefined === handler) {
       throw new Error(`unknown message id "${messageId}"`);

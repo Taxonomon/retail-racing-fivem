@@ -1,19 +1,18 @@
 import {Checkpoint, TrackFromServer} from "../../common/track/schemas";
 import {playerState} from "../player/state";
-import {hotLapState} from "./state";
-import {getTrackProps} from "../track/service/objects/prop";
-import {getTrackFixtureRemovals} from "../track/service/objects/fixture-removal";
-import {getTrackCheckpoints} from "../track/service/objects/checkpoint";
-import {ActiveHotLapTrack} from "./schemas";
 import logger from "../logging/logger";
-import {distanceBetweenVector3s, Vector3} from "../../common/vector";
+import {Vector3} from "../../common/vector";
 import {FREEZE_CLIENT_ON_TELEPORT_FOR_MS} from "./constants";
 import {getCurrentVehicleRef} from "../vehicle/service";
 import {setClientCoordinates} from "../player/service";
 import {waitOneFrame} from "../../common/wait";
 import {switchGameModeTo} from "../player/game-mode";
 import {start as startRenderingTrack, stop as stopRenderingTrack, toParsedTrack} from "../track/service/render/track";
-import {ParsedTrack} from "../track/schemas";
+import {OnTrackCheckpointPassedEventProps, ParsedTrack} from "../track/schemas";
+import {hotLapState} from "./state";
+import {hideLapTimer, updateLapTimer} from "../gui/lap-timer/service";
+import {trackState} from "../track/state";
+import {clearAll as clearAllRenderedCheckpoints} from "../track/service/render/checkpoints";
 
 export async function setUpHotLap(track: TrackFromServer) {
   if ('RACE' === playerState.gameMode) {
@@ -22,6 +21,12 @@ export async function setUpHotLap(track: TrackFromServer) {
     stopRenderingTrack();
   } else {
     switchGameModeTo('HOT_LAP');
+  }
+
+  hotLapState.lapStartedAt = Number.NaN;
+
+  if (!hotLapState.updateGui.isRunning()) {
+    hotLapState.updateGui.start(updateGui);
   }
 
   try {
@@ -106,4 +111,45 @@ async function teleportClientToSpawnPoint(coordinates: Vector3) {
 
   FreezeEntityPosition(ref, false);
   logger.debug(`Teleported client to hot lap spawn point at ${JSON.stringify(coordinates)}`);
+}
+
+export function handleOnTrackCheckpointPassedEvent(data: OnTrackCheckpointPassedEventProps) {
+  const { lap, checkpointIndex, passedAt } = data;
+
+  if (0 === checkpointIndex) {
+    hotLapState.lapStartedAt = GetGameTimer();
+  }
+}
+
+function updateGui() {
+  updateLapTimer(Number.isNaN(hotLapState.lapStartedAt) ? 0 : GetGameTimer() - hotLapState.lapStartedAt);
+}
+
+export async function resetHotLap() {
+  const track = trackState.currentTrack;
+
+  if (undefined === track) {
+    throw new Error('No track is currently loaded');
+  }
+
+  const { spawnPoint, spawnCheckpointIndex } = getSpawnPoint(track.checkpoints);
+  trackState.currentCheckpointIndex = spawnCheckpointIndex;
+  trackState.currentLap = 0;
+  hotLapState.lapStartedAt = Number.NaN;
+  clearAllRenderedCheckpoints();
+  await teleportClientToSpawnPoint(spawnPoint);
+}
+
+export function stopHotLap() {
+  if ('HOT_LAP' !== playerState.gameMode) {
+    throw new Error('Not in hot lap');
+  }
+
+  if (hotLapState.updateGui.isRunning()) {
+    hotLapState.updateGui.stop();
+  }
+
+  stopRenderingTrack();
+  hideLapTimer();
+  switchGameModeTo('FREE_MODE');
 }

@@ -9,6 +9,7 @@ import {Vector3} from "../../../../common/schemas";
 import {withinPlayerRadius} from "../../../player/coordinates";
 import playSound from "../../../sound";
 import EVENT_NAMES from "../../../../common/event-names";
+import {OnTrackCheckpointPassedEventProps} from "../../schemas";
 
 export function start(options?: { withSound?: boolean }) {
   const track = trackState.currentTrack;
@@ -116,10 +117,13 @@ function renderNext(options?: { withSound?: boolean }) {
       playSound.checkpointHit();
     }
 
-    emit(EVENT_NAMES.TRACK.CHECKPOINT.PASSED, {
-      index: currentIndex,
-      timestamp: now
-    });
+    emit(
+      EVENT_NAMES.TRACK.CHECKPOINT.PASSED, {
+        lap: trackState.currentLap,
+        checkpointIndex: targetIndex,
+        passedAt: now
+      } satisfies OnTrackCheckpointPassedEventProps
+    );
   }
 }
 

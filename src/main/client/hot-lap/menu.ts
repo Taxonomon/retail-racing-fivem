@@ -9,7 +9,7 @@ import {trackState} from "../track/state";
 import {TrackFromServer} from "../../common/track/schemas";
 import playSound from "../sound";
 import toast from "../gui/toasts/service";
-import {setUpHotLap} from "./service";
+import {resetHotLap, setUpHotLap, stopHotLap} from "./service";
 import {hotLapState} from "./state";
 
 export function initialize() {
@@ -98,7 +98,7 @@ function loadHotLapMenuForHotLapMode() {
     title: 'Reset',
     description: `Resets the hot lap and places you back at your hot lap's spawn point.`,
     icon: ItemIconType.NONE,
-    onPressed: async () => await pressSetUpHotLapItem(trackState.currentTrack!)
+    onPressed: pressResetHotLapItem
   });
 
   addItemToMenu(MENU_IDS.HOT_LAP.MAIN, {
@@ -150,7 +150,27 @@ function pressRespawnItemInHotLapMode() {
 }
 
 function pressStopItemInHotLapMode() {
-  // TODO impl
+  try {
+    playSound.select();
+    stopHotLap();
+    toast.showInfo('Stopped hot lap');
+  } catch (error: any) {
+    logger.error(`Failed to stop current hot lap: ${error.message}`);
+    toast.showError(`Failed to stop hot lap (see logs for details)`);
+    playSound.error();
+  }
+}
+
+async function pressResetHotLapItem() {
+  try {
+    playSound.select();
+    resetHotLap();
+    toast.showInfo(`Reset hot lap`);
+  } catch (error: any) {
+    logger.info(`Failed to reset hot lap: ${error.message}`);
+    toast.showError(`Failed to reset hot lap (see logs for details)`);
+    playSound.error();
+  }
 }
 
 async function pressSetUpHotLapItem(track: TrackFromServer) {

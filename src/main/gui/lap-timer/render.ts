@@ -17,6 +17,10 @@ export function renderLapTimer(props: LapTimerRenderProps) {
   }
 }
 
+export function hideLapTimer() {
+  lapTimerState.rootNode?.empty();
+}
+
 function toFormattedTime(milliseconds: number): string {
   const ms = milliseconds % 1000;
   const secs = Math.floor((milliseconds / 1000) % 60);
