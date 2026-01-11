@@ -35,8 +35,10 @@ html, body {
   --70-px-vh: 4.861vh;
   --75-px-vh: 5.208vh;
   --80-px-vh: 5.555vh;
+  --90-px-vh: 6.250vh;
   --100-px-vh: 6.944vh;
   --120-px-vh: 8.328vh;
+  --140-px-vh: 9.722vh;
   --150-px-vh: 10.416vh;
   --160-px-vh: 11.111vh;
   --180-px-vh: 12.500vh;
@@ -232,22 +234,22 @@ html, body {
 }
 
 .hud {
+  position: fixed;
+  bottom: var(--20-px-vh);
+  right: var(--20-px-vh);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   line-height: 1;
   font-family: var(--font-family-roboto-mono), monospace;
   font-weight: var(--font-weight-semibold);
 }
 
 .hud .speed {
-  position: fixed;
-  bottom: var(--70-px-vh);
-  right: var(--20-px-vh);
   display: flex;
-  vertical-align: bottom;
-  justify-content: flex-end;
   align-items: flex-end;
   gap: var(--10-px-vh);
-  padding-bottom: var(--10-px-vh);
-  transform: translateX(calc(var(--4-px-vh) * -1)); /* align with hud speed rpm */
+  padding-top: var(--10-px-vh);
 }
 
 .hud .speed .value {
@@ -255,26 +257,26 @@ html, body {
   text-shadow: var(--drop-shadow-3-px-vh);
 }
 
-.hud .speed .unit {
+
+.hud .speed .unit,
+.hud .engine .value,
+.hud .engine .unit,
+.hud .engine .icon {
   font-size: var(--font-size-1c75-vh);
   text-shadow: var(--drop-shadow-2-px-vh);
+}
+
+.hud .speed .unit {
   transform: translateY(-20%); /* align with hud speed value baseline */
 }
 
-.hud .engine .gear {
-  position: fixed;
-  bottom: var(--20-px-vh);
-  right: var(--180-px-vh);
+.hud .engine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--10-px-vh);
 }
 
-.hud .engine .rpm {
-  position: fixed;
-  bottom: var(--20-px-vh);
-  right: var(--20-px-vh);
-}
-
-.hud .engine .value,
-.hud .engine .icon {
+.hud .engine span {
   font-size: var(--font-size-3-vh);
   text-shadow: var(--drop-shadow-3-px-vh);
 }
@@ -282,8 +284,13 @@ html, body {
 .hud .engine .gear,
 .hud .engine .rpm {
   display: flex;
-  align-items: center;
+  justify-content: flex-end;
+  align-items: end;
   gap: var(--10-px-vh);
+}
+
+.hud .engine .rpm .unit {
+  transform: translateY(-10%); /* align with hud speed value baseline */
 }
 
 .lap-timer {

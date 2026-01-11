@@ -3,7 +3,7 @@ import menu from "./menu/render";
 import logger from "./logging/logger";
 import breadcrumps from "./breadcrumps/render";
 import toasts from "./toasts/render";
-import hud from "./hud/render";
+import {render as renderHud} from "./hud/render";
 import {hideLapTimer, renderLapTimer} from "./lap-timer/render";
 
 // @ts-ignore
@@ -12,7 +12,7 @@ const ROUTES = new Map([
   [ NUI_MSG_IDS.MENU.CLEAR, menu.clear ],
   [ NUI_MSG_IDS.BREADCRUMPS, breadcrumps.render ],
   [ NUI_MSG_IDS.TOASTS.ADD, toasts.addToast ],
-  [ NUI_MSG_IDS.HUD, hud.render ],
+  [ NUI_MSG_IDS.HUD, renderHud ],
   [ NUI_MSG_IDS.LAP_TIMER.RENDER, renderLapTimer ],
   [ NUI_MSG_IDS.LAP_TIMER.HIDE, hideLapTimer ]
 ]);

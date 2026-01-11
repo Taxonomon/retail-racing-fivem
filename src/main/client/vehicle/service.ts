@@ -383,3 +383,13 @@ export function addRecentlySpawnedVehicle(modelId: string) {
   updatePlayerSetting(PLAYER_SETTING_NAMES.VEHICLE.RECENTLY_SPAWNED, recentlySpawnedModelIds.slice(0, 10));
   updateRecentlySpawnedVehiclesMenu();
 }
+
+export function getRpm() {
+  const ref = getCurrentVehicleRef();
+  return 0 === ref ? undefined : GetVehicleCurrentRpm(ref);
+}
+
+export function getGear() {
+  const ref = getCurrentVehicleRef();
+  return 0 === ref ? 0 : GetVehicleCurrentGear(ref);
+}

@@ -3,13 +3,13 @@ import {playerState} from "../../player/state";
 import sendNuiMessage from "../send-nui-message";
 import {NUI_MSG_IDS} from "../../../common/gui/nui-message";
 import {HudRenderProps} from "../../../common/gui/hud/render-props";
-import {WALKING} from "../../../common/gui/hud/hud-type";
 import PLAYER_SETTING_NAMES from "../../../common/player/setting-names";
 import {KILOMETERS_PER_HOUR, METERS_PER_SECOND, MILES_PER_HOUR, Unit, UNITS} from "../../../common/unit/unit";
 import unitConverter from "../../../common/unit/conversion";
 import logger from "../../logging/logger";
 import {getNumberPlayerSetting, getStringPlayerSetting, updatePlayerSetting} from "../../player/settings/service";
 import {updateHudSpeedUnitMenuItemIcons} from "./menu";
+import {getGear as getVehicleGear, getRpm as getVehicleRpm} from "../../vehicle/service";
 
 export const HUD_SPEED_PRECISION = {
   MIN: 0,
@@ -28,12 +28,13 @@ export function startUpdatingHud() {
 
     if (undefined !== speed) {
       const data: HudRenderProps = {
-        type: WALKING,
         speed: {
           unit: hudState.unit,
           precision: hudState.precision,
           value: unitConverter.convert(speed.value, speed.unit, hudState.unit)
-        }
+        },
+        rpm: getVehicleRpm(),
+        gear: getVehicleGear()
       };
       sendNuiMessage({ id: NUI_MSG_IDS.HUD, data });
     }
