@@ -384,12 +384,24 @@ export function addRecentlySpawnedVehicle(modelId: string) {
   updateRecentlySpawnedVehiclesMenu();
 }
 
-export function getRpm() {
-  const ref = getCurrentVehicleRef();
+export function getRpm(): number | undefined {
+  const ref: number = getCurrentVehicleRef();
   return 0 === ref ? undefined : GetVehicleCurrentRpm(ref);
 }
 
-export function getGear() {
-  const ref = getCurrentVehicleRef();
-  return 0 === ref ? 0 : GetVehicleCurrentGear(ref);
+export function getGear(): number | 'N' | 'R' | undefined {
+  const ref: number = getCurrentVehicleRef();
+
+  if (0 === ref) {
+    return undefined;
+  }
+
+  const rawGear: number = GetVehicleCurrentGear(ref);
+  const reversing: boolean = GetVehicleThrottleOffset(ref) < 0;
+
+  if (reversing) {
+    return 'R';
+  } else {
+    return 0 === rawGear ? 'N' : rawGear;
+  }
 }

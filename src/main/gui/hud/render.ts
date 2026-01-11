@@ -36,7 +36,7 @@ function engineHtml(rpm: number, gear: string | number) {
         <span class="${CLASSES.ICON} ${CLASSES.MATERIAL_SYMBOLS_OUTLINED}">auto_transmission</span>
       </div>
       <div class="${CLASSES.RPM}">
-        <span class="${CLASSES.VALUE}">${rpm}</span>
+        <span class="${CLASSES.VALUE}">${(rpm * 10).toFixed(1)}</span>
         <span class="${CLASSES.ICON} ${CLASSES.MATERIAL_SYMBOLS_OUTLINED}">speed</span>
       </div>
     </div>
