@@ -1,16 +1,17 @@
+import logger from "../logging/logger";
 import {Tick} from "../../common/tick";
 import {Vector3} from "../../common/vector";
-import logger from "../logging/logger";
 import {UnitValue} from "../../common/unit/unit-value";
-import {getClientCoordinates} from "./service";
 import {GameMode} from "../../common/game-mode/game-mode";
+import {getClientCoordinates} from "./service";
+import {getClientSpeed} from "./speed";
 
 class PlayerState {
   private _coordinates?: Vector3;
+  private _speed?: UnitValue;
 
   trackCoords: Tick = new Tick('track player coordinates', logger);
   trackSpeed: Tick = new Tick('track player speed', logger);
-  speed?: UnitValue;
   pingMs?: number;
   saveSettings: Tick = new Tick('submit player settings', logger);
   lastSavedSettings: Map<string, any> = new Map();
@@ -23,6 +24,14 @@ class PlayerState {
 
   set coordinates(value: Vector3) {
     this._coordinates = value;
+  }
+
+  get speed() {
+    return this._speed ?? getClientSpeed();
+  }
+
+  set speed(value: UnitValue) {
+    this._speed = value;
   }
 }
 

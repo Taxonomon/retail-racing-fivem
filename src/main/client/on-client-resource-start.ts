@@ -7,7 +7,7 @@ import registerMessageFromServerEventListener from "./logging/msg-from-server";
 import startTrackingPlayerCoordinates from "./player/coordinates";
 import wantedLevelService from "./wanted-level/menu";
 import startHidingUnwantedNativeGuiHudElements from "./gui/native/hud";
-import startTrackingPlayerSpeed from "./player/speed";
+import {startTrackingPlayerSpeed} from "./player/speed";
 import {initializeMainMenu} from "./gui/menu/main-menu";
 import {fetchAndApplyPlayerSettings, startSavingPlayerSettingsPeriodically} from "./player/settings/service";
 import {initializeMenuInputBindings} from "./gui/menu/api/input";
