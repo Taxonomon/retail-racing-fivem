@@ -2,6 +2,9 @@ import $ from 'jquery';
 import hudState from "./state";
 import {HudRenderProps} from "../../common/gui/hud/render-props";
 
+// TODO refactor to use exported functions
+// TODO include rpm and gear (if in vehicle)
+
 const CLASSES = {
   HUD: 'hud',
   SPEED: 'speed',
