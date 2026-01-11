@@ -45,10 +45,6 @@ const UNWANTED_HUD_ELEMENTS = [
 
 export default function startHidingUnwantedNativeGuiHudElements() {
   nativeGuiState.hideUnwantedHudElements.start(async () => {
-    UNWANTED_HUD_ELEMENTS.forEach((id) => {
-      if (IsHudComponentActive(id)) {
-        HideHudComponentThisFrame(id);
-      }
-    });
+    UNWANTED_HUD_ELEMENTS.forEach(HideHudComponentThisFrame);
   });
 }

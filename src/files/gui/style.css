@@ -252,18 +252,16 @@ html, body {
   padding-top: var(--10-px-vh);
 }
 
+.hud .unit,
+.hud .value,
+.hud .icon {
+  font-size: var(--font-size-2-vh);
+  text-shadow: var(--drop-shadow-2-px-vh);
+}
+
 .hud .speed .value {
   font-size: var(--font-size-4-vh);
   text-shadow: var(--drop-shadow-3-px-vh);
-}
-
-
-.hud .speed .unit,
-.hud .engine .value,
-.hud .engine .unit,
-.hud .engine .icon {
-  font-size: var(--font-size-1c75-vh);
-  text-shadow: var(--drop-shadow-2-px-vh);
 }
 
 .hud .speed .unit {
@@ -274,11 +272,6 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: var(--10-px-vh);
-}
-
-.hud .engine span {
-  font-size: var(--font-size-3-vh);
-  text-shadow: var(--drop-shadow-3-px-vh);
 }
 
 .hud .engine .gear,
